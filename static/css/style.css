@@ -1,0 +1,57 @@
+/* static/css/style.css */
+:root {
+    --brand-primary: #cc0000;
+    --brand-light: #ffffff;
+    --brand-accent-blue: #ccdfed;
+    --brand-accent-yellow: #f6e89e;
+}
+
+body {
+    background-color: var(--brand-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 3D UI Elements */
+.card-3d {
+    background-color: var(--brand-accent-blue);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px solid var(--brand-accent-yellow);
+    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.15), -6px -6px 12px rgba(255, 255, 255, 0.9);
+    transition: transform 0.2s ease;
+}
+
+.btn-3d-primary {
+    background: linear-gradient(145deg, #e60000, #b30000);
+    color: var(--brand-light);
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 4px 4px 10px rgba(204, 0, 0, 0.3), -4px -4px 10px rgba(255, 255, 255, 1);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-3d-primary:hover {
+    color: var(--brand-accent-yellow);
+    transform: translateY(-2px);
+}
+
+.vidyasaarthi-header {
+    background-color: var(--brand-primary);
+    color: var(--brand-light);
+    padding: 15px 20px;
+    border-bottom: 5px solid var(--brand-accent-yellow);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Print Styles for Verification Sheet */
+@media print {
+    body { background-color: white; }
+    .no-print { display: none !important; }
+    .print-container { width: 100%; margin: 0; padding: 0; }
+    .print-header { border-bottom: 3px solid var(--brand-primary); padding-bottom: 10px; margin-bottom: 20px; }
+}

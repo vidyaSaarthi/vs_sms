@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card-3d mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 style="color: var(--brand-primary); margin: 0;">{{ student.full_name }}'s Profile</h3>
+        <div>
+            <a href="{{ url_for('export_verification', id=student.id) }}" class="btn-3d-primary text-decoration-none me-2" style="background: var(--brand-accent-yellow); color: var(--brand-primary);">🖨️ Parent PDF</a>
+            <a href="{{ url_for('dashboard') }}" class="btn-3d-primary text-decoration-none" style="background: var(--brand-accent-blue); color: var(--brand-primary);">Back</a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-7">
+            <h5 style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">Quick Details</h5>
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item bg-transparent"><strong>Mobile:</strong> {{ student.mobile_number }}</li>
+                <li class="list-group-item bg-transparent"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</li>
+                <li class="list-group-item bg-transparent"><strong>Father:</strong> {{ student.father_name }}</li>
+                <li class="list-group-item bg-transparent"><strong>Category:</strong> {{ student.category }}</li>
+                <li class="list-group-item bg-transparent"><strong>12th Passing Year:</strong> {{ student.class_12_year or 'N/A' }}</li>
+            </ul>
+        </div>
+
+        <div class="col-md-5">
+            <h5 style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">Cloud Documents</h5>
+            <div class="p-3 border rounded bg-light">
+                <p class="small text-muted mb-3">Click these links to download the files and create a ZIP for the parents.</p>
+
+                {% if student.documents %}
+                    <div class="d-grid gap-2">
+                    {% for doc in student.documents %}
+                        {% if doc.drive_link %}
+                            <a href="{{ doc.drive_link.replace('/preview', '/view') }}" target="_blank" class="btn btn-outline-primary text-start fw-bold">
+                                📄 Open {{ doc.doc_type.replace('_', ' ').title() }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-danger small">No documents linked for this student.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

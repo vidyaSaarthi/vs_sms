@@ -1,93 +1,256 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="card-3d mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 style="color: var(--brand-primary); margin: 0;">Register New Student</h3>
-        <a href="{{ url_for('dashboard') }}" class="btn-3d-primary" style="background: var(--brand-accent-blue); color: var(--brand-primary);">Cancel</a>
-    </div>
+<div class="container mt-4 mb-5">
+    <h2 class="mb-4" style="color: var(--brand-primary);"><i class="fas fa-user-plus"></i> New Student Admission Registration</h2>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" class="needs-validation" novalidate>
 
-        <h5 class="mt-4 mb-3" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">1. Basic Details</h5>
-        <div class="row g-3">
-            <div class="col-md-3"><label class="form-label">Full Name *</label><input type="text" class="form-control" name="full_name" required></div>
-            <div class="col-md-3"><label class="form-label">Date of Birth *</label><input type="date" class="form-control" name="dob" required></div>
-            <div class="col-md-3"><label class="form-label">Gender *</label>
-                <select class="form-select" name="gender" required>
-                    <option value="Male">Male</option><option value="Female">Female</option>
-                </select>
+        <div class="card mb-4 shadow-sm"><div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Contact Details</h5></div><div class="card-body"><div class="row g-3">
+            <div class="col-md-4"><label>Full Name *</label><input type="text" name="full_name" class="form-control" required></div>
+            <div class="col-md-4"><label>Date of Birth</label><input type="date" name="dob" class="form-control"></div>
+            <div class="col-md-4"><label>Gender</label><select name="gender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+
+            <div class="col-md-4"><label>Aadhaar Number *</label><input type="text" name="aadhaar_no" class="form-control" required></div>
+            <div class="col-md-4"><label>Category (Free Text)</label><input type="text" name="category" class="form-control" placeholder="e.g. General, OBC, etc." required></div>
+            <div class="col-md-4"><label>Identification Mark *</label><input type="text" name="identification_mark" class="form-control" required></div>
+
+            <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="Indian"></div>
+            <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control"></div>
+            <div class="col-md-4"><label>Primary Mobile *</label><input type="text" name="mobile_number" class="form-control" required></div>
+
+            <div class="col-md-4"><label>Alternative Mobile</label><input type="text" name="alt_mobile_number" class="form-control"></div>
+            <div class="col-md-4"><label>Emergency Mobile</label><input type="text" name="emergency_mobile" class="form-control"></div>
+            <div class="col-md-4"><label>Primary Email</label><input type="email" name="email_address" class="form-control"></div>
+
+            <div class="col-md-4"><label>Alternative Email</label><input type="email" name="alt_email" class="form-control"></div>
+            <div class="col-md-4"><label>Emergency Email</label><input type="email" name="emergency_email" class="form-control"></div>
+        </div></div></div>
+
+        <div class="card mb-4 shadow-sm"><div class="card-header bg-light"><h5 class="mb-0 text-danger">2. Address Details</h5></div><div class="card-body"><div class="row g-3">
+            <div class="col-md-4"><label>House Name / No.</label><input type="text" name="house_no" class="form-control"></div>
+            <div class="col-md-4"><label>Street Name</label><input type="text" name="street_name" class="form-control"></div>
+            <div class="col-md-4"><label>Post Office</label><input type="text" name="post_office" class="form-control"></div>
+            <div class="col-md-4"><label>PIN Code (Numeric)</label><input type="text" name="pin_code" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+            <div class="col-md-4"><label>State / Union Territory</label><input type="text" name="state_ut" class="form-control"></div>
+            <div class="col-md-4"><label>District</label><input type="text" name="district" class="form-control"></div>
+        </div></div></div>
+
+        <div class="card mb-4 shadow-sm"><div class="card-header bg-light"><h5 class="mb-0 text-danger">3. Parent & Financial Details</h5></div><div class="card-body"><div class="row g-3">
+            <div class="col-md-4"><label>Father's Name</label><input type="text" name="father_name" class="form-control"></div>
+            <div class="col-md-4"><label>Father's Education</label><input type="text" name="father_education" class="form-control"></div>
+            <div class="col-md-4"><label>Father's Occupation</label><input type="text" name="father_occupation" class="form-control"></div>
+
+            <div class="col-md-4"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control"></div>
+            <div class="col-md-4"><label>Mother's Education</label><input type="text" name="mother_education" class="form-control"></div>
+            <div class="col-md-4"><label>Mother's Occupation</label><input type="text" name="mother_occupation" class="form-control"></div>
+
+            <div class="col-md-4"><label>Annual Family Income (Rs.)</label><input type="text" name="family_income" class="form-control"></div>
+
+            <div class="col-12 mt-4"><h6 class="border-bottom pb-2">Bank Details</h6></div>
+            <div class="col-md-4"><label>A/c Holder Name</label><input type="text" name="bank_holder_name" class="form-control"></div>
+            <div class="col-md-4"><label>Bank Name</label><input type="text" name="bank_name" class="form-control"></div>
+            <div class="col-md-4"><label>Branch Name</label><input type="text" name="bank_branch" class="form-control"></div>
+            <div class="col-md-4"><label>Account Number (Numeric)</label><input type="text" name="bank_account_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+            <div class="col-md-4"><label>IFSC Code</label><input type="text" name="bank_ifsc" class="form-control"></div>
+            <div class="col-md-4"><label>Branch Address</label><input type="text" name="bank_address" class="form-control"></div>
+        </div></div></div>
+
+        <div class="card mb-4 shadow-sm"><div class="card-header bg-light"><h5 class="mb-0 text-danger">4. Class 10th Details</h5></div><div class="card-body">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><label>Passing Year</label><select name="class_10_year" class="form-select year-dropdown"></select></div>
+                <div class="col-md-6"><label>School Name</label><input type="text" name="class_10_school" class="form-control"></div>
+                <div class="col-md-3"><label>Board</label><input type="text" name="class_10_board" class="form-control"></div>
+                <div class="col-md-3"><label>Roll No. (Numeric)</label><input type="text" name="class_10_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_10_reg_no" class="form-control"></div>
+                <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_10_serial" class="form-control"></div>
+                <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_10_issue_date" class="form-control"></div>
             </div>
-            <div class="col-md-3"><label class="form-label">Category *</label>
-                <select class="form-select" name="category" required>
-                    <option value="General">General</option><option value="OBC">OBC</option><option value="SC">SC</option><option value="ST">ST</option>
-                </select>
+            <h6 class="border-bottom pb-2">10th Subjects & Marks</h6>
+            <div class="table-responsive"><table class="table table-sm table-bordered text-center align-middle">
+                <thead class="table-light"><tr><th>Subject</th><th>Max Marks</th><th>Obtained Marks</th></tr></thead>
+                <tbody>
+                    <tr><td class="text-start">English Lng & Lit.</td><td><input type="number" name="c10_eng_max" class="form-control form-control-sm c10-main-max" value="100"></td><td><input type="number" name="c10_eng_obt" class="form-control form-control-sm c10-main-obt"></td></tr>
+                    <tr><td class="text-start">Hindi Course A</td><td><input type="number" name="c10_hin_max" class="form-control form-control-sm c10-main-max" value="100"></td><td><input type="number" name="c10_hin_obt" class="form-control form-control-sm c10-main-obt"></td></tr>
+                    <tr><td class="text-start">Mathematics Standard</td><td><input type="number" name="c10_math_max" class="form-control form-control-sm c10-main-max" value="100"></td><td><input type="number" name="c10_math_obt" class="form-control form-control-sm c10-main-obt"></td></tr>
+                    <tr><td class="text-start">Science</td><td><input type="number" name="c10_sci_max" class="form-control form-control-sm c10-main-max" value="100"></td><td><input type="number" name="c10_sci_obt" class="form-control form-control-sm c10-main-obt"></td></tr>
+                    <tr><td class="text-start">Social Science</td><td><input type="number" name="c10_sst_max" class="form-control form-control-sm c10-main-max" value="100"></td><td><input type="number" name="c10_sst_obt" class="form-control form-control-sm c10-main-obt"></td></tr>
+                    <tr><td class="text-start">Computer Application</td><td><input type="number" name="c10_comp_max" class="form-control form-control-sm c10-main-max" value="100"></td><td><input type="number" name="c10_comp_obt" class="form-control form-control-sm c10-main-obt"></td></tr>
+
+                    <tr><td class="text-start"><select name="c10_add1_name" class="form-select form-select-sm"><option value="">Select Additional 1</option><option value="Physical Education">Physical Education</option><option value="Hindi">Hindi</option></select></td><td><input type="number" name="c10_add1_max" class="form-control form-control-sm c10-add-max" value="100"></td><td><input type="number" name="c10_add1_obt" class="form-control form-control-sm c10-add-obt"></td></tr>
+                    <tr><td class="text-start"><select name="c10_add2_name" class="form-select form-select-sm"><option value="">Select Additional 2</option><option value="Physical Education">Physical Education</option><option value="Hindi">Hindi</option></select></td><td><input type="number" name="c10_add2_max" class="form-control form-control-sm c10-add-max" value="100"></td><td><input type="number" name="c10_add2_obt" class="form-control form-control-sm c10-add-obt"></td></tr>
+
+                    <tr class="table-warning"><td class="text-end fw-bold">Total (Main Subjects):</td><td colspan="2"><div class="d-flex"><input type="number" name="c10_total_main" id="c10_total_main" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c10_perc_main" id="c10_perc_main" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
+                    <tr class="table-info"><td class="text-end fw-bold">Grand Total (Inc. Additional):</td><td colspan="2"><div class="d-flex"><input type="number" name="c10_total_grand" id="c10_total_grand" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c10_perc_grand" id="c10_perc_grand" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
+                </tbody>
+            </table></div>
+        </div></div>
+
+        <div class="card mb-4 shadow-sm"><div class="card-header bg-light"><h5 class="mb-0 text-danger">5. Class 11th Details</h5></div><div class="card-body"><div class="row g-3">
+            <div class="col-md-4"><label>Year</label><select name="class_11_year" class="form-select year-dropdown"></select></div>
+            <div class="col-md-4"><label>School Name</label><input type="text" name="class_11_school" class="form-control"></div>
+            <div class="col-md-4"><label>Roll Number (Numeric)</label><input type="text" name="class_11_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+        </div></div></div>
+
+        <div class="card mb-4 shadow-sm"><div class="card-header bg-light"><h5 class="mb-0 text-danger">6. Class 12th & Qualifying Details</h5></div><div class="card-body">
+
+            <h6 class="border-bottom pb-2">Exam Status</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4"><label>Passed / Appearing</label><select name="passed_appearing" class="form-select"><option value="Passed">Passed</option><option value="Appearing">Appearing</option></select></div>
+                <div class="col-md-4"><label>Studied Sanskrit at Plus Two?</label><select name="studied_sanskrit" class="form-select"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+                <div class="col-md-4"><label>APAAR ID</label><input type="text" name="registration_no_apaar_id" class="form-control"></div>
             </div>
-            <div class="col-md-3"><label class="form-label">Aadhaar Number *</label><input type="text" class="form-control" name="aadhaar_no" required></div>
-            <div class="col-md-3"><label class="form-label">Mobile Number *</label><input type="text" class="form-control" name="mobile_number" required></div>
-            <div class="col-md-3"><label class="form-label">Nationality</label><input type="text" class="form-control" name="nationality" value="Indian"></div>
-            <div class="col-md-3"><label class="form-label">Nativity (State)</label><input type="text" class="form-control" name="nativity" value="Haryana"></div>
-            <div class="col-md-6"><label class="form-label">Identification Mark</label><input type="text" class="form-control" name="identification_mark"></div>
-            <div class="col-md-3"><label class="form-label">Place of Residence</label>
-                <select class="form-select" name="place_of_residence">
-                    <option value="Urban">Urban</option><option value="Rural">Rural</option>
-                </select>
+
+            <h6 class="border-bottom pb-2">Academic Record</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><label>Passing Year</label><select name="class_12_year" class="form-select year-dropdown"></select></div>
+                <div class="col-md-6"><label>School Name</label><input type="text" name="class_12_school" class="form-control"></div>
+                <div class="col-md-3"><label>Board</label><input type="text" name="class_12_board" class="form-control"></div>
+                <div class="col-md-3"><label>Roll No. (Numeric)</label><input type="text" name="class_12_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_12_reg_no" class="form-control"></div>
+                <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_12_serial" class="form-control"></div>
+                <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_12_issue_date" class="form-control"></div>
             </div>
-        </div>
+            <h6 class="border-bottom pb-2">12th Subjects & Marks</h6>
+            <div class="table-responsive"><table class="table table-sm table-bordered text-center align-middle">
+                <thead class="table-light"><tr><th>Subject</th><th>Max Marks</th><th>Obtained Marks</th></tr></thead>
+                <tbody>
+                    <tr><td class="text-start">English Core</td><td><input type="number" name="c12_eng_max" class="form-control form-control-sm c12-main-max" value="100"></td><td><input type="number" name="c12_eng_obt" class="form-control form-control-sm c12-main-obt"></td></tr>
+                    <tr><td class="text-start">Physics</td><td><input type="number" name="c12_phy_max" class="form-control form-control-sm c12-main-max" value="100"></td><td><input type="number" name="c12_phy_obt" class="form-control form-control-sm c12-main-obt"></td></tr>
+                    <tr><td class="text-start">Chemistry</td><td><input type="number" name="c12_chem_max" class="form-control form-control-sm c12-main-max" value="100"></td><td><input type="number" name="c12_chem_obt" class="form-control form-control-sm c12-main-obt"></td></tr>
+                    <tr><td class="text-start">Biology</td><td><input type="number" name="c12_bio_max" class="form-control form-control-sm c12-main-max" value="100"></td><td><input type="number" name="c12_bio_obt" class="form-control form-control-sm c12-main-obt"></td></tr>
 
-        <h5 class="mt-4 mb-3" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">2. Parent Details</h5>
-        <div class="row g-3">
-            <div class="col-md-3"><label class="form-label">Father's Name *</label><input type="text" class="form-control" name="father_name" required></div>
-            <div class="col-md-3"><label class="form-label">Father Occupation</label><input type="text" class="form-control" name="father_occupation"></div>
-            <div class="col-md-3"><label class="form-label">Mother's Name *</label><input type="text" class="form-control" name="mother_name" required></div>
-            <div class="col-md-3"><label class="form-label">Mother Occupation</label><input type="text" class="form-control" name="mother_occupation"></div>
-        </div>
+                    <tr><td class="text-start"><select name="c12_add1_name" class="form-select form-select-sm"><option value="">Select Additional 1</option><option value="PHYSICAL EDUCATION">Physical Education</option><option value="arts">Arts</option></select></td><td><input type="number" name="c12_add1_max" class="form-control form-control-sm c12-add-max" value="100"></td><td><input type="number" name="c12_add1_obt" class="form-control form-control-sm c12-add-obt"></td></tr>
+                    <tr><td class="text-start"><select name="c12_add2_name" class="form-select form-select-sm"><option value="">Select Additional 2</option><option value="PHYSICAL EDUCATION">Physical Education</option><option value="arts">Arts</option></select></td><td><input type="number" name="c12_add2_max" class="form-control form-control-sm c12-add-max" value="100"></td><td><input type="number" name="c12_add2_obt" class="form-control form-control-sm c12-add-obt"></td></tr>
 
-        <h5 class="mt-4 mb-3" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">3. Communication & Address</h5>
-        <div class="row g-3">
-            <div class="col-md-6"><label class="form-label">Alternative Mobile No.</label><input type="text" class="form-control" name="alt_mobile_number"></div>
-            <div class="col-md-6"><label class="form-label">Email Address</label><input type="email" class="form-control" name="email_address"></div>
-            <div class="col-12"><label class="form-label">Present Address (House, Street, PIN, District)</label><textarea class="form-control" name="present_address" rows="2"></textarea></div>
-            <div class="col-12"><label class="form-label">Permanent Address</label><textarea class="form-control" name="permanent_address" rows="2"></textarea></div>
-        </div>
+                    <tr class="table-warning"><td class="text-end fw-bold">Total (Main Subjects):</td><td colspan="2"><div class="d-flex"><input type="number" name="c12_total_main" id="c12_total_main" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c12_perc_main" id="c12_perc_main" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
+                    <tr class="table-info"><td class="text-end fw-bold">Grand Total (Inc. Additional):</td><td colspan="2"><div class="d-flex"><input type="number" name="c12_total_grand" id="c12_total_grand" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c12_perc_grand" id="c12_perc_grand" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
+                </tbody>
+            </table></div>
+        </div></div>
 
-        <h5 class="mt-4 mb-3" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">4. Academic Details</h5>
-        <div class="row g-3">
-            <div class="col-md-3"><label class="form-label">Class 10th Year</label><input type="number" class="form-control" name="class_10_year"></div>
-            <div class="col-md-3"><label class="form-label">Class 12th Year</label><input type="number" class="form-control" name="class_12_year"></div>
-            <div class="col-md-3"><label class="form-label">Qualifying Exam</label><input type="text" class="form-control" name="qualifying_exam" value="10+2"></div>
-            <div class="col-md-3"><label class="form-label">Board of Study</label><input type="text" class="form-control" name="board_of_study" value="CBSE"></div>
-            <div class="col-md-6"><label class="form-label">Class 12th School Name</label><input type="text" class="form-control" name="class_12_school_name"></div>
-            <div class="col-md-6"><label class="form-label">12th Roll / APAAR ID</label><input type="text" class="form-control" name="registration_no_apaar_id"></div>
-        </div>
-
-        <h5 class="mt-4 mb-3" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">5. Document Uploads & Drive Links</h5>
-                <p class="text-muted small">Upload a JPG/PNG for the preview, and paste the Google Drive URL for the original PDF.</p>
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">Passport Photo</label>
-                        <input type="file" class="form-control mb-1" name="photo" accept=".png,.jpg,.jpeg">
-                        <input type="url" class="form-control form-control-sm" name="photo_url" placeholder="Google Drive Link (Optional)">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">10th Marksheet</label>
-                        <input type="file" class="form-control mb-1" name="10th_marksheet" accept=".pdf,.png,.jpg,.jpeg">
-                        <input type="url" class="form-control form-control-sm" name="10th_marksheet_url" placeholder="Paste Google Drive PDF Link">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">12th Marksheet</label>
-                        <input type="file" class="form-control mb-1" name="12th_marksheet" accept=".pdf,.png,.jpg,.jpeg">
-                        <input type="url" class="form-control form-control-sm" name="12th_marksheet_url" placeholder="Paste Google Drive PDF Link">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">Aadhaar Card</label>
-                        <input type="file" class="form-control mb-1" name="aadhaar_card" accept=".pdf,.png,.jpg,.jpeg">
-                        <input type="url" class="form-control form-control-sm" name="aadhaar_card_url" placeholder="Paste Google Drive PDF Link">
-                    </div>
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">7. Google Drive Links</h5></div>
+            <div class="card-body">
+                <h6 class="border-bottom pb-2">Personal & ID Proofs</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4"><label>Student Photo Link</label><input type="url" name="photo_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Student Signature Link</label><input type="url" name="student_signature_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Aadhaar Card Link</label><input type="url" name="aadhaar_card_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Birth Certificate Link</label><input type="url" name="birth_certificate_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Residence Proof Link</label><input type="url" name="residence_proof_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Family ID Link</label><input type="url" name="family_id_url" class="form-control"></div>
                 </div>
-
-        <div class="mt-5 text-center">
-            <button type="submit" class="btn-3d-primary btn-lg px-5">Save Complete Student Data</button>
+                <h6 class="border-bottom pb-2">Academic Certificates</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4"><label>10th Marksheet Link</label><input type="url" name="10th_marksheet_url" class="form-control"></div>
+                    <div class="col-md-4"><label>11th Marksheet Link <small class="text-muted">(Optional)</small></label><input type="url" name="11th_marksheet_url" class="form-control"></div>
+                    <div class="col-md-4"><label>12th Marksheet Link</label><input type="url" name="12th_marksheet_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Character Certificate Link</label><input type="url" name="character_certificate_url" class="form-control"></div>
+                </div>
+                <h6 class="border-bottom pb-2">Financial & Category Proofs</h6>
+                <div class="row g-3">
+                    <div class="col-md-4"><label>Bank Proof (Cheque/Passbook)</label><input type="url" name="bank_proof_url" class="form-control"></div>
+                    <div class="col-md-4"><label>Caste Certificate Link</label><input type="url" name="caste_certificate_url" class="form-control"></div>
+                    <div class="col-md-4"><label>EWS Certificate Link</label><input type="url" name="ews_certificate_url" class="form-control"></div>
+                </div>
+            </div>
         </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 mb-5">Save Complete Student Data</button>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentYear = new Date().getFullYear();
+        const yearDropdowns = document.querySelectorAll('.year-dropdown');
+        yearDropdowns.forEach(dropdown => {
+            dropdown.innerHTML = '<option value="">Select Year</option>';
+            for (let y = currentYear; y >= 2020; y--) {
+                dropdown.innerHTML += `<option value="${y}">${y}</option>`;
+            }
+        });
+
+        // 1. Phone & Email Frontend Validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let emails = [
+                document.getElementsByName('email_address')[0].value.trim().toLowerCase(),
+                document.getElementsByName('alt_email')[0].value.trim().toLowerCase(),
+                document.getElementsByName('emergency_email')[0].value.trim().toLowerCase()
+            ].filter(v => v);
+
+            if (new Set(emails).size !== emails.length) {
+                e.preventDefault();
+                alert("Error: All provided email addresses must be strictly different.");
+                return;
+            }
+
+            let phones = [
+                document.getElementsByName('mobile_number')[0].value.trim(),
+                document.getElementsByName('alt_mobile_number')[0].value.trim(),
+                document.getElementsByName('emergency_mobile')[0].value.trim()
+            ].filter(v => v);
+
+            if (new Set(phones).size !== phones.length) {
+                e.preventDefault();
+                alert("Error: All provided phone numbers must be strictly different.");
+                return;
+            }
+        });
+
+        // 2. Marks Auto Calculator
+        function setupCalculators(prefix) {
+            const mainObt = document.querySelectorAll(`.${prefix}-main-obt`);
+            const mainMax = document.querySelectorAll(`.${prefix}-main-max`);
+            const addObt = document.querySelectorAll(`.${prefix}-add-obt`);
+            const addMax = document.querySelectorAll(`.${prefix}-add-max`);
+
+            const totalMainBox = document.getElementById(`${prefix}_total_main`);
+            const percMainBox = document.getElementById(`${prefix}_perc_main`);
+            const totalGrandBox = document.getElementById(`${prefix}_total_grand`);
+            const percGrandBox = document.getElementById(`${prefix}_perc_grand`);
+
+            function calculateSums() {
+                let mObtSum = 0, mMaxSum = 0;
+                let aObtSum = 0, aMaxSum = 0;
+
+                mainObt.forEach((input, index) => {
+                    if (input.value !== "") {
+                        mObtSum += Number(input.value);
+                        mMaxSum += Number(mainMax[index].value) || 0;
+                    }
+                });
+
+                addObt.forEach((input, index) => {
+                    if (input.value !== "") {
+                        aObtSum += Number(input.value);
+                        aMaxSum += Number(addMax[index].value) || 0;
+                    }
+                });
+
+                totalMainBox.value = mObtSum;
+                totalGrandBox.value = mObtSum + aObtSum;
+
+                if (mMaxSum > 0) {
+                    percMainBox.value = ((mObtSum / mMaxSum) * 100).toFixed(2) + "%";
+                } else {
+                    percMainBox.value = "";
+                }
+
+                if ((mMaxSum + aMaxSum) > 0) {
+                    percGrandBox.value = (((mObtSum + aObtSum) / (mMaxSum + aMaxSum)) * 100).toFixed(2) + "%";
+                } else {
+                    percGrandBox.value = "";
+                }
+            }
+
+            [...mainObt, ...mainMax, ...addObt, ...addMax].forEach(input => {
+                input.addEventListener('input', calculateSums);
+            });
+        }
+
+        setupCalculators('c10');
+        setupCalculators('c12');
+    });
+</script>
 {% endblock %}

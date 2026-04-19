@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="print-container">
+    <div class="no-print mb-4 d-flex justify-content-between">
+        <a href="{{ url_for('dashboard') }}" class="btn-3d-primary text-decoration-none">Back</a>
+        <button onclick="window.print()" class="btn-3d-primary" style="background: var(--brand-accent-yellow); color: var(--brand-primary);">🖨️ Save as PDF / Print</button>
+    </div>
+
+    <div class="print-header text-center">
+        <h1 style="color: var(--brand-primary); font-weight: 900; letter-spacing: 1px; margin-bottom: 0; font-size: 28pt;">VidyaSaarthi</h1>
+        <p class="mb-0"><strong>Head Office:</strong> Kurukshetra, Haryana, India</p>
+        <p class="text-muted" style="font-size: 0.9rem;">Education Consulting & Admission Guidance</p>
+        <h4 class="mt-2 bg-light p-2 border" style="color: var(--brand-primary); font-size: 1.2rem;">STUDENT DATA VERIFICATION</h4>
+        <p style="font-size: 0.8rem; color: #555;"><em>Please verify all text details and document links provided below.</em></p>
+    </div>
+
+    <table class="table table-bordered table-sm mt-3">
+        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">1. Basic Details</th></tr></thead>
+        <tbody>
+            <tr>
+                <td width="25%"><small><strong>Full Name</strong></small></td><td width="25%"><small>{{ student.full_name }}</small></td>
+                <td width="25%"><small><strong>Date of Birth</strong></small></td><td width="25%"><small>{{ student.dob }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>Gender</strong></small></td><td><small>{{ student.gender }}</small></td>
+                <td><small><strong>Category</strong></small></td><td><small>{{ student.category }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>Aadhaar Number</strong></small></td><td><small>{{ student.aadhaar_no }}</small></td>
+                <td><small><strong>Nationality / Nativity</strong></small></td><td><small>{{ student.nationality }} / {{ student.nativity }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>Identification Mark</strong></small></td><td colspan="3"><small>{{ student.identification_mark or 'N/A' }}</small></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-sm mt-2">
+        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">2. Parent Details</th></tr></thead>
+        <tbody>
+            <tr>
+                <td width="25%"><small><strong>Father's Name</strong></small></td><td width="25%"><small>{{ student.father_name }}</small></td>
+                <td width="25%"><small><strong>Father's Occupation</strong></small></td><td width="25%"><small>{{ student.father_occupation or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>Mother's Name</strong></small></td><td><small>{{ student.mother_name }}</small></td>
+                <td><small><strong>Mother's Occupation</strong></small></td><td><small>{{ student.mother_occupation or 'N/A' }}</small></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-sm mt-2">
+        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">3. Communication & Address</th></tr></thead>
+        <tbody>
+            <tr>
+                <td width="25%"><small><strong>Primary Mobile</strong></small></td><td width="25%"><small>{{ student.mobile_number }}</small></td>
+                <td width="25%"><small><strong>Alt. Mobile</strong></small></td><td width="25%"><small>{{ student.alt_mobile_number or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>Email Address</strong></small></td><td colspan="3"><small>{{ student.email_address or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>Address Details</strong></small></td>
+                <td colspan="3"><small>
+                    {{ student.house_no or '' }} {{ student.street_name or '' }},
+                    {{ student.district or '' }}, {{ student.state_ut or '' }} - {{ student.pin_code or '' }}
+                </small></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-sm mt-2">
+        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">4. Academic Details</th></tr></thead>
+        <tbody>
+            <tr>
+                <td width="25%"><small><strong>10th Passing Year</strong></small></td><td width="25%"><small>{{ student.class_10_year or 'N/A' }}</small></td>
+                <td width="25%"><small><strong>10th Roll No.</strong></small></td><td width="25%"><small>{{ student.class_10_roll_no or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>12th Passing Year</strong></small></td><td><small>{{ student.class_12_year or 'N/A' }}</small></td>
+                <td><small><strong>12th Roll No.</strong></small></td><td><small>{{ student.class_12_roll_no or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>12th Status</strong></small></td><td><small>{{ student.passed_appearing or 'N/A' }}</small></td>
+                <td><small><strong>Studied Sanskrit (12th)</strong></small></td><td><small>{{ student.studied_sanskrit or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>12th School Name</strong></small></td><td colspan="3"><small>{{ student.class_12_school or 'N/A' }}</small></td>
+            </tr>
+            <tr>
+                <td><small><strong>APAAR ID</strong></small></td><td colspan="3"><small>{{ student.registration_no_apaar_id or 'N/A' }}</small></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="page-break-inside: avoid;">
+        <h5 class="mt-3 mb-1" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 3px; font-size: 1.1rem;">5. Cloud Document Links</h5>
+        <p class="text-muted mb-2" style="font-size: 0.75rem;"><em>Digital Verification: Click links below to view documents.</em></p>
+
+        <table class="table table-bordered table-sm mb-3">
+            <thead class="table-light">
+                <tr>
+                    <th width="30%" style="color: var(--brand-primary); font-size: 0.8rem;">Document Type</th>
+                    <th width="70%" style="color: var(--brand-primary); font-size: 0.8rem;">Document Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if student.documents %}
+                    {% for doc in student.documents %}
+                        {% if doc.drive_link %}
+                        <tr>
+                            <td class="text-capitalize fw-bold align-middle" style="font-size: 0.75rem;">{{ doc.doc_type.replace('_', ' ') }}</td>
+                            <td style="word-break: break-all; font-size: 0.75rem;">
+                                <a href="{{ doc.drive_link.replace('/preview', '/view') }}" target="_blank" style="color: #0056b3; text-decoration: underline;">
+                                    {{ doc.drive_link.replace('/preview', '/view') }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="2" class="text-center text-muted small">No documents linked.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="signature-section" style="margin-top: 40px; page-break-inside: avoid;">
+        <div class="row text-center">
+            <div class="col-6">
+                <div style="border-top: 1.5px solid #333; width: 80%; margin: 0 auto;"></div>
+                <p class="mt-2 fw-bold" style="color: var(--brand-primary); font-size: 0.9rem;">Student Signature</p>
+            </div>
+            <div class="col-6">
+                <div style="border-top: 1.5px solid #333; width: 80%; margin: 0 auto;"></div>
+                <p class="mt-2 fw-bold" style="color: var(--brand-primary); font-size: 0.9rem;">Parent/Guardian Signature</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body { background: white !important; padding: 0 !important; }
+        .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        .print-container { padding: 0.2in !important; }
+        .table { margin-bottom: 8px !important; }
+        .table-sm td, .table-sm th { padding: 0.3rem !important; }
+        .signature-section { break-inside: avoid; margin-top: 50px !important; }
+        a { text-decoration: underline !important; color: #0056b3 !important; }
+        h1, h4, h5 { page-break-after: avoid; }
+    }
+</style>
+
+{% endblock %}
