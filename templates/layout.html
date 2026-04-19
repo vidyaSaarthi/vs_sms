@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VidyaSaarthi SMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <div class="vidyasaarthi-header d-flex justify-content-between align-items-center no-print">
+        <h2 class="m-0">VidyaSaarthi</h2>
+        <div>
+            <span class="me-3" style="color: var(--brand-accent-yellow);">Welcome, {{ current_user.username }}</span>
+            <a href="{{ url_for('dashboard') }}" class="btn-3d-primary me-2" style="background: var(--brand-accent-blue); color: var(--brand-primary);">Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="btn-3d-primary">Logout</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info shadow-sm no-print">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

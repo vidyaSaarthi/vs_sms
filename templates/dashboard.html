@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 style="color: var(--brand-primary); font-weight: bold;">Student Directory</h3>
+    <a href="{{ url_for('add_student') }}" class="btn-3d-primary text-decoration-none">+ Register New Student</a>
+</div>
+
+<div class="row">
+    {% for student in students %}
+    <div class="col-md-4">
+        <div class="card-3d">
+            <h4 style="color: var(--brand-primary);">{{ student.full_name }}</h4>
+            <p class="mb-1"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</p>
+            <p class="mb-3"><strong>Mobile:</strong> {{ student.mobile_number }}</p>
+
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('view_student', id=student.id) }}" class="btn-3d-primary btn-sm flex-fill text-center text-decoration-none" style="background: var(--brand-accent-yellow); color: var(--brand-primary);">Profile</a>
+                <a href="{{ url_for('export_verification', id=student.id) }}" target="_blank" class="btn-3d-primary btn-sm flex-fill text-center text-decoration-none">Print Sheet</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center mt-5">
+        <h4 style="color: #666;">No students found. Add your first student to get started.</h4>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
