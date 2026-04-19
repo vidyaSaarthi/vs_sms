@@ -70,15 +70,14 @@ def dashboard():
 @login_required
 def add_student():
     if request.method == 'POST':
-        # --- BACKEND DATA VALIDATION ---
-        # 1. Unique Emails Check
+
+        # --- BACKEND VALIDATION: Enforce Unique Contact Details ---
         emails = [e.strip().lower() for e in [request.form.get('email_address'), request.form.get('alt_email'),
                                               request.form.get('emergency_email')] if e and e.strip()]
         if len(emails) != len(set(emails)):
             flash("Error: All provided email addresses must be strictly different.")
             return render_template('add_student.html')
 
-        # 2. Unique Phones Check
         phones = [p.strip() for p in [request.form.get('mobile_number'), request.form.get('alt_mobile_number'),
                                       request.form.get('emergency_mobile')] if p and p.strip()]
         if len(phones) != len(set(phones)):
@@ -219,7 +218,10 @@ def view_student(id):
 @login_required
 def export_verification(id):
     student = Student.query.get_or_404(id)
-    return render_template('verification_sheet.html', student=student)
+    # Decode the marks JSON data so the print template can read it
+    c10_marks = json.loads(student.class_10_marks_data) if student.class_10_marks_data else {}
+    c12_marks = json.loads(student.class_12_marks_data) if student.class_12_marks_data else {}
+    return render_template('verification_sheet.html', student=student, c10_marks=c10_marks, c12_marks=c12_marks)
 
 
 @app.cli.command("init-db")
