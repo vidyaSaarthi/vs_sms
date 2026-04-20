@@ -1,0 +1,364 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color: var(--brand-primary);"><i class="fas fa-user-edit"></i> Edit Student Data</h2>
+        <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-secondary">Cancel Edit</a>
+    </div>
+
+    <form method="POST" class="needs-validation" novalidate id="studentForm">
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Contact Details</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Target Exam</label>
+                        <select name="exam_type" class="form-select border-danger" style="background-color: #fff0f0;">
+                            <option value="NEET" {% if student.exam_type == 'NEET' %}selected{% endif %}>NEET (Medical)</option>
+                            <option value="JEE" {% if student.exam_type == 'JEE' %}selected{% endif %}>JEE (Engineering)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>Full Name</label><input type="text" name="full_name" class="form-control" value="{{ student.full_name }}"></div>
+                    <div class="col-md-4"><label>Date of Birth (mm/dd/yyyy)</label><input type="date" name="dob" class="form-control" value="{{ student.dob.strftime('%Y-%m-%d') if student.dob else '' }}"></div>
+
+                    <div class="col-md-4"><label>Gender</label>
+                        <select name="gender" class="form-select">
+                            <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>Aadhaar Number (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" value="{{ student.aadhaar_no }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-4"><label>Category (Free Text)</label><input type="text" name="category" class="form-control" value="{{ student.category }}"></div>
+
+                    <div class="col-md-4"><label>Identification Mark</label><input type="text" name="identification_mark" class="form-control" value="{{ student.identification_mark }}"></div>
+                    <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="{{ student.nationality or 'Indian' }}"></div>
+                    <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control" value="{{ student.nativity or '' }}"></div>
+
+                    <div class="col-md-4"><label>Primary Mobile (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" value="{{ student.mobile_number }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
+                    <div class="col-md-4"><label>Alternative Mobile (10 Digits)</label><input type="text" name="alt_mobile_number" id="alt_mobile_number" class="form-control" value="{{ student.alt_mobile_number or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
+                    <div class="col-md-4"><label>Emergency Mobile (10 Digits)</label><input type="text" name="emergency_mobile" id="emergency_mobile" class="form-control" value="{{ student.emergency_mobile or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
+
+                    <div class="col-md-4"><label>Primary Email</label><input type="email" name="email_address" class="form-control" value="{{ student.email_address or '' }}"></div>
+                    <div class="col-md-4"><label>Alternative Email</label><input type="email" name="alt_email" class="form-control" value="{{ student.alt_email or '' }}"></div>
+                    <div class="col-md-4"><label>Emergency Email</label><input type="email" name="emergency_email" class="form-control" value="{{ student.emergency_email or '' }}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">2. Address Details</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><label>House Name / No.</label><input type="text" name="house_no" class="form-control" value="{{ student.house_no or '' }}"></div>
+                    <div class="col-md-4"><label>Street Name</label><input type="text" name="street_name" class="form-control" value="{{ student.street_name or '' }}"></div>
+                    <div class="col-md-4"><label>Post Office</label><input type="text" name="post_office" class="form-control" value="{{ student.post_office or '' }}"></div>
+                    <div class="col-md-4"><label>PIN Code (6 Digits)</label><input type="text" name="pin_code" id="pin_code" class="form-control" value="{{ student.pin_code or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="6"></div>
+                    <div class="col-md-4"><label>State / Union Territory</label><input type="text" name="state_ut" class="form-control" value="{{ student.state_ut or '' }}"></div>
+                    <div class="col-md-4"><label>District</label><input type="text" name="district" class="form-control" value="{{ student.district or '' }}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">3. Parent & Financial Details</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><label>Father's Name</label><input type="text" name="father_name" class="form-control" value="{{ student.father_name or '' }}"></div>
+                    <div class="col-md-4"><label>Father's Education</label><input type="text" name="father_education" class="form-control" value="{{ student.father_education or '' }}"></div>
+                    <div class="col-md-4"><label>Father's Occupation</label><input type="text" name="father_occupation" class="form-control" value="{{ student.father_occupation or '' }}"></div>
+
+                    <div class="col-md-4"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control" value="{{ student.mother_name or '' }}"></div>
+                    <div class="col-md-4"><label>Mother's Education</label><input type="text" name="mother_education" class="form-control" value="{{ student.mother_education or '' }}"></div>
+                    <div class="col-md-4"><label>Mother's Occupation</label><input type="text" name="mother_occupation" class="form-control" value="{{ student.mother_occupation or '' }}"></div>
+
+                    <div class="col-md-4"><label>Annual Family Income (Rs.)</label><input type="text" name="family_income" class="form-control" value="{{ student.family_income or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+
+                    <div class="col-12 mt-4"><h6 class="border-bottom pb-2">Bank Details</h6></div>
+                    <div class="col-md-4"><label>A/c Holder Name</label><input type="text" name="bank_holder_name" class="form-control" value="{{ student.bank_holder_name or '' }}"></div>
+                    <div class="col-md-4"><label>Bank Name</label><input type="text" name="bank_name" class="form-control" value="{{ student.bank_name or '' }}"></div>
+                    <div class="col-md-4"><label>Branch Name</label><input type="text" name="bank_branch" class="form-control" value="{{ student.bank_branch or '' }}"></div>
+                    <div class="col-md-4"><label>Account Number (Numeric)</label><input type="text" name="bank_account_no" class="form-control" value="{{ student.bank_account_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-4"><label>IFSC Code</label><input type="text" name="bank_ifsc" class="form-control" value="{{ student.bank_ifsc or '' }}" oninput="this.value = this.value.toUpperCase();" maxlength="11"></div>
+                    <div class="col-md-4"><label>Branch Address</label><input type="text" name="bank_address" class="form-control" value="{{ student.bank_address or '' }}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">4. Class 10th Details</h5></div>
+            <div class="card-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label>Passing Year</label>
+                        <select name="class_10_year" class="form-select">
+                            <option value="">Select Year</option>
+                            {% for y in range(2026, 2019, -1) %}
+                                <option value="{{ y }}" {% if student.class_10_year == y %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6"><label>School Name</label><input type="text" name="class_10_school" class="form-control" value="{{ student.class_10_school or '' }}"></div>
+                    <div class="col-md-3"><label>Board</label><input type="text" name="class_10_board" class="form-control" value="{{ student.class_10_board or '' }}"></div>
+                    <div class="col-md-3"><label>Roll No. (Numeric)</label><input type="text" name="class_10_roll_no" class="form-control" value="{{ student.class_10_roll_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_10_reg_no" class="form-control" value="{{ student.class_10_reg_no or '' }}"></div>
+                    <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_10_serial" class="form-control" value="{{ student.class_10_serial or '' }}"></div>
+                    <div class="col-md-3"><label>Issue Date (mm/dd/yyyy)</label><input type="date" name="class_10_issue_date" class="form-control" value="{{ student.class_10_issue_date.strftime('%Y-%m-%d') if student.class_10_issue_date else '' }}"></div>
+                </div>
+                <h6 class="border-bottom pb-2">10th Subjects & Marks</h6>
+                <div class="table-responsive"><table class="table table-sm table-bordered text-center align-middle">
+                    <thead class="table-light"><tr><th>Subject</th><th>Max Marks</th><th>Obtained Marks</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-start">English Lng & Lit.</td><td><input type="text" name="c10_eng_max" class="form-control form-control-sm c10-main-max" value="{{ c10_marks.get('eng', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_eng_obt" class="form-control form-control-sm c10-main-obt" value="{{ c10_marks.get('eng', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Hindi Course A</td><td><input type="text" name="c10_hin_max" class="form-control form-control-sm c10-main-max" value="{{ c10_marks.get('hin', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_hin_obt" class="form-control form-control-sm c10-main-obt" value="{{ c10_marks.get('hin', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Mathematics Standard</td><td><input type="text" name="c10_math_max" class="form-control form-control-sm c10-main-max" value="{{ c10_marks.get('math', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_math_obt" class="form-control form-control-sm c10-main-obt" value="{{ c10_marks.get('math', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Science</td><td><input type="text" name="c10_sci_max" class="form-control form-control-sm c10-main-max" value="{{ c10_marks.get('sci', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_sci_obt" class="form-control form-control-sm c10-main-obt" value="{{ c10_marks.get('sci', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Social Science</td><td><input type="text" name="c10_sst_max" class="form-control form-control-sm c10-main-max" value="{{ c10_marks.get('sst', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_sst_obt" class="form-control form-control-sm c10-main-obt" value="{{ c10_marks.get('sst', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Computer Application</td><td><input type="text" name="c10_comp_max" class="form-control form-control-sm c10-main-max" value="{{ c10_marks.get('comp', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_comp_obt" class="form-control form-control-sm c10-main-obt" value="{{ c10_marks.get('comp', {}).get('obt', '') }}" maxlength="3"></td></tr>
+
+                        <tr><td class="text-start">
+                            <select name="c10_add1_name" class="form-select form-select-sm">
+                                <option value="">Select Additional 1</option>
+                                <option value="Physical Education" {% if c10_marks.get('add1', {}).get('name') == 'Physical Education' %}selected{% endif %}>Physical Education</option>
+                                <option value="Hindi" {% if c10_marks.get('add1', {}).get('name') == 'Hindi' %}selected{% endif %}>Hindi</option>
+                            </select>
+                        </td><td><input type="text" name="c10_add1_max" class="form-control form-control-sm c10-add-max" value="{{ c10_marks.get('add1', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_add1_obt" class="form-control form-control-sm c10-add-obt" value="{{ c10_marks.get('add1', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">
+                            <select name="c10_add2_name" class="form-select form-select-sm">
+                                <option value="">Select Additional 2</option>
+                                <option value="Physical Education" {% if c10_marks.get('add2', {}).get('name') == 'Physical Education' %}selected{% endif %}>Physical Education</option>
+                                <option value="Hindi" {% if c10_marks.get('add2', {}).get('name') == 'Hindi' %}selected{% endif %}>Hindi</option>
+                            </select>
+                        </td><td><input type="text" name="c10_add2_max" class="form-control form-control-sm c10-add-max" value="{{ c10_marks.get('add2', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c10_add2_obt" class="form-control form-control-sm c10-add-obt" value="{{ c10_marks.get('add2', {}).get('obt', '') }}" maxlength="3"></td></tr>
+
+                        <tr class="table-warning"><td class="text-end fw-bold">Total (Main Subjects):</td><td colspan="2"><div class="d-flex"><input type="text" name="c10_total_main" id="c10_total_main" class="form-control form-control-sm fw-bold text-center me-2" readonly><input type="text" name="c10_perc_main" id="c10_perc_main" class="form-control form-control-sm fw-bold text-center text-primary" readonly></div></td></tr>
+                        <tr class="table-info"><td class="text-end fw-bold">Grand Total (Inc. Additional):</td><td colspan="2"><div class="d-flex"><input type="text" name="c10_total_grand" id="c10_total_grand" class="form-control form-control-sm fw-bold text-center me-2" readonly><input type="text" name="c10_perc_grand" id="c10_perc_grand" class="form-control form-control-sm fw-bold text-center text-primary" readonly></div></td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">5. Class 11th Details</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Year</label>
+                        <select name="class_11_year" class="form-select">
+                            <option value="">Select Year</option>
+                            {% for y in range(2026, 2019, -1) %}
+                                <option value="{{ y }}" {% if student.class_11_year == y %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>School Name</label><input type="text" name="class_11_school" class="form-control" value="{{ student.class_11_school or '' }}"></div>
+                    <div class="col-md-4"><label>Roll Number (Numeric)</label><input type="text" name="class_11_roll_no" class="form-control" value="{{ student.class_11_roll_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">6. Class 12th & Qualifying Details</h5></div>
+            <div class="card-body">
+                <h6 class="border-bottom pb-2">Exam Status</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4"><label>Passed / Appearing</label>
+                        <select name="passed_appearing" class="form-select">
+                            <option value="Passed" {% if student.passed_appearing == 'Passed' %}selected{% endif %}>Passed</option>
+                            <option value="Appearing" {% if student.passed_appearing == 'Appearing' %}selected{% endif %}>Appearing</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>Studied Sanskrit at Plus Two?</label>
+                        <select name="studied_sanskrit" class="form-select">
+                            <option value="No" {% if student.studied_sanskrit == 'No' %}selected{% endif %}>No</option>
+                            <option value="Yes" {% if student.studied_sanskrit == 'Yes' %}selected{% endif %}>Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>APAAR ID (Numeric)</label><input type="text" name="registration_no_apaar_id" class="form-control" value="{{ student.registration_no_apaar_id or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                </div>
+
+                <h6 class="border-bottom pb-2">Academic Record</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label>Passing Year</label>
+                        <select name="class_12_year" class="form-select">
+                            <option value="">Select Year</option>
+                            {% for y in range(2026, 2019, -1) %}
+                                <option value="{{ y }}" {% if student.class_12_year == y %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6"><label>School Name</label><input type="text" name="class_12_school" class="form-control" value="{{ student.class_12_school or '' }}"></div>
+                    <div class="col-md-3"><label>Board</label><input type="text" name="class_12_board" class="form-control" value="{{ student.class_12_board or '' }}"></div>
+                    <div class="col-md-3"><label>Roll No. (Numeric)</label><input type="text" name="class_12_roll_no" class="form-control" value="{{ student.class_12_roll_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_12_reg_no" class="form-control" value="{{ student.class_12_reg_no or '' }}"></div>
+                    <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_12_serial" class="form-control" value="{{ student.class_12_serial or '' }}"></div>
+                    <div class="col-md-3"><label>Issue Date (mm/dd/yyyy)</label><input type="date" name="class_12_issue_date" class="form-control" value="{{ student.class_12_issue_date.strftime('%Y-%m-%d') if student.class_12_issue_date else '' }}"></div>
+                </div>
+                <h6 class="border-bottom pb-2">12th Subjects & Marks</h6>
+                <div class="table-responsive"><table class="table table-sm table-bordered text-center align-middle">
+                    <thead class="table-light"><tr><th>Subject</th><th>Max Marks</th><th>Obtained Marks</th></tr></thead>
+                    <tbody>
+                        <tr><td class="text-start">English Core</td><td><input type="text" name="c12_eng_max" class="form-control form-control-sm c12-main-max" value="{{ c12_marks.get('eng', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c12_eng_obt" class="form-control form-control-sm c12-main-obt" value="{{ c12_marks.get('eng', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Physics</td><td><input type="text" name="c12_phy_max" class="form-control form-control-sm c12-main-max" value="{{ c12_marks.get('phy', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c12_phy_obt" class="form-control form-control-sm c12-main-obt" value="{{ c12_marks.get('phy', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Chemistry</td><td><input type="text" name="c12_chem_max" class="form-control form-control-sm c12-main-max" value="{{ c12_marks.get('chem', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c12_chem_obt" class="form-control form-control-sm c12-main-obt" value="{{ c12_marks.get('chem', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">Biology</td><td><input type="text" name="c12_bio_max" class="form-control form-control-sm c12-main-max" value="{{ c12_marks.get('bio', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c12_bio_obt" class="form-control form-control-sm c12-main-obt" value="{{ c12_marks.get('bio', {}).get('obt', '') }}" maxlength="3"></td></tr>
+
+                        <tr><td class="text-start">
+                            <select name="c12_add1_name" class="form-select form-select-sm">
+                                <option value="">Select Additional 1</option>
+                                <option value="PHYSICAL EDUCATION" {% if c12_marks.get('add1', {}).get('name') == 'PHYSICAL EDUCATION' %}selected{% endif %}>Physical Education</option>
+                                <option value="arts" {% if c12_marks.get('add1', {}).get('name') == 'arts' %}selected{% endif %}>Arts</option>
+                            </select>
+                        </td><td><input type="text" name="c12_add1_max" class="form-control form-control-sm c12-add-max" value="{{ c12_marks.get('add1', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c12_add1_obt" class="form-control form-control-sm c12-add-obt" value="{{ c12_marks.get('add1', {}).get('obt', '') }}" maxlength="3"></td></tr>
+                        <tr><td class="text-start">
+                            <select name="c12_add2_name" class="form-select form-select-sm">
+                                <option value="">Select Additional 2</option>
+                                <option value="PHYSICAL EDUCATION" {% if c12_marks.get('add2', {}).get('name') == 'PHYSICAL EDUCATION' %}selected{% endif %}>Physical Education</option>
+                                <option value="arts" {% if c12_marks.get('add2', {}).get('name') == 'arts' %}selected{% endif %}>Arts</option>
+                            </select>
+                        </td><td><input type="text" name="c12_add2_max" class="form-control form-control-sm c12-add-max" value="{{ c12_marks.get('add2', {}).get('max', '100') }}" maxlength="3"></td><td><input type="text" name="c12_add2_obt" class="form-control form-control-sm c12-add-obt" value="{{ c12_marks.get('add2', {}).get('obt', '') }}" maxlength="3"></td></tr>
+
+                        <tr class="table-warning"><td class="text-end fw-bold">Total (Main Subjects):</td><td colspan="2"><div class="d-flex"><input type="text" name="c12_total_main" id="c12_total_main" class="form-control form-control-sm fw-bold text-center me-2" readonly><input type="text" name="c12_perc_main" id="c12_perc_main" class="form-control form-control-sm fw-bold text-center text-primary" readonly></div></td></tr>
+                        <tr class="table-info"><td class="text-end fw-bold">Grand Total (Inc. Additional):</td><td colspan="2"><div class="d-flex"><input type="text" name="c12_total_grand" id="c12_total_grand" class="form-control form-control-sm fw-bold text-center me-2" readonly><input type="text" name="c12_perc_grand" id="c12_perc_grand" class="form-control form-control-sm fw-bold text-center text-primary" readonly></div></td></tr>
+                    </tbody>
+                </table></div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">7. Google Drive Links</h5></div>
+            <div class="card-body">
+                <p class="text-muted small"><em>Update or add links below. If you delete a link entirely, it will be removed from the system.</em></p>
+                <h6 class="border-bottom pb-2">Personal & ID Proofs</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4"><label>Student Photo Link</label><input type="url" name="photo_url" class="form-control" value="{{ docs.get('photo', '') }}"></div>
+                    <div class="col-md-4"><label>Student Signature Link</label><input type="url" name="student_signature_url" class="form-control" value="{{ docs.get('student_signature', '') }}"></div>
+                    <div class="col-md-4"><label>Aadhaar Card Link</label><input type="url" name="aadhaar_card_url" class="form-control" value="{{ docs.get('aadhaar_card', '') }}"></div>
+                    <div class="col-md-4"><label>Birth Certificate Link</label><input type="url" name="birth_certificate_url" class="form-control" value="{{ docs.get('birth_certificate', '') }}"></div>
+                    <div class="col-md-4"><label>Residence Proof Link</label><input type="url" name="residence_proof_url" class="form-control" value="{{ docs.get('residence_proof', '') }}"></div>
+                    <div class="col-md-4"><label>Family ID Link</label><input type="url" name="family_id_url" class="form-control" value="{{ docs.get('family_id', '') }}"></div>
+                </div>
+                <h6 class="border-bottom pb-2">Academic Certificates</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4"><label>10th Marksheet Link</label><input type="url" name="10th_marksheet_url" class="form-control" value="{{ docs.get('10th_marksheet', '') }}"></div>
+                    <div class="col-md-4"><label>11th Marksheet Link</label><input type="url" name="11th_marksheet_url" class="form-control" value="{{ docs.get('11th_marksheet', '') }}"></div>
+                    <div class="col-md-4"><label>12th Marksheet Link</label><input type="url" name="12th_marksheet_url" class="form-control" value="{{ docs.get('12th_marksheet', '') }}"></div>
+                    <div class="col-md-4"><label>Character Certificate Link</label><input type="url" name="character_certificate_url" class="form-control" value="{{ docs.get('character_certificate', '') }}"></div>
+                </div>
+                <h6 class="border-bottom pb-2">Financial & Category Proofs</h6>
+                <div class="row g-3">
+                    <div class="col-md-4"><label>Bank Proof (Cheque/Passbook)</label><input type="url" name="bank_proof_url" class="form-control" value="{{ docs.get('bank_proof', '') }}"></div>
+                    <div class="col-md-4"><label>Caste Certificate Link</label><input type="url" name="caste_certificate_url" class="form-control" value="{{ docs.get('caste_certificate', '') }}"></div>
+                    <div class="col-md-4"><label>EWS Certificate Link</label><input type="url" name="ews_certificate_url" class="form-control" value="{{ docs.get('ews_certificate', '') }}"></div>
+                </div>
+            </div>
+        </div>
+
+        {% if student.is_approved %}
+        <div class="card border-danger mb-4 shadow-sm">
+            <div class="card-body bg-light">
+                <h5 class="text-danger fw-bold"><i class="fas fa-lock"></i> RECORD LOCKED: Parent Approved</h5>
+                <p class="small text-muted mb-2">This application has been verified. You must enter the Admin Override PIN to save changes.</p>
+                <div class="input-group">
+                    <span class="input-group-text bg-danger text-white"><i class="fas fa-key"></i></span>
+                    <input type="password" name="admin_pin" class="form-control fw-bold border-danger" placeholder="Enter 4-Digit Admin PIN" required>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-warning btn-lg w-100 mb-5" style="color: #333; font-weight: bold;">Update Student Data</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let today = new Date().toISOString().split('T')[0];
+        document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+            dateInput.setAttribute('max', today);
+        });
+
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+
+            // Only blocks if the user actually typed something and it's the wrong length
+            let aadhaar = document.getElementById('aadhaar_no').value.trim();
+            if (aadhaar !== "" && aadhaar.length !== 12) { e.preventDefault(); alert("Validation Error: Aadhaar Number must be exactly 12 digits if provided."); return; }
+
+            let priMobile = document.getElementById('mobile_number').value.trim();
+            if (priMobile !== "" && priMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Primary Mobile must be exactly 10 digits if provided."); return; }
+
+            let altMobile = document.getElementById('alt_mobile_number').value.trim();
+            if (altMobile !== "" && altMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Alternative Mobile must be exactly 10 digits if provided."); return; }
+
+            let emergMobile = document.getElementById('emergency_mobile').value.trim();
+            if (emergMobile !== "" && emergMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Emergency Mobile must be exactly 10 digits if provided."); return; }
+
+            let pinCode = document.getElementById('pin_code').value.trim();
+            if (pinCode !== "" && pinCode.length !== 6) { e.preventDefault(); alert("Validation Error: PIN Code must be exactly 6 digits if provided."); return; }
+
+            let emails = [
+                document.getElementsByName('email_address')[0].value.trim().toLowerCase(),
+                document.getElementsByName('alt_email')[0].value.trim().toLowerCase(),
+                document.getElementsByName('emergency_email')[0].value.trim().toLowerCase()
+            ].filter(v => v);
+            if (new Set(emails).size !== emails.length) { e.preventDefault(); alert("Validation Error: All provided email addresses must be unique."); return; }
+
+            let phones = [priMobile, altMobile, emergMobile].filter(v => v);
+            if (new Set(phones).size !== phones.length) { e.preventDefault(); alert("Validation Error: All provided phone numbers must be strictly different."); return; }
+
+            let invalidMarks = false;
+            ['c10', 'c12'].forEach(prefix => {
+                const obtInputs = document.querySelectorAll(`.${prefix}-main-obt, .${prefix}-add-obt`);
+                const maxInputs = document.querySelectorAll(`.${prefix}-main-max, .${prefix}-add-max`);
+                obtInputs.forEach((obtInput, index) => {
+                    let obtVal = Number(obtInput.value);
+                    let maxVal = Number(maxInputs[index].value);
+                    if (obtInput.value !== "" && obtVal > maxVal) {
+                        invalidMarks = true;
+                        obtInput.style.border = "2px solid red";
+                        obtInput.style.backgroundColor = "#ffe6e6";
+                    } else {
+                        obtInput.style.border = "";
+                        obtInput.style.backgroundColor = "";
+                    }
+                });
+            });
+
+            if (invalidMarks) {
+                e.preventDefault();
+                alert("Validation Error: Obtained marks cannot be greater than Maximum marks!");
+                return;
+            }
+        });
+
+        function setupCalculators(prefix) {
+            const mainObt = document.querySelectorAll(`.${prefix}-main-obt`);
+            const mainMax = document.querySelectorAll(`.${prefix}-main-max`);
+            const addObt = document.querySelectorAll(`.${prefix}-add-obt`);
+            const addMax = document.querySelectorAll(`.${prefix}-add-max`);
+            const totalMainBox = document.getElementById(`${prefix}_total_main`);
+            const percMainBox = document.getElementById(`${prefix}_perc_main`);
+            const totalGrandBox = document.getElementById(`${prefix}_total_grand`);
+            const percGrandBox = document.getElementById(`${prefix}_perc_grand`);
+
+            function calculateSums() {
+                let mObtSum = 0, mMaxSum = 0, aObtSum = 0, aMaxSum = 0;
+                mainObt.forEach((input, index) => { if (input.value !== "") { mObtSum += Number(input.value); mMaxSum += Number(mainMax[index].value) || 0; } });
+                addObt.forEach((input, index) => { if (input.value !== "") { aObtSum += Number(input.value); aMaxSum += Number(addMax[index].value) || 0; } });
+
+                totalMainBox.value = mObtSum;
+                totalGrandBox.value = mObtSum + aObtSum;
+
+                if (mMaxSum > 0) { percMainBox.value = ((mObtSum / mMaxSum) * 100).toFixed(2) + "%"; } else { percMainBox.value = ""; }
+                if ((mMaxSum + aMaxSum) > 0) { percGrandBox.value = (((mObtSum + aObtSum) / (mMaxSum + aMaxSum)) * 100).toFixed(2) + "%"; } else { percGrandBox.value = ""; }
+            }
+
+            [...mainObt, ...mainMax, ...addObt, ...addMax].forEach(input => { input.addEventListener('input', calculateSums); });
+            calculateSums(); // Run once on load to populate pre-existing data!
+        }
+        setupCalculators('c10');
+        setupCalculators('c12');
+    });
+</script>
+{% endblock %}

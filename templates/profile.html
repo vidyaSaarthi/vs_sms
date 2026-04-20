@@ -4,6 +4,22 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 style="color: var(--brand-primary); margin: 0;">{{ student.full_name }}'s Profile</h3>
         <div>
+            {% if not student.is_approved %}
+                <form action="{{ url_for('approve_student', id=student.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success fw-bold me-2" onclick="return confirm('WARNING: Are you sure? Marking this as Parent Approved will lock the record. Only an Admin can edit it afterwards.');">
+                        <i class="fas fa-lock"></i> Mark as Approved
+                    </button>
+                </form>
+            {% else %}
+                <span class="btn btn-outline-success fw-bold disabled me-2"><i class="fas fa-check-circle"></i> Parent Approved (Locked)</span>
+            {% endif %}
+
+            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-warning me-2"><i class="fas fa-edit"></i> Edit</a>
+
+            <button type="button" class="btn btn-danger me-2 fw-bold" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+
             <a href="{{ url_for('export_verification', id=student.id) }}" class="btn-3d-primary text-decoration-none me-2" style="background: var(--brand-accent-yellow); color: var(--brand-primary);">🖨️ Parent PDF</a>
             <a href="{{ url_for('dashboard') }}" class="btn-3d-primary text-decoration-none" style="background: var(--brand-accent-blue); color: var(--brand-primary);">Back</a>
         </div>
@@ -13,6 +29,7 @@
         <div class="col-md-7">
             <h5 style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">Quick Details</h5>
             <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item bg-transparent"><strong>Target Exam:</strong> <span class="badge {% if student.exam_type == 'NEET' %}bg-danger{% else %}bg-primary{% endif %}">{{ student.exam_type or 'Unassigned' }}</span></li>
                 <li class="list-group-item bg-transparent"><strong>Mobile:</strong> {{ student.mobile_number }}</li>
                 <li class="list-group-item bg-transparent"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</li>
                 <li class="list-group-item bg-transparent"><strong>Father:</strong> {{ student.father_name }}</li>
@@ -24,8 +41,7 @@
         <div class="col-md-5">
             <h5 style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 5px;">Cloud Documents</h5>
             <div class="p-3 border rounded bg-light">
-                <p class="small text-muted mb-3">Click these links to download the files and create a ZIP for the parents.</p>
-
+                <p class="small text-muted mb-3">Click these links to view the secure Google Drive documents.</p>
                 {% if student.documents %}
                     <div class="d-grid gap-2">
                     {% for doc in student.documents %}
@@ -43,4 +59,34 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger" style="border-width: 3px;">
+
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> SECURE DELETION</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form action="{{ url_for('delete_student', id=student.id) }}" method="POST">
+          <div class="modal-body bg-light">
+            <p class="mb-3 text-dark">You are about to permanently delete all records and document links for <strong>{{ student.full_name }}</strong>. <br><br><span class="text-danger fw-bold">This action cannot be undone.</span></p>
+
+            <div class="mb-3 p-3 border border-danger rounded" style="background-color: #fff0f0;">
+                <label class="form-label fw-bold text-danger"><i class="fas fa-key"></i> Enter Admin PIN to Confirm:</label>
+                <input type="password" name="admin_pin" class="form-control fw-bold text-center fs-5" required placeholder="****" maxlength="4">
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger fw-bold"><i class="fas fa-trash"></i> Permanently Delete Student</button>
+          </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
 {% endblock %}

@@ -9,27 +9,35 @@
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Contact Details</h5></div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4"><label>Full Name *</label><input type="text" name="full_name" class="form-control" required></div>
+                    <div class="col-md-4">
+                        <label>Target Exam</label>
+                        <select name="exam_type" class="form-select border-danger" style="background-color: #fff0f0;">
+                            <option value="">Select Exam</option>
+                            <option value="NEET">NEET (Medical)</option>
+                            <option value="JEE">JEE (Engineering)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>Full Name</label><input type="text" name="full_name" class="form-control"></div>
                     <div class="col-md-4"><label>Date of Birth (mm/dd/yyyy)</label><input type="date" name="dob" class="form-control"></div>
+
                     <div class="col-md-4"><label>Gender</label>
                         <select name="gender" class="form-select">
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
                     </div>
+                    <div class="col-md-4"><label>Aadhaar Number (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-4"><label>Category (Free Text)</label><input type="text" name="category" class="form-control" placeholder="e.g. General, OBC, etc."></div>
 
-                    <div class="col-md-4"><label>Aadhaar Number * (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12" required></div>
-                    <div class="col-md-4"><label>Category (Free Text)</label><input type="text" name="category" class="form-control" placeholder="e.g. General, OBC, etc." required></div>
-                    <div class="col-md-4"><label>Identification Mark *</label><input type="text" name="identification_mark" class="form-control" required></div>
-
+                    <div class="col-md-4"><label>Identification Mark</label><input type="text" name="identification_mark" class="form-control"></div>
                     <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="Indian"></div>
                     <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control"></div>
-                    <div class="col-md-4"><label>Primary Mobile * (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10" required></div>
 
+                    <div class="col-md-4"><label>Primary Mobile (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Alternative Mobile (10 Digits)</label><input type="text" name="alt_mobile_number" id="alt_mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Emergency Mobile (10 Digits)</label><input type="text" name="emergency_mobile" id="emergency_mobile" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
-                    <div class="col-md-4"><label>Primary Email</label><input type="email" name="email_address" class="form-control"></div>
 
+                    <div class="col-md-4"><label>Primary Email</label><input type="email" name="email_address" class="form-control"></div>
                     <div class="col-md-4"><label>Alternative Email</label><input type="email" name="alt_email" class="form-control"></div>
                     <div class="col-md-4"><label>Emergency Email</label><input type="email" name="emergency_email" class="form-control"></div>
                 </div>
@@ -209,81 +217,47 @@
             }
         });
 
-        // 3. Form Submission Validator (Strict Lengths, Phones, Emails, & Marks)
+        // 3. Form Submission Validator (Bypasses empty fields)
         document.getElementById('studentForm').addEventListener('submit', function(e) {
 
-            // Validate Exact Digit Lengths
             let aadhaar = document.getElementById('aadhaar_no').value.trim();
-            if (aadhaar.length !== 12) {
-                e.preventDefault();
-                alert("Validation Error: Aadhaar Number must be exactly 12 digits.");
-                return;
-            }
+            if (aadhaar !== "" && aadhaar.length !== 12) { e.preventDefault(); alert("Validation Error: Aadhaar Number must be exactly 12 digits if provided."); return; }
 
             let priMobile = document.getElementById('mobile_number').value.trim();
-            if (priMobile.length !== 10) {
-                e.preventDefault();
-                alert("Validation Error: Primary Mobile must be exactly 10 digits.");
-                return;
-            }
+            if (priMobile !== "" && priMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Primary Mobile must be exactly 10 digits if provided."); return; }
 
             let altMobile = document.getElementById('alt_mobile_number').value.trim();
-            if (altMobile !== "" && altMobile.length !== 10) {
-                e.preventDefault();
-                alert("Validation Error: Alternative Mobile must be exactly 10 digits if provided.");
-                return;
-            }
+            if (altMobile !== "" && altMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Alternative Mobile must be exactly 10 digits if provided."); return; }
 
             let emergMobile = document.getElementById('emergency_mobile').value.trim();
-            if (emergMobile !== "" && emergMobile.length !== 10) {
-                e.preventDefault();
-                alert("Validation Error: Emergency Mobile must be exactly 10 digits if provided.");
-                return;
-            }
+            if (emergMobile !== "" && emergMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Emergency Mobile must be exactly 10 digits if provided."); return; }
 
             let pinCode = document.getElementById('pin_code').value.trim();
-            if (pinCode !== "" && pinCode.length !== 6) {
-                e.preventDefault();
-                alert("Validation Error: PIN Code must be exactly 6 digits if provided.");
-                return;
-            }
+            if (pinCode !== "" && pinCode.length !== 6) { e.preventDefault(); alert("Validation Error: PIN Code must be exactly 6 digits if provided."); return; }
 
-            // Check Unique Emails
             let emails = [
                 document.getElementsByName('email_address')[0].value.trim().toLowerCase(),
                 document.getElementsByName('alt_email')[0].value.trim().toLowerCase(),
                 document.getElementsByName('emergency_email')[0].value.trim().toLowerCase()
             ].filter(v => v);
-            if (new Set(emails).size !== emails.length) {
-                e.preventDefault();
-                alert("Validation Error: All provided email addresses must be unique.");
-                return;
-            }
+            if (new Set(emails).size !== emails.length) { e.preventDefault(); alert("Validation Error: All provided email addresses must be unique."); return; }
 
-            // Check Unique Phones
             let phones = [priMobile, altMobile, emergMobile].filter(v => v);
-            if (new Set(phones).size !== phones.length) {
-                e.preventDefault();
-                alert("Validation Error: All provided phone numbers must be strictly different.");
-                return;
-            }
+            if (new Set(phones).size !== phones.length) { e.preventDefault(); alert("Validation Error: All provided phone numbers must be strictly different."); return; }
 
-            // Verify marks (Ensure Obtained is never > Max)
             let invalidMarks = false;
             ['c10', 'c12'].forEach(prefix => {
                 const obtInputs = document.querySelectorAll(`.${prefix}-main-obt, .${prefix}-add-obt`);
                 const maxInputs = document.querySelectorAll(`.${prefix}-main-max, .${prefix}-add-max`);
-
                 obtInputs.forEach((obtInput, index) => {
                     let obtVal = Number(obtInput.value);
                     let maxVal = Number(maxInputs[index].value);
-
                     if (obtInput.value !== "" && obtVal > maxVal) {
                         invalidMarks = true;
-                        obtInput.style.border = "2px solid red"; // Highlight error
-                        obtInput.style.backgroundColor = "#ffe6e6"; // Light red background
+                        obtInput.style.border = "2px solid red";
+                        obtInput.style.backgroundColor = "#ffe6e6";
                     } else {
-                        obtInput.style.border = ""; // Clear previous errors
+                        obtInput.style.border = "";
                         obtInput.style.backgroundColor = "";
                     }
                 });
@@ -291,7 +265,7 @@
 
             if (invalidMarks) {
                 e.preventDefault();
-                alert("Validation Error: Obtained marks cannot be greater than Maximum marks! Please check the fields highlighted in red.");
+                alert("Validation Error: Obtained marks cannot be greater than Maximum marks!");
                 return;
             }
         });
@@ -302,51 +276,25 @@
             const mainMax = document.querySelectorAll(`.${prefix}-main-max`);
             const addObt = document.querySelectorAll(`.${prefix}-add-obt`);
             const addMax = document.querySelectorAll(`.${prefix}-add-max`);
-
             const totalMainBox = document.getElementById(`${prefix}_total_main`);
             const percMainBox = document.getElementById(`${prefix}_perc_main`);
             const totalGrandBox = document.getElementById(`${prefix}_total_grand`);
             const percGrandBox = document.getElementById(`${prefix}_perc_grand`);
 
             function calculateSums() {
-                let mObtSum = 0, mMaxSum = 0;
-                let aObtSum = 0, aMaxSum = 0;
-
-                mainObt.forEach((input, index) => {
-                    if (input.value !== "") {
-                        mObtSum += Number(input.value);
-                        mMaxSum += Number(mainMax[index].value) || 0;
-                    }
-                });
-
-                addObt.forEach((input, index) => {
-                    if (input.value !== "") {
-                        aObtSum += Number(input.value);
-                        aMaxSum += Number(addMax[index].value) || 0;
-                    }
-                });
+                let mObtSum = 0, mMaxSum = 0, aObtSum = 0, aMaxSum = 0;
+                mainObt.forEach((input, index) => { if (input.value !== "") { mObtSum += Number(input.value); mMaxSum += Number(mainMax[index].value) || 0; } });
+                addObt.forEach((input, index) => { if (input.value !== "") { aObtSum += Number(input.value); aMaxSum += Number(addMax[index].value) || 0; } });
 
                 totalMainBox.value = mObtSum;
                 totalGrandBox.value = mObtSum + aObtSum;
 
-                if (mMaxSum > 0) {
-                    percMainBox.value = ((mObtSum / mMaxSum) * 100).toFixed(2) + "%";
-                } else {
-                    percMainBox.value = "";
-                }
-
-                if ((mMaxSum + aMaxSum) > 0) {
-                    percGrandBox.value = (((mObtSum + aObtSum) / (mMaxSum + aMaxSum)) * 100).toFixed(2) + "%";
-                } else {
-                    percGrandBox.value = "";
-                }
+                if (mMaxSum > 0) { percMainBox.value = ((mObtSum / mMaxSum) * 100).toFixed(2) + "%"; } else { percMainBox.value = ""; }
+                if ((mMaxSum + aMaxSum) > 0) { percGrandBox.value = (((mObtSum + aObtSum) / (mMaxSum + aMaxSum)) * 100).toFixed(2) + "%"; } else { percGrandBox.value = ""; }
             }
 
-            [...mainObt, ...mainMax, ...addObt, ...addMax].forEach(input => {
-                input.addEventListener('input', calculateSums);
-            });
+            [...mainObt, ...mainMax, ...addObt, ...addMax].forEach(input => { input.addEventListener('input', calculateSums); });
         }
-
         setupCalculators('c10');
         setupCalculators('c12');
     });

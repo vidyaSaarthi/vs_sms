@@ -1,28 +1,120 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 style="color: var(--brand-primary); font-weight: bold;">Student Directory</h3>
-    <a href="{{ url_for('add_student') }}" class="btn-3d-primary text-decoration-none">+ Register New Student</a>
-</div>
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color: var(--brand-primary); font-weight: 900;">Student Directory</h2>
+        <a href="{{ url_for('add_student') }}" class="btn btn-success fw-bold" style="box-shadow: 0 4px 6px rgba(0,0,0,0.1);">+ Add New Student</a>
+    </div>
 
-<div class="row">
-    {% for student in students %}
-    <div class="col-md-4">
-        <div class="card-3d">
-            <h4 style="color: var(--brand-primary);">{{ student.full_name }}</h4>
-            <p class="mb-1"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</p>
-            <p class="mb-3"><strong>Mobile:</strong> {{ student.mobile_number }}</p>
-
-            <div class="d-flex gap-2">
-                <a href="{{ url_for('view_student', id=student.id) }}" class="btn-3d-primary btn-sm flex-fill text-center text-decoration-none" style="background: var(--brand-accent-yellow); color: var(--brand-primary);">Profile</a>
-                <a href="{{ url_for('export_verification', id=student.id) }}" target="_blank" class="btn-3d-primary btn-sm flex-fill text-center text-decoration-none">Print Sheet</a>
+    <div class="card shadow-sm mb-4" style="border: 2px solid var(--brand-accent-blue);">
+        <div class="card-body bg-light">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <select id="examFilter" class="form-select fw-bold text-danger">
+                        <option value="ALL">🎯 All Exams (NEET & JEE)</option>
+                        <option value="NEET">NEET Students</option>
+                        <option value="JEE">JEE Students</option>
+                    </select>
+                </div>
+                <div class="col-md-9">
+                    <input type="text" id="searchInput" class="form-control" placeholder="🔍 Instantly search by Student Name...">
+                </div>
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="col-12 text-center mt-5">
-        <h4 style="color: #666;">No students found. Add your first student to get started.</h4>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="studentGrid">
+        {% for student in students %}
+        <div class="col student-card-container" data-exam="{{ student.exam_type or '' }}" data-name="{{ student.full_name | lower }}">
+            <div class="card h-100 shadow-sm position-relative" style="background-color: var(--brand-accent-blue); border: 2px solid var(--brand-accent-yellow); border-radius: 12px;">
+
+                {% if student.is_approved %}
+                <span class="position-absolute top-0 start-0 badge rounded-pill m-2 fs-6 bg-success" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10;">
+                    <i class="fas fa-check-circle"></i> Approved
+                </span>
+                {% endif %}
+
+                {% if student.exam_type %}
+                    <span class="position-absolute top-0 end-0 badge rounded-pill m-2 fs-6 {% if student.exam_type == 'NEET' %}bg-danger{% else %}bg-primary{% endif %}" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        {{ student.exam_type }}
+                    </span>
+                {% else %}
+                    <span class="position-absolute top-0 end-0 badge rounded-pill m-2 fs-6 bg-secondary" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        Unassigned
+                    </span>
+                {% endif %}
+
+                <div class="card-body mt-4">
+                    <h4 class="card-title mb-3" style="color: var(--brand-primary); font-weight: 800;">{{ student.full_name }}</h4>
+                    <p class="card-text mb-1" style="color: #333;"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</p>
+                    <p class="card-text mb-3" style="color: #333;"><strong>Mobile:</strong> {{ student.mobile_number }}</p>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{{ url_for('view_student', id=student.id) }}" class="btn flex-fill" style="background: var(--brand-accent-yellow); color: var(--brand-primary); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Profile</a>
+                        <a href="{{ url_for('edit_student', id=student.id) }}" class="btn flex-fill btn-warning text-dark fw-bold" style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Edit</a>
+                        <a href="{{ url_for('export_verification', id=student.id) }}" class="btn flex-fill" style="background: var(--brand-primary); color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Print</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center mt-5" id="emptyStateOriginal">
+            <h4 class="text-muted">No students registered yet.</h4>
+            <p class="text-muted">Click the "+ Add New Student" button to begin.</p>
+        </div>
+        {% endfor %}
+
+        <div class="col-12 text-center mt-5" id="noResultsMessage" style="display: none;">
+            <h4 class="text-muted">No matching students found.</h4>
+            <p class="text-muted">Try adjusting your filters or search text.</p>
+        </div>
     </div>
-    {% endfor %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const examFilter = document.getElementById('examFilter');
+        const searchInput = document.getElementById('searchInput');
+        const studentCards = document.querySelectorAll('.student-card-container');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        function filterStudents() {
+            // Trim and uppercase for robust matching
+            const selectedExam = examFilter.value.trim().toUpperCase();
+            const searchText = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            studentCards.forEach(card => {
+                // Get data, default to empty string if missing, trim and uppercase
+                const cardExam = (card.getAttribute('data-exam') || "").trim().toUpperCase();
+                const cardName = (card.getAttribute('data-name') || "").toLowerCase();
+
+                // Match Logic
+                const matchesExam = (selectedExam === "ALL" || cardExam === selectedExam);
+                const matchesSearch = (searchText === "" || cardName.includes(searchText));
+
+                // Toggle Visibility
+                if (matchesExam && matchesSearch) {
+                    card.style.display = "";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // Show "No Results" message if everything is filtered out
+            if (studentCards.length > 0) {
+                if (visibleCount === 0) {
+                    noResultsMessage.style.display = "block";
+                } else {
+                    noResultsMessage.style.display = "none";
+                }
+            }
+        }
+
+        // Trigger filter instantly when typing or changing dropdown
+        examFilter.addEventListener('change', filterStudents);
+        searchInput.addEventListener('input', filterStudents);
+    });
+</script>
 {% endblock %}

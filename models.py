@@ -18,7 +18,8 @@ class Student(db.Model):
     __tablename__ = 'students'
     id = db.Column(db.Integer, primary_key=True)
 
-    # 1. Basic Details
+    is_approved = db.Column(db.Boolean, default=False)  # NEW: Parent Approval Lock
+    exam_type = db.Column(db.String(20), nullable=False)
     full_name = db.Column(db.String(150), nullable=False)
     gender = db.Column(db.String(20), nullable=False)
     dob = db.Column(db.Date, nullable=True)
@@ -28,16 +29,13 @@ class Student(db.Model):
     nationality = db.Column(db.String(50), default='Indian')
     nativity = db.Column(db.String(100), nullable=True)
 
-    # 2. Communication
     mobile_number = db.Column(db.String(15), unique=True, nullable=False)
     alt_mobile_number = db.Column(db.String(15), nullable=True)
     emergency_mobile = db.Column(db.String(15), nullable=True)
-
     email_address = db.Column(db.String(120), nullable=True)
     alt_email = db.Column(db.String(120), nullable=True)
     emergency_email = db.Column(db.String(120), nullable=True)
 
-    # Split Address Fields
     house_no = db.Column(db.String(100), nullable=True)
     street_name = db.Column(db.String(150), nullable=True)
     post_office = db.Column(db.String(100), nullable=True)
@@ -45,7 +43,6 @@ class Student(db.Model):
     state_ut = db.Column(db.String(100), nullable=True)
     district = db.Column(db.String(100), nullable=True)
 
-    # 3. Parent Details & Finances
     father_name = db.Column(db.String(150), nullable=True)
     father_education = db.Column(db.String(150), nullable=True)
     father_occupation = db.Column(db.String(150), nullable=True)
@@ -54,7 +51,6 @@ class Student(db.Model):
     mother_occupation = db.Column(db.String(150), nullable=True)
     family_income = db.Column(db.String(100), nullable=True)
 
-    # 4. Bank Details
     bank_holder_name = db.Column(db.String(150), nullable=True)
     bank_name = db.Column(db.String(150), nullable=True)
     bank_branch = db.Column(db.String(150), nullable=True)
@@ -62,7 +58,6 @@ class Student(db.Model):
     bank_account_no = db.Column(db.String(50), nullable=True)
     bank_ifsc = db.Column(db.String(20), nullable=True)
 
-    # 5. Class 10
     class_10_year = db.Column(db.Integer, nullable=True)
     class_10_school = db.Column(db.String(200), nullable=True)
     class_10_serial = db.Column(db.String(50), nullable=True)
@@ -72,12 +67,10 @@ class Student(db.Model):
     class_10_roll_no = db.Column(db.String(50), nullable=True)
     class_10_marks_data = db.Column(db.Text, nullable=True)
 
-    # 6. Class 11
     class_11_year = db.Column(db.Integer, nullable=True)
     class_11_school = db.Column(db.String(200), nullable=True)
     class_11_roll_no = db.Column(db.String(50), nullable=True)
 
-    # 7. Class 12
     passed_appearing = db.Column(db.String(50), nullable=True)
     studied_sanskrit = db.Column(db.String(20), nullable=True)
     registration_no_apaar_id = db.Column(db.String(100), nullable=True)
