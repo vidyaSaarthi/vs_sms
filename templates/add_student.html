@@ -3,40 +3,47 @@
 <div class="container mt-4 mb-5">
     <h2 class="mb-4" style="color: var(--brand-primary);"><i class="fas fa-user-plus"></i> New Student Admission Registration</h2>
 
-    <form method="POST" class="needs-validation" novalidate id="studentForm">
-
+    <form method="POST" id="studentForm">
+        
         <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Contact Details</h5></div>
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Target Exams</h5></div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label>Target Exam</label>
-                        <select name="exam_type" class="form-select border-danger" style="background-color: #fff0f0;">
+                        <select name="exam_type" id="examTypeSelect" class="form-select border-danger" style="background-color: #fff0f0;">
                             <option value="">Select Exam</option>
                             <option value="NEET">NEET (Medical)</option>
                             <option value="JEE">JEE (Engineering)</option>
                         </select>
                     </div>
+                    <div class="col-md-8">
+                        <label>Forms Filled</label>
+                        <div id="formsCheckboxes" class="border p-2 rounded bg-light" style="min-height: 38px;">
+                            <em class="text-muted small">Select Target Exam first to view available forms.</em>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label>Any Other Forms Filled (Free Text)</label>
+                        <input type="text" name="other_forms_filled" class="form-control" placeholder="Type any other forms here...">
+                    </div>
+                    
                     <div class="col-md-4"><label>Full Name</label><input type="text" name="full_name" class="form-control"></div>
                     <div class="col-md-4"><label>Date of Birth (mm/dd/yyyy)</label><input type="date" name="dob" class="form-control"></div>
-
                     <div class="col-md-4"><label>Gender</label>
-                        <select name="gender" class="form-select">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
+                        <select name="gender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select>
                     </div>
-                    <div class="col-md-4"><label>Aadhaar Number (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
-                    <div class="col-md-4"><label>Category (Free Text)</label><input type="text" name="category" class="form-control" placeholder="e.g. General, OBC, etc."></div>
-
+                    <div class="col-md-4"><label>Student's Aadhaar No. (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-4"><label>Category</label><input type="text" name="category" class="form-control"></div>
                     <div class="col-md-4"><label>Identification Mark</label><input type="text" name="identification_mark" class="form-control"></div>
+                    
                     <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="Indian"></div>
                     <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control"></div>
-
+                    
                     <div class="col-md-4"><label>Primary Mobile (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Alternative Mobile (10 Digits)</label><input type="text" name="alt_mobile_number" id="alt_mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Emergency Mobile (10 Digits)</label><input type="text" name="emergency_mobile" id="emergency_mobile" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
-
+                    
                     <div class="col-md-4"><label>Primary Email</label><input type="email" name="email_address" class="form-control"></div>
                     <div class="col-md-4"><label>Alternative Email</label><input type="email" name="alt_email" class="form-control"></div>
                     <div class="col-md-4"><label>Emergency Email</label><input type="email" name="emergency_email" class="form-control"></div>
@@ -63,56 +70,88 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-4"><label>Father's Name</label><input type="text" name="father_name" class="form-control"></div>
-                    <div class="col-md-4"><label>Father's Education</label><input type="text" name="father_education" class="form-control"></div>
-                    <div class="col-md-4"><label>Father's Occupation</label><input type="text" name="father_occupation" class="form-control"></div>
-
+                    <div class="col-md-4"><label>Father's Aadhaar No. (12 Digits)</label><input type="text" name="father_aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-2"><label>Father's Education</label><input type="text" name="father_education" class="form-control"></div>
+                    <div class="col-md-2"><label>Father's Occupation</label><input type="text" name="father_occupation" class="form-control"></div>
+                    
                     <div class="col-md-4"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control"></div>
-                    <div class="col-md-4"><label>Mother's Education</label><input type="text" name="mother_education" class="form-control"></div>
-                    <div class="col-md-4"><label>Mother's Occupation</label><input type="text" name="mother_occupation" class="form-control"></div>
-
-                    <div class="col-md-4"><label>Annual Family Income (Rs.)</label><input type="text" name="family_income" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" placeholder="e.g. 500000"></div>
+                    <div class="col-md-4"><label>Mother's Aadhaar No. (12 Digits)</label><input type="text" name="mother_aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-2"><label>Mother's Education</label><input type="text" name="mother_education" class="form-control"></div>
+                    <div class="col-md-2"><label>Mother's Occupation</label><input type="text" name="mother_occupation" class="form-control"></div>
+                    
+                    <div class="col-md-4">
+                        <label>Annual Family Income</label>
+                        <select name="family_income" class="form-select">
+                            <option value="">Select Income Bracket</option>
+                            {% for bracket in ['0 - 1 Lakh', '1 Lakh - 2 Lakhs', '2 Lakhs - 3 Lakhs', '3 Lakhs - 4 Lakhs', '4 Lakhs - 5 Lakhs', '5 Lakhs - 6 Lakhs', '6 Lakhs - 7 Lakhs', '7 Lakhs - 8 Lakhs', '8 Lakhs - 9 Lakhs', '9 Lakhs - 10 Lakhs', '10 Lakhs - 11 Lakhs', '11 Lakhs - 12 Lakhs', '12 Lakhs and above'] %}
+                                <option value="{{ bracket }}">{{ bracket }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
                     <div class="col-12 mt-4"><h6 class="border-bottom pb-2">Bank Details</h6></div>
                     <div class="col-md-4"><label>A/c Holder Name</label><input type="text" name="bank_holder_name" class="form-control"></div>
                     <div class="col-md-4"><label>Bank Name</label><input type="text" name="bank_name" class="form-control"></div>
                     <div class="col-md-4"><label>Branch Name</label><input type="text" name="bank_branch" class="form-control"></div>
                     <div class="col-md-4"><label>Account Number (Numeric)</label><input type="text" name="bank_account_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
-                    <div class="col-md-4"><label>IFSC Code</label><input type="text" name="bank_ifsc" class="form-control" oninput="this.value = this.value.toUpperCase();" maxlength="11" pattern="^[A-Z]{4}0[A-Z0-9]{6}$" title="Must be a valid 11-character IFSC Code"></div>
+                    <div class="col-md-4"><label>IFSC Code</label><input type="text" name="bank_ifsc" class="form-control" oninput="this.value = this.value.toUpperCase();" maxlength="11"></div>
                     <div class="col-md-4"><label>Branch Address</label><input type="text" name="bank_address" class="form-control"></div>
                 </div>
             </div>
         </div>
 
         <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light"><h5 class="mb-0 text-danger">4. Class 10th Details</h5></div>
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">4. Class 10th Subjects & Marks</h5></div>
             <div class="card-body">
                 <div class="row g-3 mb-4">
                     <div class="col-md-3"><label>Passing Year</label><select name="class_10_year" class="form-select year-dropdown"></select></div>
-                    <div class="col-md-6"><label>School Name</label><input type="text" name="class_10_school" class="form-control"></div>
                     <div class="col-md-3"><label>Board</label><input type="text" name="class_10_board" class="form-control"></div>
-                    <div class="col-md-3"><label>Roll No. (Numeric)</label><input type="text" name="class_10_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>Roll No.</label><input type="text" name="class_10_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
                     <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_10_reg_no" class="form-control"></div>
+                    
                     <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_10_serial" class="form-control"></div>
-                    <div class="col-md-3"><label>Issue Date (mm/dd/yyyy)</label><input type="date" name="class_10_issue_date" class="form-control"></div>
+                    <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_10_issue_date" class="form-control"></div>
+                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_10_school" class="form-control"></div>
+                    <div class="col-md-3"><label>State Name</label><input type="text" name="class_10_state" class="form-control"></div>
                 </div>
-                <h6 class="border-bottom pb-2">10th Subjects & Marks</h6>
-                <div class="table-responsive"><table class="table table-sm table-bordered text-center align-middle">
-                    <thead class="table-light"><tr><th>Subject</th><th>Max Marks</th><th>Obtained Marks</th></tr></thead>
+                
+                <h6 class="bg-secondary text-white p-2 rounded">A. Main Subjects</h6>
+                <table class="table table-sm table-bordered text-center align-middle" id="table-c10-main">
+                    <thead class="table-light"><tr><th width="50%">Subject</th><th width="25%">Max Marks</th><th width="25%">Obtained</th></tr></thead>
                     <tbody>
-                        <tr><td class="text-start">English Lng & Lit.</td><td><input type="text" name="c10_eng_max" class="form-control form-control-sm c10-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_eng_obt" class="form-control form-control-sm c10-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Hindi Course A</td><td><input type="text" name="c10_hin_max" class="form-control form-control-sm c10-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_hin_obt" class="form-control form-control-sm c10-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Mathematics Standard</td><td><input type="text" name="c10_math_max" class="form-control form-control-sm c10-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_math_obt" class="form-control form-control-sm c10-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Science</td><td><input type="text" name="c10_sci_max" class="form-control form-control-sm c10-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_sci_obt" class="form-control form-control-sm c10-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Social Science</td><td><input type="text" name="c10_sst_max" class="form-control form-control-sm c10-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_sst_obt" class="form-control form-control-sm c10-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Computer Application</td><td><input type="text" name="c10_comp_max" class="form-control form-control-sm c10-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_comp_obt" class="form-control form-control-sm c10-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-
-                        <tr><td class="text-start"><select name="c10_add1_name" class="form-select form-select-sm"><option value="">Select Additional 1</option><option value="Physical Education">Physical Education</option><option value="Hindi">Hindi</option></select></td><td><input type="text" name="c10_add1_max" class="form-control form-control-sm c10-add-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_add1_obt" class="form-control form-control-sm c10-add-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start"><select name="c10_add2_name" class="form-select form-select-sm"><option value="">Select Additional 2</option><option value="Physical Education">Physical Education</option><option value="Hindi">Hindi</option></select></td><td><input type="text" name="c10_add2_max" class="form-control form-control-sm c10-add-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c10_add2_obt" class="form-control form-control-sm c10-add-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-
-                        <tr class="table-warning"><td class="text-end fw-bold">Total (Main Subjects):</td><td colspan="2"><div class="d-flex"><input type="text" name="c10_total_main" id="c10_total_main" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c10_perc_main" id="c10_perc_main" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
-                        <tr class="table-info"><td class="text-end fw-bold">Grand Total (Inc. Additional):</td><td colspan="2"><div class="d-flex"><input type="text" name="c10_total_grand" id="c10_total_grand" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c10_perc_grand" id="c10_perc_grand" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
+                        <tr><td class="text-start">English</td><td><input type="text" name="c10_main_eng_max" class="form-control form-control-sm c10-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c10_main_eng_obt" class="form-control form-control-sm c10-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
+                        <tr><td class="text-start">Mathematics</td><td><input type="text" name="c10_main_math_max" class="form-control form-control-sm c10-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c10_main_math_obt" class="form-control form-control-sm c10-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
+                        <tr><td class="text-start">Science</td><td><input type="text" name="c10_main_sci_max" class="form-control form-control-sm c10-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c10_main_sci_obt" class="form-control form-control-sm c10-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
+                        <tr><td class="text-start">Social Science</td><td><input type="text" name="c10_main_sst_max" class="form-control form-control-sm c10-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c10_main_sst_obt" class="form-control form-control-sm c10-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
                     </tbody>
-                </table></div>
+                </table>
+
+                <div class="d-flex justify-content-between mt-4 mb-2"><h6 class="bg-secondary text-white p-2 rounded w-100 mb-0">B. Other Main Subjects</h6><button type="button" class="btn btn-sm btn-outline-primary ms-2 add-row" data-target="tbody-c10-other" data-prefix="c10_other">+ Add Subject</button></div>
+                <table class="table table-sm table-bordered text-center align-middle" id="table-c10-other">
+                    <thead class="table-light"><tr><th width="45%">Subject Name</th><th width="20%">Max Marks</th><th width="20%">Obtained</th><th width="15%">Action</th></tr></thead>
+                    <tbody id="tbody-c10-other"></tbody>
+                </table>
+
+                <div class="d-flex justify-content-between mt-4 mb-2"><h6 class="bg-secondary text-white p-2 rounded w-100 mb-0">C. Additional Subjects</h6><button type="button" class="btn btn-sm btn-outline-primary ms-2 add-row" data-target="tbody-c10-add" data-prefix="c10_add">+ Add Subject</button></div>
+                <table class="table table-sm table-bordered text-center align-middle" id="table-c10-add">
+                    <thead class="table-light"><tr><th width="45%">Subject Name</th><th width="20%">Max Marks</th><th width="20%">Obtained</th><th width="15%">Action</th></tr></thead>
+                    <tbody id="tbody-c10-add"></tbody>
+                </table>
+
+                <div class="mt-4 p-3 border rounded" style="background-color: #f8f9fa; border-left: 5px solid var(--brand-accent-yellow) !important;">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-md-5 text-end fw-bold" style="color: var(--brand-primary);">Total (Main + Other Main):</div>
+                        <div class="col-md-2"><input type="text" name="c10_overall_main_max" id="c10_overall_main_max" class="form-control fw-bold text-center" readonly placeholder="Max"></div>
+                        <div class="col-md-2"><input type="text" name="c10_overall_main_obt" id="c10_overall_main_obt" class="form-control fw-bold text-center" readonly placeholder="Obt"></div>
+                        <div class="col-md-3"><input type="text" name="c10_overall_main_perc" id="c10_overall_main_perc" class="form-control fw-bold text-center text-primary" readonly placeholder="%"></div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-md-5 text-end fw-bold text-danger">Grand Total (Inc. Additional):</div>
+                        <div class="col-md-2"><input type="text" name="c10_overall_grand_max" id="c10_overall_grand_max" class="form-control fw-bold text-center border-danger" readonly placeholder="Max"></div>
+                        <div class="col-md-2"><input type="text" name="c10_overall_grand_obt" id="c10_overall_grand_obt" class="form-control fw-bold text-center border-danger" readonly placeholder="Obt"></div>
+                        <div class="col-md-3"><input type="text" name="c10_overall_grand_perc" id="c10_overall_grand_perc" class="form-control fw-bold text-center text-danger border-danger" readonly placeholder="%"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -120,77 +159,121 @@
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">5. Class 11th Details</h5></div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4"><label>Year</label><select name="class_11_year" class="form-select year-dropdown"></select></div>
-                    <div class="col-md-4"><label>School Name</label><input type="text" name="class_11_school" class="form-control"></div>
-                    <div class="col-md-4"><label>Roll Number (Numeric)</label><input type="text" name="class_11_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>Passing Year</label><select name="class_11_year" class="form-select year-dropdown"></select></div>
+                    <div class="col-md-3"><label>Roll Number</label><input type="text" name="class_11_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_11_school" class="form-control"></div>
+                    <div class="col-md-3"><label>State Name</label><input type="text" name="class_11_state" class="form-control"></div>
                 </div>
             </div>
         </div>
 
         <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light"><h5 class="mb-0 text-danger">6. Class 12th & Qualifying Details</h5></div>
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">6. Class 12th Subjects & Marks</h5></div>
             <div class="card-body">
-
+                
                 <h6 class="border-bottom pb-2">Exam Status</h6>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4"><label>Passed / Appearing</label><select name="passed_appearing" class="form-select"><option value="Passed">Passed</option><option value="Appearing">Appearing</option></select></div>
                     <div class="col-md-4"><label>Studied Sanskrit at Plus Two?</label><select name="studied_sanskrit" class="form-select"><option value="No">No</option><option value="Yes">Yes</option></select></div>
-                    <div class="col-md-4"><label>APAAR ID (Numeric)</label><input type="text" name="registration_no_apaar_id" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-4"><label>APAAR ID</label><input type="text" name="registration_no_apaar_id" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
                 </div>
 
                 <h6 class="border-bottom pb-2">Academic Record</h6>
                 <div class="row g-3 mb-4">
                     <div class="col-md-3"><label>Passing Year</label><select name="class_12_year" class="form-select year-dropdown"></select></div>
-                    <div class="col-md-6"><label>School Name</label><input type="text" name="class_12_school" class="form-control"></div>
                     <div class="col-md-3"><label>Board</label><input type="text" name="class_12_board" class="form-control"></div>
-                    <div class="col-md-3"><label>Roll No. (Numeric)</label><input type="text" name="class_12_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>Roll No.</label><input type="text" name="class_12_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
                     <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_12_reg_no" class="form-control"></div>
+                    
                     <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_12_serial" class="form-control"></div>
-                    <div class="col-md-3"><label>Issue Date (mm/dd/yyyy)</label><input type="date" name="class_12_issue_date" class="form-control"></div>
+                    <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_12_issue_date" class="form-control"></div>
+                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_12_school" class="form-control"></div>
+                    <div class="col-md-3"><label>State Name</label><input type="text" name="class_12_state" class="form-control"></div>
                 </div>
-                <h6 class="border-bottom pb-2">12th Subjects & Marks</h6>
-                <div class="table-responsive"><table class="table table-sm table-bordered text-center align-middle">
-                    <thead class="table-light"><tr><th>Subject</th><th>Max Marks</th><th>Obtained Marks</th></tr></thead>
+
+                <h6 class="bg-secondary text-white p-2 rounded">A. Main Subjects</h6>
+                <table class="table table-sm table-bordered text-center align-middle" id="table-c12-main">
+                    <thead class="table-light"><tr><th width="50%">Subject</th><th width="25%">Max Marks</th><th width="25%">Obtained</th></tr></thead>
                     <tbody>
-                        <tr><td class="text-start">English Core</td><td><input type="text" name="c12_eng_max" class="form-control form-control-sm c12-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c12_eng_obt" class="form-control form-control-sm c12-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Physics</td><td><input type="text" name="c12_phy_max" class="form-control form-control-sm c12-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c12_phy_obt" class="form-control form-control-sm c12-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Chemistry</td><td><input type="text" name="c12_chem_max" class="form-control form-control-sm c12-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c12_chem_obt" class="form-control form-control-sm c12-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start">Biology</td><td><input type="text" name="c12_bio_max" class="form-control form-control-sm c12-main-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c12_bio_obt" class="form-control form-control-sm c12-main-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-
-                        <tr><td class="text-start"><select name="c12_add1_name" class="form-select form-select-sm"><option value="">Select Additional 1</option><option value="PHYSICAL EDUCATION">Physical Education</option><option value="arts">Arts</option></select></td><td><input type="text" name="c12_add1_max" class="form-control form-control-sm c12-add-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c12_add1_obt" class="form-control form-control-sm c12-add-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-                        <tr><td class="text-start"><select name="c12_add2_name" class="form-select form-select-sm"><option value="">Select Additional 2</option><option value="PHYSICAL EDUCATION">Physical Education</option><option value="arts">Arts</option></select></td><td><input type="text" name="c12_add2_max" class="form-control form-control-sm c12-add-max" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td><td><input type="text" name="c12_add2_obt" class="form-control form-control-sm c12-add-obt" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3"></td></tr>
-
-                        <tr class="table-warning"><td class="text-end fw-bold">Total (Main Subjects):</td><td colspan="2"><div class="d-flex"><input type="text" name="c12_total_main" id="c12_total_main" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c12_perc_main" id="c12_perc_main" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
-                        <tr class="table-info"><td class="text-end fw-bold">Grand Total (Inc. Additional):</td><td colspan="2"><div class="d-flex"><input type="text" name="c12_total_grand" id="c12_total_grand" class="form-control form-control-sm fw-bold text-center me-2" placeholder="Marks" readonly><input type="text" name="c12_perc_grand" id="c12_perc_grand" class="form-control form-control-sm fw-bold text-center text-primary" placeholder="%" readonly></div></td></tr>
+                        <tr><td class="text-start">English</td><td><input type="text" name="c12_main_eng_max" class="form-control form-control-sm c12-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c12_main_eng_obt" class="form-control form-control-sm c12-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
+                        <tr><td class="text-start">Physics</td><td><input type="text" name="c12_main_phy_max" class="form-control form-control-sm c12-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c12_main_phy_obt" class="form-control form-control-sm c12-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
+                        <tr><td class="text-start">Chemistry</td><td><input type="text" name="c12_main_chem_max" class="form-control form-control-sm c12-main-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td><td><input type="text" name="c12_main_chem_obt" class="form-control form-control-sm c12-main-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td></tr>
                     </tbody>
-                </table></div>
+                </table>
+
+                <div class="d-flex justify-content-between mt-4 mb-2"><h6 class="bg-secondary text-white p-2 rounded w-100 mb-0">B. Other Main Subjects</h6><button type="button" class="btn btn-sm btn-outline-primary ms-2 add-row" data-target="tbody-c12-other" data-prefix="c12_other">+ Add Subject</button></div>
+                <table class="table table-sm table-bordered text-center align-middle" id="table-c12-other">
+                    <thead class="table-light"><tr><th width="45%">Subject Name</th><th width="20%">Max Marks</th><th width="20%">Obtained</th><th width="15%">Action</th></tr></thead>
+                    <tbody id="tbody-c12-other"></tbody>
+                </table>
+
+                <div class="d-flex justify-content-between mt-4 mb-2"><h6 class="bg-secondary text-white p-2 rounded w-100 mb-0">C. Additional Subjects</h6><button type="button" class="btn btn-sm btn-outline-primary ms-2 add-row" data-target="tbody-c12-add" data-prefix="c12_add">+ Add Subject</button></div>
+                <table class="table table-sm table-bordered text-center align-middle" id="table-c12-add">
+                    <thead class="table-light"><tr><th width="45%">Subject Name</th><th width="20%">Max Marks</th><th width="20%">Obtained</th><th width="15%">Action</th></tr></thead>
+                    <tbody id="tbody-c12-add"></tbody>
+                </table>
+
+                <div class="mt-4 p-3 border rounded" style="background-color: #f8f9fa; border-left: 5px solid var(--brand-accent-yellow) !important;">
+                    <div class="row align-items-center mb-2">
+                        <div class="col-md-5 text-end fw-bold" style="color: var(--brand-primary);">Total (Main + Other Main):</div>
+                        <div class="col-md-2"><input type="text" name="c12_overall_main_max" id="c12_overall_main_max" class="form-control fw-bold text-center" readonly placeholder="Max"></div>
+                        <div class="col-md-2"><input type="text" name="c12_overall_main_obt" id="c12_overall_main_obt" class="form-control fw-bold text-center" readonly placeholder="Obt"></div>
+                        <div class="col-md-3"><input type="text" name="c12_overall_main_perc" id="c12_overall_main_perc" class="form-control fw-bold text-center text-primary" readonly placeholder="%"></div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-md-5 text-end fw-bold text-danger">Grand Total (Inc. Additional):</div>
+                        <div class="col-md-2"><input type="text" name="c12_overall_grand_max" id="c12_overall_grand_max" class="form-control fw-bold text-center border-danger" readonly placeholder="Max"></div>
+                        <div class="col-md-2"><input type="text" name="c12_overall_grand_obt" id="c12_overall_grand_obt" class="form-control fw-bold text-center border-danger" readonly placeholder="Obt"></div>
+                        <div class="col-md-3"><input type="text" name="c12_overall_grand_perc" id="c12_overall_grand_perc" class="form-control fw-bold text-center text-danger border-danger" readonly placeholder="%"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light"><h5 class="mb-0 text-danger">7. Google Drive Links</h5></div>
+            <div class="card-header bg-light"><h5 class="mb-0 text-danger">7. Complete Document Links</h5></div>
             <div class="card-body">
-                <h6 class="border-bottom pb-2">Personal & ID Proofs</h6>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4"><label>Student Photo Link</label><input type="url" name="photo_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Student Signature Link</label><input type="url" name="student_signature_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Aadhaar Card Link</label><input type="url" name="aadhaar_card_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Birth Certificate Link</label><input type="url" name="birth_certificate_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Residence Proof Link</label><input type="url" name="residence_proof_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Family ID Link</label><input type="url" name="family_id_url" class="form-control"></div>
-                </div>
-                <h6 class="border-bottom pb-2">Academic Certificates</h6>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4"><label>10th Marksheet Link</label><input type="url" name="10th_marksheet_url" class="form-control"></div>
-                    <div class="col-md-4"><label>11th Marksheet Link <small class="text-muted">(Optional)</small></label><input type="url" name="11th_marksheet_url" class="form-control"></div>
-                    <div class="col-md-4"><label>12th Marksheet Link</label><input type="url" name="12th_marksheet_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Character Certificate Link</label><input type="url" name="character_certificate_url" class="form-control"></div>
-                </div>
-                <h6 class="border-bottom pb-2">Financial & Category Proofs</h6>
                 <div class="row g-3">
-                    <div class="col-md-4"><label>Bank Proof (Cheque/Passbook)</label><input type="url" name="bank_proof_url" class="form-control"></div>
-                    <div class="col-md-4"><label>Caste Certificate Link</label><input type="url" name="caste_certificate_url" class="form-control"></div>
-                    <div class="col-md-4"><label>EWS Certificate Link</label><input type="url" name="ews_certificate_url" class="form-control"></div>
+                    {% set doc_list = [
+                        ('photo_url', 'Student Photo Link'), ('student_signature_url', 'Student Signature Link'), 
+                        ('aadhaar_card_url', 'Student Aadhaar Card Link'), ('father_aadhaar_url', 'Father Aadhaar Card Link'), 
+                        ('mother_aadhaar_url', 'Mother Aadhaar Card Link'), ('student_pan_card_url', 'Student PAN Card Link'),
+                        ('passport_url', 'Passport Link'), ('driving_license_url', 'Driving License Link'),
+                        ('birth_certificate_url', 'Birth Certificate Link'), ('residence_proof_url', 'Residence Proof Link'), 
+                        ('family_id_url', 'Family ID Link'), ('apaar_id_doc_url', 'APAAR ID Document Link'),
+                        ('10th_marksheet_url', '10th Marksheet Link'), ('11th_marksheet_url', '11th Marksheet Link'), 
+                        ('12th_marksheet_url', '12th Marksheet Link'), ('improvement_marksheet_url', '12th Improvement Marksheet Link'),
+                        ('school_leaving_certificate_url', 'School Leaving Cert. (SLC) Link'), ('transfer_certificate_url', 'Transfer Cert. (TC) Link'),
+                        ('character_certificate_url', 'Character Certificate Link'), ('neet_jee_admit_card_url', 'NEET/JEE Admit Card Link'), 
+                        ('neet_jee_result_url', 'NEET/JEE Result Card Link'), ('fingerprints_url', 'Fingerprints Scans Link'),
+                        ('bank_proof_url', 'Bank Proof (Passbook) Link'), ('caste_certificate_url', 'Caste Certificate Link'), ('ews_certificate_url', 'EWS Certificate Link')
+                    ] %}
+                    {% for id, label in doc_list %}
+                    <div class="col-md-4">
+                        <label>{{ label }}</label>
+                        <input type="url" name="{{ id }}" class="form-control form-control-sm">
+                    </div>
+                    {% endfor %}
+
+                    <div class="col-md-12 mt-3 border-top pt-3 d-flex justify-content-between align-items-center">
+                        <h6 class="text-danger mb-0">Other Custom Documents</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="addCustomDocBtn">+ Add Custom Document</button>
+                    </div>
+                    
+                    <div id="customDocsContainer" class="col-md-12 mt-2">
+                        <div class="row g-2 mb-2 custom-doc-row">
+                            <div class="col-md-4">
+                                <input type="text" name="custom_doc_name[]" class="form-control form-control-sm" placeholder="Document Name (e.g. Gap Certificate)">
+                            </div>
+                            <div class="col-md-7">
+                                <input type="url" name="custom_doc_url[]" class="form-control form-control-sm" placeholder="Link (https://drive.google.com/...)">
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-sm btn-danger remove-custom-doc w-100">X</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -200,103 +283,156 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // 1. Prevent Future Dates on all Date inputs
-        let today = new Date().toISOString().split('T')[0];
-        document.querySelectorAll('input[type="date"]').forEach(dateInput => {
-            dateInput.setAttribute('max', today);
-        });
-
-        // 2. Populate Years (2020 to Current)
-        const currentYear = new Date().getFullYear();
-        const yearDropdowns = document.querySelectorAll('.year-dropdown');
-        yearDropdowns.forEach(dropdown => {
-            dropdown.innerHTML = '<option value="">Select Year</option>';
-            for (let y = currentYear; y >= 2020; y--) {
-                dropdown.innerHTML += `<option value="${y}">${y}</option>`;
-            }
-        });
-
-        // 3. Form Submission Validator (Bypasses empty fields)
-        document.getElementById('studentForm').addEventListener('submit', function(e) {
-
-            let aadhaar = document.getElementById('aadhaar_no').value.trim();
-            if (aadhaar !== "" && aadhaar.length !== 12) { e.preventDefault(); alert("Validation Error: Aadhaar Number must be exactly 12 digits if provided."); return; }
-
-            let priMobile = document.getElementById('mobile_number').value.trim();
-            if (priMobile !== "" && priMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Primary Mobile must be exactly 10 digits if provided."); return; }
-
-            let altMobile = document.getElementById('alt_mobile_number').value.trim();
-            if (altMobile !== "" && altMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Alternative Mobile must be exactly 10 digits if provided."); return; }
-
-            let emergMobile = document.getElementById('emergency_mobile').value.trim();
-            if (emergMobile !== "" && emergMobile.length !== 10) { e.preventDefault(); alert("Validation Error: Emergency Mobile must be exactly 10 digits if provided."); return; }
-
-            let pinCode = document.getElementById('pin_code').value.trim();
-            if (pinCode !== "" && pinCode.length !== 6) { e.preventDefault(); alert("Validation Error: PIN Code must be exactly 6 digits if provided."); return; }
-
-            let emails = [
-                document.getElementsByName('email_address')[0].value.trim().toLowerCase(),
-                document.getElementsByName('alt_email')[0].value.trim().toLowerCase(),
-                document.getElementsByName('emergency_email')[0].value.trim().toLowerCase()
-            ].filter(v => v);
-            if (new Set(emails).size !== emails.length) { e.preventDefault(); alert("Validation Error: All provided email addresses must be unique."); return; }
-
-            let phones = [priMobile, altMobile, emergMobile].filter(v => v);
-            if (new Set(phones).size !== phones.length) { e.preventDefault(); alert("Validation Error: All provided phone numbers must be strictly different."); return; }
-
-            let invalidMarks = false;
-            ['c10', 'c12'].forEach(prefix => {
-                const obtInputs = document.querySelectorAll(`.${prefix}-main-obt, .${prefix}-add-obt`);
-                const maxInputs = document.querySelectorAll(`.${prefix}-main-max, .${prefix}-add-max`);
-                obtInputs.forEach((obtInput, index) => {
-                    let obtVal = Number(obtInput.value);
-                    let maxVal = Number(maxInputs[index].value);
-                    if (obtInput.value !== "" && obtVal > maxVal) {
-                        invalidMarks = true;
-                        obtInput.style.border = "2px solid red";
-                        obtInput.style.backgroundColor = "#ffe6e6";
-                    } else {
-                        obtInput.style.border = "";
-                        obtInput.style.backgroundColor = "";
-                    }
-                });
-            });
-
-            if (invalidMarks) {
-                e.preventDefault();
-                alert("Validation Error: Obtained marks cannot be greater than Maximum marks!");
-                return;
-            }
-        });
-
-        // 4. Marks Auto Calculator
-        function setupCalculators(prefix) {
-            const mainObt = document.querySelectorAll(`.${prefix}-main-obt`);
-            const mainMax = document.querySelectorAll(`.${prefix}-main-max`);
-            const addObt = document.querySelectorAll(`.${prefix}-add-obt`);
-            const addMax = document.querySelectorAll(`.${prefix}-add-max`);
-            const totalMainBox = document.getElementById(`${prefix}_total_main`);
-            const percMainBox = document.getElementById(`${prefix}_perc_main`);
-            const totalGrandBox = document.getElementById(`${prefix}_total_grand`);
-            const percGrandBox = document.getElementById(`${prefix}_perc_grand`);
-
-            function calculateSums() {
-                let mObtSum = 0, mMaxSum = 0, aObtSum = 0, aMaxSum = 0;
-                mainObt.forEach((input, index) => { if (input.value !== "") { mObtSum += Number(input.value); mMaxSum += Number(mainMax[index].value) || 0; } });
-                addObt.forEach((input, index) => { if (input.value !== "") { aObtSum += Number(input.value); aMaxSum += Number(addMax[index].value) || 0; } });
-
-                totalMainBox.value = mObtSum;
-                totalGrandBox.value = mObtSum + aObtSum;
-
-                if (mMaxSum > 0) { percMainBox.value = ((mObtSum / mMaxSum) * 100).toFixed(2) + "%"; } else { percMainBox.value = ""; }
-                if ((mMaxSum + aMaxSum) > 0) { percGrandBox.value = (((mObtSum + aObtSum) / (mMaxSum + aMaxSum)) * 100).toFixed(2) + "%"; } else { percGrandBox.value = ""; }
-            }
-
-            [...mainObt, ...mainMax, ...addObt, ...addMax].forEach(input => { input.addEventListener('input', calculateSums); });
-        }
-        setupCalculators('c10');
-        setupCalculators('c12');
+document.addEventListener("DOMContentLoaded", function() {
+    
+    let today = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+        dateInput.setAttribute('max', today);
     });
+
+    const currentYear = new Date().getFullYear();
+    const yearDropdowns = document.querySelectorAll('.year-dropdown');
+    yearDropdowns.forEach(dropdown => {
+        dropdown.innerHTML = '<option value="">Select Year</option>';
+        for (let y = currentYear; y >= 2010; y--) {
+            dropdown.innerHTML += `<option value="${y}">${y}</option>`;
+        }
+    });
+
+    const examSelect = document.getElementById('examTypeSelect');
+    const formsContainer = document.getElementById('formsCheckboxes');
+    const neetForms = ['AIIMS BSc Nursing', 'AIIMS BSc Paramedical', 'Kerala', 'Karnataka', 'NEET', 'IAT', 'NEST', 'CUET', 'IPU'];
+    const jeeForms = ['CUET', 'IAT', 'SRM JEE', 'CUCET', 'NEET', 'SITEEE', 'IPMAT', 'COMEDK', 'UGET', 'BITSAT', 'IPU', 'IIT', 'NEST', 'VITEEE', 'JEE Mains 1', 'JEE Mains 2', 'MET', 'SNU SAT'];
+
+    examSelect.addEventListener('change', function() {
+        formsContainer.innerHTML = '';
+        let forms = this.value === 'NEET' ? neetForms : (this.value === 'JEE' ? jeeForms : []);
+        if(forms.length === 0) { formsContainer.innerHTML = '<em class="text-muted small">Select Target Exam first.</em>'; return; }
+        
+        forms.forEach(form => {
+            let idStr = form.replace(/\s+/g, '');
+            formsContainer.innerHTML += `
+                <div class="form-check form-check-inline mb-2">
+                    <input class="form-check-input border-secondary" type="checkbox" name="forms_filled" value="${form}" id="form_${idStr}">
+                    <label class="form-check-label fw-bold" for="form_${idStr}">${form}</label>
+                </div>`;
+        });
+    });
+
+    // --- MULTIPLE CUSTOM DOCUMENTS LOGIC ---
+    document.getElementById('addCustomDocBtn').addEventListener('click', function() {
+        const container = document.getElementById('customDocsContainer');
+        const newRow = document.createElement('div');
+        newRow.className = 'row g-2 mb-2 custom-doc-row';
+        newRow.innerHTML = `
+            <div class="col-md-4"><input type="text" name="custom_doc_name[]" class="form-control form-control-sm" placeholder="Document Name"></div>
+            <div class="col-md-7"><input type="url" name="custom_doc_url[]" class="form-control form-control-sm" placeholder="Link (https://...)"></div>
+            <div class="col-md-1"><button type="button" class="btn btn-sm btn-danger remove-custom-doc w-100">X</button></div>
+        `;
+        container.appendChild(newRow);
+    });
+
+    document.addEventListener('click', function(e) {
+        if(e.target && e.target.classList.contains('remove-custom-doc')) {
+            e.target.closest('.custom-doc-row').remove();
+        }
+    });
+
+    // --- DYNAMIC ROWS FOR MARKS ---
+    document.querySelectorAll('.add-row').forEach(btn => {
+        btn.addEventListener('click', function() {
+            let targetId = this.getAttribute('data-target');
+            let prefix = this.getAttribute('data-prefix');
+            let tbody = document.getElementById(targetId);
+            
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" name="${prefix}_name[]" class="form-control form-control-sm" placeholder="Subject Name" required></td>
+                <td><input type="text" name="${prefix}_max[]" class="form-control form-control-sm ${prefix}-max calc" value="100" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td>
+                <td><input type="text" name="${prefix}_obt[]" class="form-control form-control-sm ${prefix}-obt calc" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-row">X</button></td>
+            `;
+            tbody.appendChild(tr);
+            attachCalcListeners();
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if(e.target && e.target.classList.contains('remove-row')) {
+            e.target.closest('tr').remove();
+            calculateAllTotals();
+        }
+    });
+
+    // --- OVERALL MACRO CALCULATOR ---
+    function attachCalcListeners() {
+        document.querySelectorAll('.calc').forEach(input => {
+            input.removeEventListener('input', calculateAllTotals);
+            input.addEventListener('input', calculateAllTotals);
+        });
+    }
+
+    function calculateAllTotals() {
+        ['c10', 'c12'].forEach(prefix => {
+            let mainMax = 0, mainObt = 0;
+            let otherMax = 0, otherObt = 0;
+            let addMax = 0, addObt = 0;
+
+            document.querySelectorAll(`.${prefix}-main-max`).forEach(i => mainMax += Number(i.value) || 0);
+            document.querySelectorAll(`.${prefix}-main-obt`).forEach(i => mainObt += Number(i.value) || 0);
+
+            document.querySelectorAll(`.${prefix}_other-max`).forEach(i => otherMax += Number(i.value) || 0);
+            document.querySelectorAll(`.${prefix}_other-obt`).forEach(i => otherObt += Number(i.value) || 0);
+
+            document.querySelectorAll(`.${prefix}_add-max`).forEach(i => addMax += Number(i.value) || 0);
+            document.querySelectorAll(`.${prefix}_add-obt`).forEach(i => addObt += Number(i.value) || 0);
+
+            let overallMainMax = mainMax + otherMax;
+            let overallMainObt = mainObt + otherObt;
+            let grandMax = overallMainMax + addMax;
+            let grandObt = overallMainObt + addObt;
+
+            document.getElementById(`${prefix}_overall_main_max`).value = overallMainMax || '';
+            document.getElementById(`${prefix}_overall_main_obt`).value = overallMainObt || '';
+            let mainPerc = document.getElementById(`${prefix}_overall_main_perc`);
+            if(overallMainMax > 0) mainPerc.value = ((overallMainObt / overallMainMax) * 100).toFixed(2) + "%";
+            else mainPerc.value = '';
+
+            document.getElementById(`${prefix}_overall_grand_max`).value = grandMax || '';
+            document.getElementById(`${prefix}_overall_grand_obt`).value = grandObt || '';
+            let grandPerc = document.getElementById(`${prefix}_overall_grand_perc`);
+            if(grandMax > 0) grandPerc.value = ((grandObt / grandMax) * 100).toFixed(2) + "%";
+            else grandPerc.value = '';
+        });
+    }
+    
+    attachCalcListeners();
+
+    document.getElementById('studentForm').addEventListener('submit', function(e) {
+        let invalidMarks = false;
+        ['c10-main', 'c10_other', 'c10_add', 'c12-main', 'c12_other', 'c12_add'].forEach(prefix => {
+            const obtInputs = document.querySelectorAll(`.${prefix}-obt`);
+            const maxInputs = document.querySelectorAll(`.${prefix}-max`);
+            obtInputs.forEach((obtInput, index) => {
+                let obtVal = Number(obtInput.value);
+                let maxVal = Number(maxInputs[index].value);
+                if (obtInput.value !== "" && obtVal > maxVal) {
+                    invalidMarks = true;
+                    obtInput.style.border = "2px solid red"; 
+                    obtInput.style.backgroundColor = "#ffe6e6";
+                } else {
+                    obtInput.style.border = ""; 
+                    obtInput.style.backgroundColor = "";
+                }
+            });
+        });
+
+        if (invalidMarks) {
+            e.preventDefault();
+            alert("Validation Error: Obtained marks cannot be greater than Maximum marks in any subject!");
+            return;
+        }
+    });
+});
 </script>
 {% endblock %}

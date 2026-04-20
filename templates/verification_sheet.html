@@ -1,288 +1,271 @@
-{% extends "layout.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Sheet - {{ student.full_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; color: #000; font-size: 13px; }
+        .print-container { max-width: 900px; margin: 20px auto; background: #fff; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .section-title { font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #cc0000; color: #cc0000; padding-bottom: 5px; margin-top: 20px; margin-bottom: 15px; font-size: 16px; }
+        .data-label { font-weight: bold; color: #555; font-size: 12px; }
+        .data-value { font-weight: bold; border-bottom: 1px dotted #ccc; padding-bottom: 2px; min-height: 20px; }
+        .table-sm th, .table-sm td { padding: 4px 8px; font-size: 12px; border-color: #333; }
+        .table-light th { background-color: #f6e89e !important; color: #333 !important; }
+        .macro-total-box { background-color: #ccdfed !important; border: 2px solid #333; font-weight: bold; }
+
+        @media print {
+            body { background: #fff; }
+            .print-container { box-shadow: none; margin: 0; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
+            .avoid-break { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
 
 <div class="print-container">
-    <div class="no-print mb-4 d-flex justify-content-between">
-        <a href="{{ url_for('dashboard') }}" class="btn-3d-primary text-decoration-none">Back</a>
-        <button onclick="window.print()" class="btn-3d-primary" style="background: var(--brand-accent-yellow); color: var(--brand-primary);">🖨️ Save as PDF / Print</button>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary fw-bold"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        <button onclick="window.print()" class="btn btn-danger fw-bold"><i class="fas fa-print"></i> Print Verification Sheet</button>
     </div>
 
-    <div class="print-header text-center">
-        <h1 style="color: var(--brand-primary); font-weight: 900; letter-spacing: 1px; margin-bottom: 0; font-size: 28pt;">VidyaSaarthi</h1>
-        <p class="mb-0"><strong>Head Office:</strong> Kurukshetra, Haryana, India</p>
-        <p class="text-muted" style="font-size: 0.9rem;">Education Consulting & Admission Guidance</p>
-        <h4 class="mt-2 bg-light p-2 border" style="color: var(--brand-primary); font-size: 1.2rem;">COMPLETE STUDENT DATA VERIFICATION</h4>
-        <p style="font-size: 0.8rem; color: #555;"><em>Please verify all details and document links below. Empty fields indicate missing data.</em></p>
+    <div class="text-center mb-4 pb-3" style="border-bottom: 3px solid #cc0000;">
+        <h2 style="color: #cc0000; font-weight: 900; margin: 0; text-transform: uppercase;">VidyaSaarthi</h2>
+        <p class="mb-1" style="font-size: 16px; font-weight: bold; color: #333;">Edu-Specialist Pvt. Ltd.</p>
+        <p class="mb-0 text-muted">Official Student Verification Record</p>
     </div>
 
-    <table class="table table-bordered table-sm mt-3">
-        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">1. Basic Details</th></tr></thead>
-        <tbody>
-            <tr>
-                <td width="25%"><small><strong>Full Name</strong></small></td><td width="25%"><small>{{ student.full_name or 'N/A' }}</small></td>
-                <td width="25%"><small><strong>Date of Birth</strong></small></td><td width="25%"><small>{{ student.dob.strftime('%d-%B-%Y') if student.dob else 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Gender</strong></small></td><td><small>{{ student.gender or 'N/A' }}</small></td>
-                <td><small><strong>Category</strong></small></td><td><small>{{ student.category or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Aadhaar Number</strong></small></td><td><small>{{ student.aadhaar_no or 'N/A' }}</small></td>
-                <td><small><strong>Identification Mark</strong></small></td><td><small>{{ student.identification_mark or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Nationality</strong></small></td><td><small>{{ student.nationality or 'N/A' }}</small></td>
-                <td><small><strong>Nativity (State)</strong></small></td><td><small>{{ student.nativity or 'N/A' }}</small></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="avoid-break">
+        <div class="section-title">1. Target Exam & Forms</div>
+        <div class="row g-2 mb-3">
+            <div class="col-4"><span class="data-label">Target Exam:</span><div class="data-value text-danger">{{ student.exam_type or '' }}</div></div>
+            <div class="col-8"><span class="data-label">Selected Forms:</span><div class="data-value">{{ student.forms_filled or '' }}</div></div>
+            <div class="col-12"><span class="data-label">Other Forms Filled:</span><div class="data-value">{{ student.other_forms_filled or '' }}</div></div>
+        </div>
 
-    <table class="table table-bordered table-sm mt-2">
-        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">2. Communication Details</th></tr></thead>
-        <tbody>
-            <tr>
-                <td width="25%"><small><strong>Primary Mobile</strong></small></td><td width="25%"><small>{{ student.mobile_number or 'N/A' }}</small></td>
-                <td width="25%"><small><strong>Primary Email</strong></small></td><td width="25%"><small>{{ student.email_address or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Alternative Mobile</strong></small></td><td><small>{{ student.alt_mobile_number or 'N/A' }}</small></td>
-                <td><small><strong>Alternative Email</strong></small></td><td><small>{{ student.alt_email or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Emergency Mobile</strong></small></td><td><small>{{ student.emergency_mobile or 'N/A' }}</small></td>
-                <td><small><strong>Emergency Email</strong></small></td><td><small>{{ student.emergency_email or 'N/A' }}</small></td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="section-title">2. Basic Details</div>
+        <div class="row g-2 mb-3">
+            <div class="col-6"><span class="data-label">Full Name:</span><div class="data-value">{{ student.full_name }}</div></div>
+            <div class="col-3"><span class="data-label">DOB:</span><div class="data-value">{{ student.dob.strftime('%d-%m-%Y') if student.dob else '' }}</div></div>
+            <div class="col-3"><span class="data-label">Gender:</span><div class="data-value">{{ student.gender }}</div></div>
 
-    <table class="table table-bordered table-sm mt-2">
-        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">3. Address Details</th></tr></thead>
-        <tbody>
-            <tr>
-                <td width="25%"><small><strong>House Name / No.</strong></small></td><td width="25%"><small>{{ student.house_no or 'N/A' }}</small></td>
-                <td width="25%"><small><strong>Street Name</strong></small></td><td width="25%"><small>{{ student.street_name or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Post Office</strong></small></td><td><small>{{ student.post_office or 'N/A' }}</small></td>
-                <td><small><strong>PIN Code</strong></small></td><td><small>{{ student.pin_code or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>State / Union Territory</strong></small></td><td><small>{{ student.state_ut or 'N/A' }}</small></td>
-                <td><small><strong>District</strong></small></td><td><small>{{ student.district or 'N/A' }}</small></td>
-            </tr>
-        </tbody>
-    </table>
+            <div class="col-4"><span class="data-label">Aadhaar No:</span><div class="data-value">{{ student.aadhaar_no or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Category:</span><div class="data-value">{{ student.category or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Nationality / Nativity:</span><div class="data-value">{{ student.nationality or '' }} {% if student.nationality and student.nativity %}/{% endif %} {{ student.nativity or '' }}</div></div>
 
-    <table class="table table-bordered table-sm mt-2">
-        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">4. Parent & Financial Details</th></tr></thead>
-        <tbody>
-            <tr>
-                <td width="25%"><small><strong>Father's Name</strong></small></td><td width="25%"><small>{{ student.father_name or 'N/A' }}</small></td>
-                <td width="25%"><small><strong>Mother's Name</strong></small></td><td width="25%"><small>{{ student.mother_name or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Father's Education</strong></small></td><td><small>{{ student.father_education or 'N/A' }}</small></td>
-                <td><small><strong>Mother's Education</strong></small></td><td><small>{{ student.mother_education or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Father's Occupation</strong></small></td><td><small>{{ student.father_occupation or 'N/A' }}</small></td>
-                <td><small><strong>Mother's Occupation</strong></small></td><td><small>{{ student.mother_occupation or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Annual Family Income</strong></small></td><td colspan="3"><small>{% if student.family_income %}Rs. {{ student.family_income }}{% else %}N/A{% endif %}</small></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table class="table table-bordered table-sm mt-2">
-        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">5. Bank Details</th></tr></thead>
-        <tbody>
-            <tr>
-                <td width="25%"><small><strong>A/c Holder Name</strong></small></td><td width="25%"><small>{{ student.bank_holder_name or 'N/A' }}</small></td>
-                <td width="25%"><small><strong>Bank Name</strong></small></td><td width="25%"><small>{{ student.bank_name or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>Branch Name</strong></small></td><td><small>{{ student.bank_branch or 'N/A' }}</small></td>
-                <td><small><strong>Account Number</strong></small></td><td><small>{{ student.bank_account_no or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>IFSC Code</strong></small></td><td><small>{{ student.bank_ifsc or 'N/A' }}</small></td>
-                <td><small><strong>Branch Address</strong></small></td><td><small>{{ student.bank_address or 'N/A' }}</small></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div style="page-break-inside: avoid;">
-        <table class="table table-bordered table-sm mt-3 mb-0 border-bottom-0">
-            <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">6. Class 10th Details & Marks</th></tr></thead>
-            <tbody>
-                <tr>
-                    <td width="25%"><small><strong>Passing Year</strong></small></td><td width="25%"><small>{{ student.class_10_year or 'N/A' }}</small></td>
-                    <td width="25%"><small><strong>Board</strong></small></td><td width="25%"><small>{{ student.class_10_board or 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>Roll Number</strong></small></td><td><small>{{ student.class_10_roll_no or 'N/A' }}</small></td>
-                    <td><small><strong>Registration No.</strong></small></td><td><small>{{ student.class_10_reg_no or 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>Serial Number</strong></small></td><td><small>{{ student.class_10_serial or 'N/A' }}</small></td>
-                    <td><small><strong>Issue Date</strong></small></td><td><small>{{ student.class_10_issue_date.strftime('%d-%B-%Y') if student.class_10_issue_date else 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>School Name</strong></small></td><td colspan="3"><small>{{ student.class_10_school or 'N/A' }}</small></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table class="table table-bordered table-sm text-center">
-            <thead class="table-secondary">
-                <tr><th class="text-start"><small>Subject</small></th><th><small>Max Marks</small></th><th><small>Obtained Marks</small></th></tr>
-            </thead>
-            <tbody>
-                <tr><td class="text-start"><small>English Lng & Lit.</small></td><td><small>{{ c10_marks.get('eng', {}).get('max', '') }}</small></td><td><small>{{ c10_marks.get('eng', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Hindi Course A</small></td><td><small>{{ c10_marks.get('hin', {}).get('max', '') }}</small></td><td><small>{{ c10_marks.get('hin', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Mathematics Standard</small></td><td><small>{{ c10_marks.get('math', {}).get('max', '') }}</small></td><td><small>{{ c10_marks.get('math', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Science</small></td><td><small>{{ c10_marks.get('sci', {}).get('max', '') }}</small></td><td><small>{{ c10_marks.get('sci', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Social Science</small></td><td><small>{{ c10_marks.get('sst', {}).get('max', '') }}</small></td><td><small>{{ c10_marks.get('sst', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Computer Application</small></td><td><small>{{ c10_marks.get('comp', {}).get('max', '') }}</small></td><td><small>{{ c10_marks.get('comp', {}).get('obt', '') }}</small></td></tr>
-
-                {% if c10_marks.get('add1', {}).get('name') %}
-                <tr><td class="text-start"><small>{{ c10_marks['add1']['name'] }} (Add.)</small></td><td><small>{{ c10_marks['add1']['max'] }}</small></td><td><small>{{ c10_marks['add1']['obt'] }}</small></td></tr>
-                {% endif %}
-                {% if c10_marks.get('add2', {}).get('name') %}
-                <tr><td class="text-start"><small>{{ c10_marks['add2']['name'] }} (Add.)</small></td><td><small>{{ c10_marks['add2']['max'] }}</small></td><td><small>{{ c10_marks['add2']['obt'] }}</small></td></tr>
-                {% endif %}
-
-                <tr class="table-warning"><td class="text-end fw-bold"><small>Total (Main Subjects):</small></td><td colspan="2"><small><strong>{{ c10_marks.get('main_total', '') }}</strong> &nbsp;|&nbsp; Percentage: <strong>{{ c10_marks.get('main_perc', '') }}</strong></small></td></tr>
-                <tr class="table-info"><td class="text-end fw-bold"><small>Grand Total (Inc. Additional):</small></td><td colspan="2"><small><strong>{{ c10_marks.get('grand_total', '') }}</strong> &nbsp;|&nbsp; Percentage: <strong>{{ c10_marks.get('grand_perc', '') }}</strong></small></td></tr>
-            </tbody>
-        </table>
+            <div class="col-12"><span class="data-label">Identification Mark:</span><div class="data-value">{{ student.identification_mark or '' }}</div></div>
+        </div>
     </div>
 
-    <table class="table table-bordered table-sm mt-3">
-        <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">7. Class 11th Details</th></tr></thead>
-        <tbody>
-            <tr>
-                <td width="25%"><small><strong>Passing Year</strong></small></td><td width="25%"><small>{{ student.class_11_year or 'N/A' }}</small></td>
-                <td width="25%"><small><strong>Roll Number</strong></small></td><td width="25%"><small>{{ student.class_11_roll_no or 'N/A' }}</small></td>
-            </tr>
-            <tr>
-                <td><small><strong>School Name</strong></small></td><td colspan="3"><small>{{ student.class_11_school or 'N/A' }}</small></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="avoid-break">
+        <div class="section-title">3. Contact & Address</div>
+        <div class="row g-2 mb-3">
+            <div class="col-4"><span class="data-label">Primary Mobile:</span><div class="data-value">{{ student.mobile_number }}</div></div>
+            <div class="col-4"><span class="data-label">Alternative Mobile:</span><div class="data-value">{{ student.alt_mobile_number or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Emergency Mobile:</span><div class="data-value">{{ student.emergency_mobile or '' }}</div></div>
 
-    <div style="page-break-inside: avoid;">
-        <table class="table table-bordered table-sm mt-3 mb-0 border-bottom-0">
-            <thead class="table-light"><tr><th colspan="4" style="color: var(--brand-primary); font-size: 0.9rem;">8. Class 12th & Qualifying Details & Marks</th></tr></thead>
-            <tbody>
-                <tr>
-                    <td width="25%"><small><strong>Exam Status</strong></small></td><td width="25%"><small>{{ student.passed_appearing or 'N/A' }}</small></td>
-                    <td width="25%"><small><strong>Studied Sanskrit?</strong></small></td><td width="25%"><small>{{ student.studied_sanskrit or 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>APAAR ID</strong></small></td><td><small>{{ student.registration_no_apaar_id or 'N/A' }}</small></td>
-                    <td><small><strong>Passing Year</strong></small></td><td><small>{{ student.class_12_year or 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>Board</strong></small></td><td><small>{{ student.class_12_board or 'N/A' }}</small></td>
-                    <td><small><strong>Roll Number</strong></small></td><td><small>{{ student.class_12_roll_no or 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>Registration No.</strong></small></td><td><small>{{ student.class_12_reg_no or 'N/A' }}</small></td>
-                    <td><small><strong>Serial Number</strong></small></td><td><small>{{ student.class_12_serial or 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>Issue Date</strong></small></td><td colspan="3"><small>{{ student.class_12_issue_date.strftime('%d-%B-%Y') if student.class_12_issue_date else 'N/A' }}</small></td>
-                </tr>
-                <tr>
-                    <td><small><strong>School Name</strong></small></td><td colspan="3"><small>{{ student.class_12_school or 'N/A' }}</small></td>
-                </tr>
-            </tbody>
-        </table>
+            <div class="col-4"><span class="data-label">Primary Email:</span><div class="data-value">{{ student.email_address or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Alternative Email:</span><div class="data-value">{{ student.alt_email or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Emergency Email:</span><div class="data-value">{{ student.emergency_email or '' }}</div></div>
 
-        <table class="table table-bordered table-sm text-center">
-            <thead class="table-secondary">
-                <tr><th class="text-start"><small>Subject</small></th><th><small>Max Marks</small></th><th><small>Obtained Marks</small></th></tr>
-            </thead>
-            <tbody>
-                <tr><td class="text-start"><small>English Core</small></td><td><small>{{ c12_marks.get('eng', {}).get('max', '') }}</small></td><td><small>{{ c12_marks.get('eng', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Physics</small></td><td><small>{{ c12_marks.get('phy', {}).get('max', '') }}</small></td><td><small>{{ c12_marks.get('phy', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Chemistry</small></td><td><small>{{ c12_marks.get('chem', {}).get('max', '') }}</small></td><td><small>{{ c12_marks.get('chem', {}).get('obt', '') }}</small></td></tr>
-                <tr><td class="text-start"><small>Biology</small></td><td><small>{{ c12_marks.get('bio', {}).get('max', '') }}</small></td><td><small>{{ c12_marks.get('bio', {}).get('obt', '') }}</small></td></tr>
-
-                {% if c12_marks.get('add1', {}).get('name') %}
-                <tr><td class="text-start"><small>{{ c12_marks['add1']['name'] }} (Add.)</small></td><td><small>{{ c12_marks['add1']['max'] }}</small></td><td><small>{{ c12_marks['add1']['obt'] }}</small></td></tr>
-                {% endif %}
-                {% if c12_marks.get('add2', {}).get('name') %}
-                <tr><td class="text-start"><small>{{ c12_marks['add2']['name'] }} (Add.)</small></td><td><small>{{ c12_marks['add2']['max'] }}</small></td><td><small>{{ c12_marks['add2']['obt'] }}</small></td></tr>
-                {% endif %}
-
-                <tr class="table-warning"><td class="text-end fw-bold"><small>Total (Main Subjects):</small></td><td colspan="2"><small><strong>{{ c12_marks.get('main_total', '') }}</strong> &nbsp;|&nbsp; Percentage: <strong>{{ c12_marks.get('main_perc', '') }}</strong></small></td></tr>
-                <tr class="table-info"><td class="text-end fw-bold"><small>Grand Total (Inc. Additional):</small></td><td colspan="2"><small><strong>{{ c12_marks.get('grand_total', '') }}</strong> &nbsp;|&nbsp; Percentage: <strong>{{ c12_marks.get('grand_perc', '') }}</strong></small></td></tr>
-            </tbody>
-        </table>
+            <div class="col-12 mt-2"><span class="data-label">Full Address:</span>
+                <div class="data-value">
+                    {{ student.house_no or '' }} {{ student.street_name or '' }}
+                    {{ student.post_office or '' }} {{ student.district or '' }}
+                    {{ student.state_ut or '' }} {{ student.pin_code or '' }}
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div style="page-break-before: always; page-break-inside: avoid;">
-        <h5 class="mt-3 mb-1" style="color: var(--brand-primary); border-bottom: 2px solid var(--brand-accent-yellow); padding-bottom: 3px; font-size: 1.1rem;">9. Cloud Document Links</h5>
-        <p class="text-muted mb-3" style="font-size: 0.85rem;"><em>Digital Verification: The following is the complete checklist of required and optional documents.</em></p>
-
-        {% set master_docs = [
-            ('photo', 'Student Photo'),
-            ('student_signature', 'Student Signature'),
-            ('aadhaar_card', 'Aadhaar Card'),
-            ('birth_certificate', 'Birth Certificate'),
-            ('residence_proof', 'Residence Proof'),
-            ('family_id', 'Family ID'),
-            ('10th_marksheet', '10th Marksheet'),
-            ('11th_marksheet', '11th Marksheet'),
-            ('12th_marksheet', '12th Marksheet'),
-            ('character_certificate', 'Character Certificate'),
-            ('bank_proof', 'Bank Proof (Cheque/Passbook)'),
-            ('caste_certificate', 'Caste Certificate'),
-            ('ews_certificate', 'EWS Certificate')
-        ] %}
-
-        <table class="table table-bordered mb-3">
+    <div class="avoid-break">
+        <div class="section-title">4. Parent & Financial Details</div>
+        <table class="table table-sm table-bordered text-center align-middle mb-3">
             <thead class="table-light">
-                <tr>
-                    <th width="30%" style="color: var(--brand-primary); font-size: 0.9rem;">Document Type</th>
-                    <th width="70%" style="color: var(--brand-primary); font-size: 0.9rem;">Document Link</th>
-                </tr>
+                <tr><th>Relation</th><th>Name</th><th>Aadhaar No.</th><th>Education</th><th>Occupation</th></tr>
             </thead>
             <tbody>
-                {% for doc_key, doc_label in master_docs %}
-                    {% set matched_doc = student.documents | selectattr('doc_type', 'equalto', doc_key) | first %}
-                    <tr>
-                        <td class="fw-bold align-middle py-3" style="font-size: 0.85rem;">{{ doc_label }}</td>
-                        <td class="align-middle py-3" style="word-break: break-all; font-size: 0.85rem;">
-                            {% if matched_doc and matched_doc.drive_link %}
-                                <a href="{{ matched_doc.drive_link.replace('/preview', '/view') }}" target="_blank" style="color: #0056b3; text-decoration: underline;">
-                                    {{ matched_doc.drive_link.replace('/preview', '/view') }}
-                                </a>
-                            {% else %}
-                                <span class="text-danger fst-italic">Not Provided</span>
-                            {% endif %}
-                        </td>
-                    </tr>
+                <tr><td class="fw-bold">Father</td><td>{{ student.father_name or '' }}</td><td>{{ student.father_aadhaar_no or '' }}</td><td>{{ student.father_education or '' }}</td><td>{{ student.father_occupation or '' }}</td></tr>
+                <tr><td class="fw-bold">Mother</td><td>{{ student.mother_name or '' }}</td><td>{{ student.mother_aadhaar_no or '' }}</td><td>{{ student.mother_education or '' }}</td><td>{{ student.mother_occupation or '' }}</td></tr>
+            </tbody>
+        </table>
+
+        <div class="row g-2 mb-3">
+            <div class="col-4"><span class="data-label">Annual Family Income:</span><div class="data-value">{{ student.family_income or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Bank Name & Branch:</span><div class="data-value">{{ student.bank_name or '' }} {{ student.bank_branch or '' }}</div></div>
+            <div class="col-4"><span class="data-label">A/c Holder Name:</span><div class="data-value">{{ student.bank_holder_name or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Account Number:</span><div class="data-value">{{ student.bank_account_no or '' }}</div></div>
+            <div class="col-4"><span class="data-label">IFSC Code:</span><div class="data-value">{{ student.bank_ifsc or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Bank Address:</span><div class="data-value">{{ student.bank_address or '' }}</div></div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="text-center mb-4 pb-3 no-print" style="border-bottom: 3px solid #cc0000;">
+        <h2 style="color: #cc0000; font-weight: 900; margin: 0; text-transform: uppercase;">VidyaSaarthi</h2>
+    </div>
+
+    <div class="avoid-break">
+        <div class="section-title">5. Class 10th Academic Record</div>
+        <div class="row g-2 mb-2">
+            <div class="col-3"><span class="data-label">Passing Year:</span><div class="data-value">{{ student.class_10_year or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Board:</span><div class="data-value">{{ student.class_10_board or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Roll No:</span><div class="data-value">{{ student.class_10_roll_no or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Regn No:</span><div class="data-value">{{ student.class_10_reg_no or '' }}</div></div>
+            <div class="col-4"><span class="data-label">School Name:</span><div class="data-value">{{ student.class_10_school or '' }}</div></div>
+            <div class="col-4"><span class="data-label">State Name:</span><div class="data-value">{{ student.class_10_state or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Serial No / Issue:</span><div class="data-value">{{ student.class_10_serial or '' }} {{ student.class_10_issue_date.strftime('%d-%m-%Y') if student.class_10_issue_date else '' }}</div></div>
+        </div>
+
+        <table class="table table-sm table-bordered text-center mt-3">
+            <thead class="table-light"><tr><th width="40%">Subject Type</th><th width="30%">Max Marks</th><th width="30%">Obtained Marks</th></tr></thead>
+            <tbody>
+                <tr><td class="text-start fw-bold" colspan="3" style="background: #f9f9f9;">Main Subjects</td></tr>
+                <tr><td class="text-start">English</td><td>{{ c10_marks.get('main', {}).get('eng', {}).get('max', '') }}</td><td>{{ c10_marks.get('main', {}).get('eng', {}).get('obt', '') }}</td></tr>
+                <tr><td class="text-start">Mathematics</td><td>{{ c10_marks.get('main', {}).get('math', {}).get('max', '') }}</td><td>{{ c10_marks.get('main', {}).get('math', {}).get('obt', '') }}</td></tr>
+                <tr><td class="text-start">Science</td><td>{{ c10_marks.get('main', {}).get('sci', {}).get('max', '') }}</td><td>{{ c10_marks.get('main', {}).get('sci', {}).get('obt', '') }}</td></tr>
+                <tr><td class="text-start">Social Science</td><td>{{ c10_marks.get('main', {}).get('sst', {}).get('max', '') }}</td><td>{{ c10_marks.get('main', {}).get('sst', {}).get('obt', '') }}</td></tr>
+
+                {% for sub in c10_marks.get('other', {}).get('subjects', []) %}
+                    <tr><td class="text-start">{{ sub.name }} <span class="text-muted small">(Other Main)</span></td><td>{{ sub.max }}</td><td>{{ sub.obt }}</td></tr>
                 {% endfor %}
+
+                {% for sub in c10_marks.get('additional', {}).get('subjects', []) %}
+                    <tr><td class="text-start">{{ sub.name }} <span class="text-muted small">(Additional)</span></td><td>{{ sub.max }}</td><td>{{ sub.obt }}</td></tr>
+                {% endfor %}
+
+                <tr class="macro-total-box">
+                    <td class="text-end">OVERALL MAIN TOTAL:</td>
+                    <td>{{ c10_marks.get('overall_main', {}).get('max', '') }}</td>
+                    <td>{{ c10_marks.get('overall_main', {}).get('obt', '') }} <span class="text-primary ms-2">{% if c10_marks.get('overall_main', {}).get('perc') %}({{ c10_marks.get('overall_main', {}).get('perc', '') }}){% endif %}</span></td>
+                </tr>
+                <tr class="macro-total-box" style="background-color: #ffcccc !important;">
+                    <td class="text-end">GRAND TOTAL (INC. ADDITIONAL):</td>
+                    <td>{{ c10_marks.get('overall_grand', {}).get('max', '') }}</td>
+                    <td>{{ c10_marks.get('overall_grand', {}).get('obt', '') }} <span class="text-danger ms-2">{% if c10_marks.get('overall_grand', {}).get('perc') %}({{ c10_marks.get('overall_grand', {}).get('perc', '') }}){% endif %}</span></td>
+                </tr>
             </tbody>
         </table>
     </div>
+
+    <div class="avoid-break">
+        <div class="section-title">6. Class 11th & 12th Academic Record</div>
+        <div class="row g-2 mb-3 pb-2 border-bottom">
+            <div class="col-12"><strong class="text-primary">Class 11th Info:</strong> Passed Year: {{ student.class_11_year or '' }} | Roll No: {{ student.class_11_roll_no or '' }} | School: {{ student.class_11_school or '' }} | State: {{ student.class_11_state or '' }}</div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-4"><span class="data-label">12th Status:</span><div class="data-value">{{ student.passed_appearing or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Studied Sanskrit:</span><div class="data-value">{{ student.studied_sanskrit or '' }}</div></div>
+            <div class="col-4"><span class="data-label">APAAR ID:</span><div class="data-value">{{ student.registration_no_apaar_id or '' }}</div></div>
+
+            <div class="col-3"><span class="data-label">Passing Year:</span><div class="data-value">{{ student.class_12_year or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Board:</span><div class="data-value">{{ student.class_12_board or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Roll No:</span><div class="data-value">{{ student.class_12_roll_no or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Regn No:</span><div class="data-value">{{ student.class_12_reg_no or '' }}</div></div>
+
+            <div class="col-4"><span class="data-label">School Name:</span><div class="data-value">{{ student.class_12_school or '' }}</div></div>
+            <div class="col-4"><span class="data-label">State Name:</span><div class="data-value">{{ student.class_12_state or '' }}</div></div>
+            <div class="col-4"><span class="data-label">Serial No / Issue:</span><div class="data-value">{{ student.class_12_serial or '' }} {{ student.class_12_issue_date.strftime('%d-%m-%Y') if student.class_12_issue_date else '' }}</div></div>
+        </div>
+
+        <table class="table table-sm table-bordered text-center mt-3">
+            <thead class="table-light"><tr><th width="40%">Subject Type</th><th width="30%">Max Marks</th><th width="30%">Obtained Marks</th></tr></thead>
+            <tbody>
+                <tr><td class="text-start fw-bold" colspan="3" style="background: #f9f9f9;">Main Subjects</td></tr>
+                <tr><td class="text-start">English</td><td>{{ c12_marks.get('main', {}).get('eng', {}).get('max', '') }}</td><td>{{ c12_marks.get('main', {}).get('eng', {}).get('obt', '') }}</td></tr>
+                <tr><td class="text-start">Physics</td><td>{{ c12_marks.get('main', {}).get('phy', {}).get('max', '') }}</td><td>{{ c12_marks.get('main', {}).get('phy', {}).get('obt', '') }}</td></tr>
+                <tr><td class="text-start">Chemistry</td><td>{{ c12_marks.get('main', {}).get('chem', {}).get('max', '') }}</td><td>{{ c12_marks.get('main', {}).get('chem', {}).get('obt', '') }}</td></tr>
+
+                {% for sub in c12_marks.get('other', {}).get('subjects', []) %}
+                    <tr><td class="text-start">{{ sub.name }} <span class="text-muted small">(Other Main)</span></td><td>{{ sub.max }}</td><td>{{ sub.obt }}</td></tr>
+                {% endfor %}
+
+                {% for sub in c12_marks.get('additional', {}).get('subjects', []) %}
+                    <tr><td class="text-start">{{ sub.name }} <span class="text-muted small">(Additional)</span></td><td>{{ sub.max }}</td><td>{{ sub.obt }}</td></tr>
+                {% endfor %}
+
+                <tr class="macro-total-box">
+                    <td class="text-end">OVERALL MAIN TOTAL:</td>
+                    <td>{{ c12_marks.get('overall_main', {}).get('max', '') }}</td>
+                    <td>{{ c12_marks.get('overall_main', {}).get('obt', '') }} <span class="text-primary ms-2">{% if c12_marks.get('overall_main', {}).get('perc') %}({{ c12_marks.get('overall_main', {}).get('perc', '') }}){% endif %}</span></td>
+                </tr>
+                <tr class="macro-total-box" style="background-color: #ffcccc !important;">
+                    <td class="text-end">GRAND TOTAL (INC. ADDITIONAL):</td>
+                    <td>{{ c12_marks.get('overall_grand', {}).get('max', '') }}</td>
+                    <td>{{ c12_marks.get('overall_grand', {}).get('obt', '') }} <span class="text-danger ms-2">{% if c12_marks.get('overall_grand', {}).get('perc') %}({{ c12_marks.get('overall_grand', {}).get('perc', '') }}){% endif %}</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="text-center mb-4 pb-3 no-print" style="border-bottom: 3px solid #cc0000;">
+        <h2 style="color: #cc0000; font-weight: 900; margin: 0; text-transform: uppercase;">VidyaSaarthi</h2>
+    </div>
+
+    <div class="avoid-break">
+        <div class="section-title">7. Submitted Digital Documents</div>
+        <p class="text-muted mb-3">Only documents that have been actively submitted and linked are shown below.</p>
+
+        <div class="row">
+            <div class="col-12">
+                <ul class="list-group list-group-flush border">
+                    {% set full_doc_list = [
+                        ('photo', 'Student Photo Link'), ('student_signature', 'Student Signature Link'),
+                        ('aadhaar_card', 'Student Aadhaar Card Link'), ('father_aadhaar', 'Father Aadhaar Card Link'),
+                        ('mother_aadhaar', 'Mother Aadhaar Card Link'), ('student_pan_card', 'Student PAN Card Link'),
+                        ('passport', 'Passport Link'), ('driving_license', 'Driving License Link'),
+                        ('birth_certificate', 'Birth Certificate Link'), ('residence_proof', 'Residence Proof Link'),
+                        ('family_id', 'Family ID Link'), ('apaar_id_doc', 'APAAR ID Document Link'),
+                        ('10th_marksheet', '10th Marksheet Link'), ('11th_marksheet', '11th Marksheet Link'),
+                        ('12th_marksheet', '12th Marksheet Link'), ('improvement_marksheet', '12th Improvement Marksheet Link'),
+                        ('school_leaving_certificate', 'School Leaving Cert. (SLC) Link'), ('transfer_certificate', 'Transfer Cert. (TC) Link'),
+                        ('character_certificate', 'Character Certificate Link'), ('neet_jee_admit_card', 'NEET/JEE Admit Card Link'),
+                        ('neet_jee_result', 'NEET/JEE Result Card Link'), ('fingerprints', 'Fingerprints Scans Link'),
+                        ('bank_proof', 'Bank Proof (Passbook) Link'), ('caste_certificate', 'Caste Certificate Link'), ('ews_certificate', 'EWS Certificate Link')
+                    ] %}
+
+                    {% set submitted_docs = {} %}
+                    {% for doc in student.documents %}
+                        {% if doc.drive_link %}
+                            {% set _ = submitted_docs.update({doc.doc_type: doc.drive_link}) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for doc_key, label in full_doc_list %}
+                        {% if submitted_docs.get(doc_key) %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" style="font-size: 12px; padding: 6px 10px;">
+                            <span class="fw-bold">{{ label }}</span>
+                            <span style="word-break: break-all; max-width: 60%; text-align: right;">
+                                <a href="{{ submitted_docs.get(doc_key) }}" target="_blank">{{ submitted_docs.get(doc_key) }}</a>
+                            </span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for doc in student.documents %}
+                        {% if doc.drive_link and doc.doc_type not in master_docs %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-light" style="font-size: 12px; padding: 6px 10px; border-left: 4px solid var(--brand-primary) !important;">
+                            <span class="fw-bold">{{ doc.doc_type }} <small class="text-danger">(Custom Document)</small></span>
+                            <span style="word-break: break-all; max-width: 60%; text-align: right;">
+                                <a href="{{ doc.drive_link }}" target="_blank">{{ doc.drive_link }}</a>
+                            </span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<style>
-    @media print {
-        body { background: white !important; padding: 0 !important; }
-        .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-        .print-container { padding: 0.2in !important; }
-        .table { margin-bottom: 12px !important; }
-        .table-sm td, .table-sm th { padding: 0.3rem !important; }
-        .py-3 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
-        a { text-decoration: underline !important; color: #0056b3 !important; }
-        h1, h4, h5 { page-break-after: avoid; }
-    }
-</style>
-
-{% endblock %}
+</body>
+</html>
