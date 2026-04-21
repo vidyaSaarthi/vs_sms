@@ -3,11 +3,14 @@ import sqlite3
 from datetime import datetime
 import shutil
 
+
 def merge_databases():
+    # Define paths
     main_db_path = Path('instance/vidyasaarthi.db')
     downloads_path = Path.home() / "Downloads"
     second_db_path = downloads_path / 'vidyasaarthi.db'
 
+    # Check if files exist
     if not main_db_path.exists():
         print(f"❌ Error: Cannot find main database at {main_db_path}")
         return
@@ -15,18 +18,18 @@ def merge_databases():
         print(f"❌ Error: Cannot find second database at {second_db_path}")
         return
 
-    # Backup
+    # 📁 Backup Main Database
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_path = main_db_path.parent / f"vidyasaarthi_backup_{timestamp}.db"
 
     try:
         shutil.copy2(main_db_path, backup_path)
-        print(f"Backup created at: {backup_path}")
+        print(f"📁 Backup created safely at: {backup_path}")
     except Exception as e:
         print(f"❌ Backup failed: {e}")
         return
 
-    # Connections
+    # Connect to both databases
     conn_main = sqlite3.connect(main_db_path)
     conn_main.row_factory = sqlite3.Row
     cursor_main = conn_main.cursor()
@@ -35,48 +38,87 @@ def merge_databases():
     conn_second.row_factory = sqlite3.Row
     cursor_second = conn_second.cursor()
 
-    # 1. Get all students from Laptop 2
+    # Get all students from Laptop 2
     cursor_second.execute("SELECT * FROM students")
     students_to_merge = cursor_second.fetchall()
 
-    print(f"🔍 Found {len(students_to_merge)} students in Laptop 2. Starting merge...\n")
+    print(f"\n🔍 Found {len(students_to_merge)} students in Laptop 2. Starting merge...\n")
     success_count = 0
-    skip_count = 0
+    overwrite_count = 0
 
     for student in students_to_merge:
         student_dict = dict(student)
         old_id = student_dict.pop('id')  # Remove old ID to prevent collision
 
-        columns = ', '.join(student_dict.keys())
-        placeholders = ', '.join(['?'] * len(student_dict))
+        # ==========================================
+        # 🧠 INTELLIGENT MATCHING LOGIC
+        # ==========================================
 
-        try:
-            # 2. Insert Student into Main DB
-            cursor_main.execute(f"INSERT INTO students ({columns}) VALUES ({placeholders})",
-                                list(student_dict.values()))
-            new_student_id = cursor_main.lastrowid  # Get the newly generated safe ID
+        # PLAN A & B: Look for existing Aadhaar/Mobile OR exact Name+DOB+Father match
+        cursor_main.execute("""
+            SELECT id FROM students 
+            WHERE aadhaar_no = ? 
+               OR mobile_number = ? 
+               OR (full_name = ? AND dob = ? AND father_name = ? AND full_name != '' AND dob IS NOT NULL)
+        """, (
+            student_dict.get('aadhaar_no'),
+            student_dict.get('mobile_number'),
+            student_dict.get('full_name'),
+            student_dict.get('dob'),
+            student_dict.get('father_name')
+        ))
 
-            # 3. Get all documents for this student from Laptop 2
+        existing_record = cursor_main.fetchone()
+
+        if existing_record:
+            # 🔄 OVERWRITE LOGIC
+            existing_id = existing_record['id']
+
+            # Overwrite Student Data completely
+            set_clause = ', '.join([f"{col} = ?" for col in student_dict.keys()])
+            update_values = list(student_dict.values())
+            update_values.append(existing_id)
+            cursor_main.execute(f"UPDATE students SET {set_clause} WHERE id = ?", update_values)
+
+            # Clear old documents, insert new ones
+            cursor_main.execute("DELETE FROM documents WHERE student_id = ?", (existing_id,))
             cursor_second.execute("SELECT * FROM documents WHERE student_id = ?", (old_id,))
             documents = cursor_second.fetchall()
 
             for doc in documents:
                 doc_dict = dict(doc)
-                doc_dict.pop('id')  # Remove old doc ID
-                doc_dict['student_id'] = new_student_id  # Link to the new safe Student ID
-
+                doc_dict.pop('id')
+                doc_dict['student_id'] = existing_id
                 doc_cols = ', '.join(doc_dict.keys())
                 doc_place = ', '.join(['?'] * len(doc_dict))
                 cursor_main.execute(f"INSERT INTO documents ({doc_cols}) VALUES ({doc_place})", list(doc_dict.values()))
 
-            print(f"✅ Successfully Merged: {student_dict['full_name']}")
-            success_count += 1
+            print(f"🔄 Successfully Overwritten/Updated: {student_dict['full_name']}")
+            overwrite_count += 1
 
-        except sqlite3.IntegrityError as e:
-            # This triggers if Aadhaar or Mobile already exists in the main database
-            print(
-                f"⚠️ Skipped {student_dict['full_name']}: Already exists in main database (Duplicate Aadhaar/Mobile).")
-            skip_count += 1
+        else:
+            # ➕ INSERT NEW LOGIC (No match found)
+            columns = ', '.join(student_dict.keys())
+            placeholders = ', '.join(['?'] * len(student_dict))
+
+            cursor_main.execute(f"INSERT INTO students ({columns}) VALUES ({placeholders})",
+                                list(student_dict.values()))
+            new_student_id = cursor_main.lastrowid
+
+            # Attach Documents
+            cursor_second.execute("SELECT * FROM documents WHERE student_id = ?", (old_id,))
+            documents = cursor_second.fetchall()
+
+            for doc in documents:
+                doc_dict = dict(doc)
+                doc_dict.pop('id')
+                doc_dict['student_id'] = new_student_id
+                doc_cols = ', '.join(doc_dict.keys())
+                doc_place = ', '.join(['?'] * len(doc_dict))
+                cursor_main.execute(f"INSERT INTO documents ({doc_cols}) VALUES ({doc_place})", list(doc_dict.values()))
+
+            print(f"✅ Successfully Added New: {student_dict['full_name']}")
+            success_count += 1
 
     # Save all changes to the main database
     conn_main.commit()
@@ -84,7 +126,7 @@ def merge_databases():
     conn_main.close()
     conn_second.close()
 
-    print(f"\n🎉 Merge Complete! {success_count} added, {skip_count} skipped.")
+    print(f"\n🎉 Merge Complete! {success_count} new students added, {overwrite_count} existing records updated.")
 
 
 if __name__ == "__main__":
