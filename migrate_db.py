@@ -1,32 +1,32 @@
-import sqlite3
-import os
 from pathlib import Path
-import datetime, shutil
-
+import sqlite3
+from datetime import datetime
+import shutil
 
 def merge_databases():
-    main_db_path = 'instance/vidyasaarthi.db'
-
+    main_db_path = Path('instance/vidyasaarthi.db')
     downloads_path = Path.home() / "Downloads"
     second_db_path = downloads_path / 'vidyasaarthi.db'
 
-    if not os.path.exists(main_db_path):
+    if not main_db_path.exists():
         print(f"❌ Error: Cannot find main database at {main_db_path}")
         return
-    if not os.path.exists(second_db_path):
+    if not second_db_path.exists():
         print(f"❌ Error: Cannot find second database at {second_db_path}")
         return
 
-    # Create backup file name with timestamp
+    # Backup
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_path = main_db_path.parent / f"vidyasaarthi_backup_{timestamp}.db"
 
-    # Copy database
-    shutil.copy2(main_db_path, backup_path)
+    try:
+        shutil.copy2(main_db_path, backup_path)
+        print(f"Backup created at: {backup_path}")
+    except Exception as e:
+        print(f"❌ Backup failed: {e}")
+        return
 
-    print(f"Backup created at: {backup_path}")
-
-    # Connect to both databases
+    # Connections
     conn_main = sqlite3.connect(main_db_path)
     conn_main.row_factory = sqlite3.Row
     cursor_main = conn_main.cursor()
