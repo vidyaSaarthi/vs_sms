@@ -71,29 +71,34 @@ def merge_databases():
         existing_record = cursor_main.fetchone()
 
         if existing_record:
-            # 🔄 OVERWRITE LOGIC
+            # 🗑️ DELETE & REPLACE LOGIC
             existing_id = existing_record['id']
 
-            # Overwrite Student Data completely
-            set_clause = ', '.join([f"{col} = ?" for col in student_dict.keys()])
-            update_values = list(student_dict.values())
-            update_values.append(existing_id)
-            cursor_main.execute(f"UPDATE students SET {set_clause} WHERE id = ?", update_values)
-
-            # Clear old documents, insert new ones
+            # 1. Delete all old documents tied to the old record
             cursor_main.execute("DELETE FROM documents WHERE student_id = ?", (existing_id,))
-            cursor_second.execute("SELECT * FROM documents WHERE student_id = ?", (old_id,))
+
+            # 2. Delete the old student record completely from Main DB
+            cursor_main.execute("DELETE FROM students WHERE id = ?", (existing_id,))
+
+            # 3. Insert the fresh student data from Laptop 2 as a brand new row
+            columns = ', '.join(student_dict.keys())
+            placeholders = ', '.join(['?'] * len(student_dict))
+            cursor_main.execute(f"INSERT INTO students ({columns}) VALUES ({placeholders})",
+                                list(student_dict.values()))
+            new_student_id = cursor_main.lastrowid
+
+            # 4. Attach the fresh documents from Laptop 2 to this new row
+            cursor_second.execute("SELECT * FROM documents WHERE student_id = ?", (student['id'],))
             documents = cursor_second.fetchall()
 
             for doc in documents:
-                doc_dict = dict(doc)
-                doc_dict.pop('id')
-                doc_dict['student_id'] = existing_id
+                doc_dict = {key: doc[key] for key in doc.keys() if key != 'id'}
+                doc_dict['student_id'] = new_student_id
                 doc_cols = ', '.join(doc_dict.keys())
                 doc_place = ', '.join(['?'] * len(doc_dict))
                 cursor_main.execute(f"INSERT INTO documents ({doc_cols}) VALUES ({doc_place})", list(doc_dict.values()))
 
-            print(f"🔄 Successfully Overwritten/Updated: {student_dict['full_name']}")
+            print(f"🗑️ Deleted old record & Inserted fresh copy: {student_dict['full_name']}")
             overwrite_count += 1
 
         else:
