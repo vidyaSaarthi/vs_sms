@@ -8,11 +8,24 @@ from models import db, Student, Staff, Document
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 
+# app = Flask(__name__)
+# app.config['SECRET_KEY'] = 'vidyasaarthi_super_secret_key_2026'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vidyasaarthi.db'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['ADMIN_PIN'] = '2468'
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'vidyasaarthi_super_secret_key_2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vidyasaarthi.db'
+
+# Cloud-Safe Environment Variables
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'vidyasaarthi_fallback_key')
+app.config['ADMIN_PIN'] = os.environ.get('ADMIN_PIN', '8888')
+
+# Smart Database Routing (Uses Cloud Postgres if online, Local SQLite if offline)
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///vidyasaarthi.db')
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['ADMIN_PIN'] = '2468'
 
 db.init_app(app)
 login_manager = LoginManager()
