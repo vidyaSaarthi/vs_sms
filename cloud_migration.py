@@ -4,7 +4,7 @@ from models import db, Student, Staff, Document
 from app import app
 
 # 1. Paste your new Cloud PostgreSQL URL here
-CLOUD_DB_URL = "postgresql://postgres:IbjWncmCmbGfvXmdHhchGhtCljcqsXXZ@postgres.railway.internal:5432/railway"
+CLOUD_DB_URL = "postgresql+pg8000://postgres:IbjWncmCmbGfvXmdHhchGhtCljcqsXXZ@postgres.railway.internal:5432/railway"
 
 
 def push_to_cloud():
