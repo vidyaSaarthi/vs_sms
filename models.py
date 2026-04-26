@@ -26,6 +26,8 @@ class Student(db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     gender = db.Column(db.String(20), nullable=False)
     dob = db.Column(db.Date, nullable=True)
+    blood_group = db.Column(db.String(10), nullable=True)  # NEW
+    religion = db.Column(db.String(50), nullable=True)  # NEW
     identification_mark = db.Column(db.String(200), nullable=True)
     category = db.Column(db.String(100), nullable=False)
     aadhaar_no = db.Column(db.String(20), unique=True, nullable=False)
@@ -47,14 +49,18 @@ class Student(db.Model):
     district = db.Column(db.String(100), nullable=True)
 
     father_name = db.Column(db.String(150), nullable=True)
-    father_aadhaar_no = db.Column(db.String(20), nullable=True)  # NEW
+    father_aadhaar_no = db.Column(db.String(20), nullable=True)
     father_education = db.Column(db.String(150), nullable=True)
     father_occupation = db.Column(db.String(150), nullable=True)
+    father_designation = db.Column(db.String(150), nullable=True)  # NEW
+    father_organization = db.Column(db.String(150), nullable=True)  # NEW
 
     mother_name = db.Column(db.String(150), nullable=True)
-    mother_aadhaar_no = db.Column(db.String(20), nullable=True)  # NEW
+    mother_aadhaar_no = db.Column(db.String(20), nullable=True)
     mother_education = db.Column(db.String(150), nullable=True)
     mother_occupation = db.Column(db.String(150), nullable=True)
+    mother_designation = db.Column(db.String(150), nullable=True)  # NEW
+    mother_organization = db.Column(db.String(150), nullable=True)  # NEW
 
     family_income = db.Column(db.String(100), nullable=True)
 
@@ -67,6 +73,7 @@ class Student(db.Model):
 
     class_10_year = db.Column(db.Integer, nullable=True)
     class_10_school = db.Column(db.String(200), nullable=True)
+    class_10_school_type = db.Column(db.String(50), nullable=True)  # NEW
     class_10_state = db.Column(db.String(100), nullable=True)
     class_10_serial = db.Column(db.String(50), nullable=True)
     class_10_reg_no = db.Column(db.String(50), nullable=True)
@@ -85,12 +92,16 @@ class Student(db.Model):
     registration_no_apaar_id = db.Column(db.String(100), nullable=True)
     class_12_year = db.Column(db.Integer, nullable=True)
     class_12_school = db.Column(db.String(200), nullable=True)
+    class_12_school_type = db.Column(db.String(50), nullable=True)  # NEW
+    class_12_school_code = db.Column(db.String(50), nullable=True)  # NEW
+    class_12_center_code = db.Column(db.String(50), nullable=True)  # NEW
     class_12_state = db.Column(db.String(100), nullable=True)
     class_12_serial = db.Column(db.String(50), nullable=True)
     class_12_reg_no = db.Column(db.String(50), nullable=True)
     class_12_board = db.Column(db.String(100), nullable=True)
     class_12_issue_date = db.Column(db.Date, nullable=True)
     class_12_roll_no = db.Column(db.String(50), nullable=True)
+    class_12_admit_card_id = db.Column(db.String(100), nullable=True)  # NEW
     class_12_marks_data = db.Column(db.Text, nullable=True)
 
     documents = db.relationship('Document', backref='student', lazy=True)

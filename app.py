@@ -28,12 +28,14 @@ def convert_to_embed_link(url):
     return url
 
 
+# ADDED '12th_admit_card' to the list
 MASTER_DOC_TYPES = [
     'photo', 'student_signature', 'aadhaar_card', '10th_marksheet', '11th_marksheet', '12th_marksheet',
     'bank_proof', 'birth_certificate', 'residence_proof', 'caste_certificate', 'ews_certificate',
     'family_id', 'character_certificate', 'improvement_marksheet', 'neet_jee_result', 'passport',
     'school_leaving_certificate', 'transfer_certificate', 'father_aadhaar', 'mother_aadhaar',
-    'neet_jee_admit_card', 'student_pan_card', 'apaar_id_doc', 'fingerprints', 'driving_license'
+    'neet_jee_admit_card', 'student_pan_card', 'apaar_id_doc', 'fingerprints', 'driving_license',
+    '12th_admit_card'
 ]
 
 
@@ -114,14 +116,12 @@ def add_student():
                 },
                 "other": {"subjects": extract_dynamic_marks('c10', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c10', 'add')},
-                "overall_main": {
-                    "max": request.form.get('c10_overall_main_max'), "obt": request.form.get('c10_overall_main_obt'),
-                    "perc": request.form.get('c10_overall_main_perc')
-                },
-                "overall_grand": {
-                    "max": request.form.get('c10_overall_grand_max'), "obt": request.form.get('c10_overall_grand_obt'),
-                    "perc": request.form.get('c10_overall_grand_perc')
-                }
+                "overall_main": {"max": request.form.get('c10_overall_main_max'),
+                                 "obt": request.form.get('c10_overall_main_obt'),
+                                 "perc": request.form.get('c10_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c10_overall_grand_max'),
+                                  "obt": request.form.get('c10_overall_grand_obt'),
+                                  "perc": request.form.get('c10_overall_grand_perc')}
             }
 
             c12_marks = {
@@ -132,20 +132,19 @@ def add_student():
                 },
                 "other": {"subjects": extract_dynamic_marks('c12', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c12', 'add')},
-                "overall_main": {
-                    "max": request.form.get('c12_overall_main_max'), "obt": request.form.get('c12_overall_main_obt'),
-                    "perc": request.form.get('c12_overall_main_perc')
-                },
-                "overall_grand": {
-                    "max": request.form.get('c12_overall_grand_max'), "obt": request.form.get('c12_overall_grand_obt'),
-                    "perc": request.form.get('c12_overall_grand_perc')
-                }
+                "overall_main": {"max": request.form.get('c12_overall_main_max'),
+                                 "obt": request.form.get('c12_overall_main_obt'),
+                                 "perc": request.form.get('c12_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c12_overall_grand_max'),
+                                  "obt": request.form.get('c12_overall_grand_obt'),
+                                  "perc": request.form.get('c12_overall_grand_perc')}
             }
 
             new_student = Student(
                 exam_type=request.form.get('exam_type'), forms_filled=forms_filled_str,
                 other_forms_filled=request.form.get('other_forms_filled'),
                 full_name=request.form.get('full_name'), dob=dob_val, gender=request.form.get('gender'),
+                blood_group=request.form.get('blood_group'), religion=request.form.get('religion'),  # NEW
                 category=request.form.get('category'), identification_mark=request.form.get('identification_mark'),
                 aadhaar_no=request.form.get('aadhaar_no'), nationality=request.form.get('nationality'),
                 nativity=request.form.get('nativity'),
@@ -162,9 +161,14 @@ def add_student():
                 father_name=request.form.get('father_name'), father_aadhaar_no=request.form.get('father_aadhaar_no'),
                 father_education=request.form.get('father_education'),
                 father_occupation=request.form.get('father_occupation'),
+                father_designation=request.form.get('father_designation'),
+                father_organization=request.form.get('father_organization'),  # NEW
+
                 mother_name=request.form.get('mother_name'), mother_aadhaar_no=request.form.get('mother_aadhaar_no'),
                 mother_education=request.form.get('mother_education'),
                 mother_occupation=request.form.get('mother_occupation'),
+                mother_designation=request.form.get('mother_designation'),
+                mother_organization=request.form.get('mother_organization'),  # NEW
 
                 family_income=request.form.get('family_income'), bank_holder_name=request.form.get('bank_holder_name'),
                 bank_name=request.form.get('bank_name'),
@@ -172,7 +176,9 @@ def add_student():
                 bank_account_no=request.form.get('bank_account_no'), bank_ifsc=request.form.get('bank_ifsc'),
 
                 class_10_year=request.form.get('class_10_year') or None,
-                class_10_school=request.form.get('class_10_school'), class_10_state=request.form.get('class_10_state'),
+                class_10_school=request.form.get('class_10_school'),
+                class_10_school_type=request.form.get('class_10_school_type'),
+                class_10_state=request.form.get('class_10_state'),  # NEW
                 class_10_serial=request.form.get('class_10_serial'),
                 class_10_reg_no=request.form.get('class_10_reg_no'),
                 class_10_board=request.form.get('class_10_board'), class_10_issue_date=c10_issue_val,
@@ -188,11 +194,14 @@ def add_student():
                 studied_sanskrit=request.form.get('studied_sanskrit'),
                 registration_no_apaar_id=request.form.get('registration_no_apaar_id'),
                 class_12_year=request.form.get('class_12_year') or None,
-                class_12_school=request.form.get('class_12_school'), class_12_state=request.form.get('class_12_state'),
-                class_12_serial=request.form.get('class_12_serial'),
-                class_12_reg_no=request.form.get('class_12_reg_no'),
-                class_12_board=request.form.get('class_12_board'), class_12_issue_date=c12_issue_val,
-                class_12_roll_no=request.form.get('class_12_roll_no'),
+                class_12_school=request.form.get('class_12_school'),
+                class_12_school_type=request.form.get('class_12_school_type'),  # NEW
+                class_12_school_code=request.form.get('class_12_school_code'),
+                class_12_center_code=request.form.get('class_12_center_code'),  # NEW
+                class_12_state=request.form.get('class_12_state'), class_12_serial=request.form.get('class_12_serial'),
+                class_12_reg_no=request.form.get('class_12_reg_no'), class_12_board=request.form.get('class_12_board'),
+                class_12_issue_date=c12_issue_val, class_12_roll_no=request.form.get('class_12_roll_no'),
+                class_12_admit_card_id=request.form.get('class_12_admit_card_id'),  # NEW
                 class_12_marks_data=json.dumps(c12_marks)
             )
             db.session.add(new_student)
@@ -204,7 +213,6 @@ def add_student():
                     db.session.add(Document(student_id=new_student.id, doc_type=doc_type,
                                             drive_link=convert_to_embed_link(raw_link.strip())))
 
-            # MULTIPLE CUSTOM DOCUMENTS LOGIC
             custom_names = request.form.getlist('custom_doc_name[]')
             custom_urls = request.form.getlist('custom_doc_url[]')
             for name, url in zip(custom_names, custom_urls):
@@ -271,14 +279,12 @@ def edit_student(id):
                 },
                 "other": {"subjects": extract_dynamic_marks('c10', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c10', 'add')},
-                "overall_main": {
-                    "max": request.form.get('c10_overall_main_max'), "obt": request.form.get('c10_overall_main_obt'),
-                    "perc": request.form.get('c10_overall_main_perc')
-                },
-                "overall_grand": {
-                    "max": request.form.get('c10_overall_grand_max'), "obt": request.form.get('c10_overall_grand_obt'),
-                    "perc": request.form.get('c10_overall_grand_perc')
-                }
+                "overall_main": {"max": request.form.get('c10_overall_main_max'),
+                                 "obt": request.form.get('c10_overall_main_obt'),
+                                 "perc": request.form.get('c10_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c10_overall_grand_max'),
+                                  "obt": request.form.get('c10_overall_grand_obt'),
+                                  "perc": request.form.get('c10_overall_grand_perc')}
             }
 
             c12_marks = {
@@ -289,19 +295,19 @@ def edit_student(id):
                 },
                 "other": {"subjects": extract_dynamic_marks('c12', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c12', 'add')},
-                "overall_main": {
-                    "max": request.form.get('c12_overall_main_max'), "obt": request.form.get('c12_overall_main_obt'),
-                    "perc": request.form.get('c12_overall_main_perc')
-                },
-                "overall_grand": {
-                    "max": request.form.get('c12_overall_grand_max'), "obt": request.form.get('c12_overall_grand_obt'),
-                    "perc": request.form.get('c12_overall_grand_perc')
-                }
+                "overall_main": {"max": request.form.get('c12_overall_main_max'),
+                                 "obt": request.form.get('c12_overall_main_obt'),
+                                 "perc": request.form.get('c12_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c12_overall_grand_max'),
+                                  "obt": request.form.get('c12_overall_grand_obt'),
+                                  "perc": request.form.get('c12_overall_grand_perc')}
             }
 
             student.exam_type = request.form.get('exam_type')
             student.full_name = request.form.get('full_name')
             student.gender = request.form.get('gender')
+            student.blood_group = request.form.get('blood_group')  # NEW
+            student.religion = request.form.get('religion')  # NEW
             student.category = request.form.get('category')
             student.identification_mark = request.form.get('identification_mark')
             student.aadhaar_no = request.form.get('aadhaar_no')
@@ -324,11 +330,15 @@ def edit_student(id):
             student.father_aadhaar_no = request.form.get('father_aadhaar_no')
             student.father_education = request.form.get('father_education')
             student.father_occupation = request.form.get('father_occupation')
+            student.father_designation = request.form.get('father_designation')  # NEW
+            student.father_organization = request.form.get('father_organization')  # NEW
 
             student.mother_name = request.form.get('mother_name')
             student.mother_aadhaar_no = request.form.get('mother_aadhaar_no')
             student.mother_education = request.form.get('mother_education')
             student.mother_occupation = request.form.get('mother_occupation')
+            student.mother_designation = request.form.get('mother_designation')  # NEW
+            student.mother_organization = request.form.get('mother_organization')  # NEW
 
             student.family_income = request.form.get('family_income')
             student.bank_holder_name = request.form.get('bank_holder_name')
@@ -340,6 +350,7 @@ def edit_student(id):
 
             student.class_10_year = request.form.get('class_10_year') or None
             student.class_10_school = request.form.get('class_10_school')
+            student.class_10_school_type = request.form.get('class_10_school_type')  # NEW
             student.class_10_state = request.form.get('class_10_state')
             student.class_10_serial = request.form.get('class_10_serial')
             student.class_10_reg_no = request.form.get('class_10_reg_no')
@@ -357,14 +368,15 @@ def edit_student(id):
             student.registration_no_apaar_id = request.form.get('registration_no_apaar_id')
             student.class_12_year = request.form.get('class_12_year') or None
             student.class_12_school = request.form.get('class_12_school')
+            student.class_12_school_type = request.form.get('class_12_school_type')  # NEW
+            student.class_12_school_code = request.form.get('class_12_school_code')  # NEW
+            student.class_12_center_code = request.form.get('class_12_center_code')  # NEW
             student.class_12_state = request.form.get('class_12_state')
             student.class_12_serial = request.form.get('class_12_serial')
             student.class_12_reg_no = request.form.get('class_12_reg_no')
             student.class_12_board = request.form.get('class_12_board')
-            student.class_12_issue_date = datetime.strptime(request.form.get('class_12_issue_date'),
-                                                            '%Y-%m-%d').date() if request.form.get(
-                'class_12_issue_date') else None
             student.class_12_roll_no = request.form.get('class_12_roll_no')
+            student.class_12_admit_card_id = request.form.get('class_12_admit_card_id')  # NEW
             student.class_12_marks_data = json.dumps(c12_marks)
 
             for doc_type in MASTER_DOC_TYPES:
@@ -379,7 +391,6 @@ def edit_student(id):
                 elif embed_link:
                     db.session.add(Document(student_id=student.id, doc_type=doc_type, drive_link=embed_link))
 
-            # MULTIPLE CUSTOM DOCUMENTS UPDATE LOGIC
             old_custom_docs = Document.query.filter(Document.student_id == student.id,
                                                     Document.doc_type.notin_(MASTER_DOC_TYPES)).all()
             for od in old_custom_docs: db.session.delete(od)

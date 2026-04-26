@@ -54,9 +54,10 @@
             <div class="col-3"><span class="data-label">DOB:</span><div class="data-value">{{ student.dob.strftime('%d-%m-%Y') if student.dob else '' }}</div></div>
             <div class="col-3"><span class="data-label">Gender:</span><div class="data-value">{{ student.gender }}</div></div>
 
-            <div class="col-4"><span class="data-label">Aadhaar No:</span><div class="data-value">{{ student.aadhaar_no or '' }}</div></div>
-            <div class="col-4"><span class="data-label">Category:</span><div class="data-value">{{ student.category or '' }}</div></div>
-            <div class="col-4"><span class="data-label">Nationality / Nativity:</span><div class="data-value">{{ student.nationality or '' }} {% if student.nationality and student.nativity %}/{% endif %} {{ student.nativity or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Blood Group:</span><div class="data-value text-danger">{{ student.blood_group or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Religion:</span><div class="data-value">{{ student.religion or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Category:</span><div class="data-value">{{ student.category or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Aadhaar No:</span><div class="data-value">{{ student.aadhaar_no or '' }}</div></div>
 
             <div class="col-12"><span class="data-label">Identification Mark:</span><div class="data-value">{{ student.identification_mark or '' }}</div></div>
         </div>
@@ -85,15 +86,24 @@
 
     <div class="avoid-break">
         <div class="section-title">4. Parent & Financial Details</div>
-        <table class="table table-sm table-bordered text-center align-middle mb-3">
-            <thead class="table-light">
-                <tr><th>Relation</th><th>Name</th><th>Aadhaar No.</th><th>Education</th><th>Occupation</th></tr>
-            </thead>
-            <tbody>
-                <tr><td class="fw-bold">Father</td><td>{{ student.father_name or '' }}</td><td>{{ student.father_aadhaar_no or '' }}</td><td>{{ student.father_education or '' }}</td><td>{{ student.father_occupation or '' }}</td></tr>
-                <tr><td class="fw-bold">Mother</td><td>{{ student.mother_name or '' }}</td><td>{{ student.mother_aadhaar_no or '' }}</td><td>{{ student.mother_education or '' }}</td><td>{{ student.mother_occupation or '' }}</td></tr>
-            </tbody>
-        </table>
+        <div class="row g-2 mb-3 pb-2 border-bottom">
+            <div class="col-12 text-primary fw-bold mb-1 border-bottom">Father's Details</div>
+            <div class="col-3"><span class="data-label">Name:</span><div class="data-value">{{ student.father_name or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Aadhaar:</span><div class="data-value">{{ student.father_aadhaar_no or '' }}</div></div>
+            <div class="col-2"><span class="data-label">Education:</span><div class="data-value">{{ student.father_education or '' }}</div></div>
+            <div class="col-2"><span class="data-label">Occupation:</span><div class="data-value">{{ student.father_occupation or '' }}</div></div>
+            <div class="col-2"><span class="data-label">Designation:</span><div class="data-value">{{ student.father_designation or '' }}</div></div>
+            <div class="col-12"><span class="data-label">Organization:</span><div class="data-value">{{ student.father_organization or '' }}</div></div>
+        </div>
+        <div class="row g-2 mb-3 pb-2 border-bottom">
+            <div class="col-12 text-primary fw-bold mb-1 border-bottom">Mother's Details</div>
+            <div class="col-3"><span class="data-label">Name:</span><div class="data-value">{{ student.mother_name or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Aadhaar:</span><div class="data-value">{{ student.mother_aadhaar_no or '' }}</div></div>
+            <div class="col-2"><span class="data-label">Education:</span><div class="data-value">{{ student.mother_education or '' }}</div></div>
+            <div class="col-2"><span class="data-label">Occupation:</span><div class="data-value">{{ student.mother_occupation or '' }}</div></div>
+            <div class="col-2"><span class="data-label">Designation:</span><div class="data-value">{{ student.mother_designation or '' }}</div></div>
+            <div class="col-12"><span class="data-label">Organization:</span><div class="data-value">{{ student.mother_organization or '' }}</div></div>
+        </div>
 
         <div class="row g-2 mb-3">
             <div class="col-4"><span class="data-label">Annual Family Income:</span><div class="data-value">{{ student.family_income or '' }}</div></div>
@@ -117,9 +127,10 @@
             <div class="col-3"><span class="data-label">Board:</span><div class="data-value">{{ student.class_10_board or '' }}</div></div>
             <div class="col-3"><span class="data-label">Roll No:</span><div class="data-value">{{ student.class_10_roll_no or '' }}</div></div>
             <div class="col-3"><span class="data-label">Regn No:</span><div class="data-value">{{ student.class_10_reg_no or '' }}</div></div>
-            <div class="col-4"><span class="data-label">School Name:</span><div class="data-value">{{ student.class_10_school or '' }}</div></div>
-            <div class="col-4"><span class="data-label">State Name:</span><div class="data-value">{{ student.class_10_state or '' }}</div></div>
-            <div class="col-4"><span class="data-label">Serial No / Issue:</span><div class="data-value">{{ student.class_10_serial or '' }} {{ student.class_10_issue_date.strftime('%d-%m-%Y') if student.class_10_issue_date else '' }}</div></div>
+            <div class="col-3"><span class="data-label">School Name:</span><div class="data-value">{{ student.class_10_school or '' }}</div></div>
+            <div class="col-3"><span class="data-label">School Type:</span><div class="data-value">{{ student.class_10_school_type or '' }}</div></div>
+            <div class="col-3"><span class="data-label">State Name:</span><div class="data-value">{{ student.class_10_state or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Serial No / Issue:</span><div class="data-value">{{ student.class_10_serial or '' }} {{ student.class_10_issue_date.strftime('%d-%m-%Y') if student.class_10_issue_date else '' }}</div></div>
         </div>
 
         <table class="table table-sm table-bordered text-center mt-3">
@@ -169,7 +180,12 @@
             <div class="col-3"><span class="data-label">Roll No:</span><div class="data-value">{{ student.class_12_roll_no or '' }}</div></div>
             <div class="col-3"><span class="data-label">Regn No:</span><div class="data-value">{{ student.class_12_reg_no or '' }}</div></div>
 
-            <div class="col-4"><span class="data-label">School Name:</span><div class="data-value">{{ student.class_12_school or '' }}</div></div>
+            <div class="col-3"><span class="data-label">School Name:</span><div class="data-value">{{ student.class_12_school or '' }}</div></div>
+            <div class="col-3"><span class="data-label">School Type:</span><div class="data-value">{{ student.class_12_school_type or '' }}</div></div>
+            <div class="col-3"><span class="data-label">School Code:</span><div class="data-value">{{ student.class_12_school_code or '' }}</div></div>
+            <div class="col-3"><span class="data-label">Center Code:</span><div class="data-value">{{ student.class_12_center_code or '' }}</div></div>
+
+            <div class="col-4"><span class="data-label">Admit Card ID:</span><div class="data-value">{{ student.class_12_admit_card_id or '' }}</div></div>
             <div class="col-4"><span class="data-label">State Name:</span><div class="data-value">{{ student.class_12_state or '' }}</div></div>
             <div class="col-4"><span class="data-label">Serial No / Issue:</span><div class="data-value">{{ student.class_12_serial or '' }} {{ student.class_12_issue_date.strftime('%d-%m-%Y') if student.class_12_issue_date else '' }}</div></div>
         </div>
@@ -227,8 +243,9 @@
                         ('12th_marksheet', '12th Marksheet Link'), ('improvement_marksheet', '12th Improvement Marksheet Link'),
                         ('school_leaving_certificate', 'School Leaving Cert. (SLC) Link'), ('transfer_certificate', 'Transfer Cert. (TC) Link'),
                         ('character_certificate', 'Character Certificate Link'), ('neet_jee_admit_card', 'NEET/JEE Admit Card Link'),
-                        ('neet_jee_result', 'NEET/JEE Result Card Link'), ('fingerprints', 'Fingerprints Scans Link'),
-                        ('bank_proof', 'Bank Proof (Passbook) Link'), ('caste_certificate', 'Caste Certificate Link'), ('ews_certificate', 'EWS Certificate Link')
+                        ('12th_admit_card', '12th Admit Card Link'), ('neet_jee_result', 'NEET/JEE Result Card Link'),
+                        ('fingerprints', 'Fingerprints Scans Link'), ('bank_proof', 'Bank Proof (Passbook) Link'),
+                        ('caste_certificate', 'Caste Certificate Link'), ('ews_certificate', 'EWS Certificate Link')
                     ] %}
 
                     {% set submitted_docs = {} %}

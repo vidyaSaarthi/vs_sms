@@ -33,17 +33,31 @@
                     <div class="col-md-4"><label>Gender</label>
                         <select name="gender" class="form-select"><option value="Male">Male</option><option value="Female">Female</option></select>
                     </div>
+
                     <div class="col-md-4"><label>Student's Aadhaar No. (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-4"><label>Blood Group</label>
+                        <select name="blood_group" class="form-select">
+                            <option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option>
+                            <option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>Religion</label>
+                        <select name="religion" class="form-select">
+                            <option value="">Select</option><option value="Hindu">Hindu</option><option value="Muslim">Muslim</option>
+                            <option value="Sikh">Sikh</option><option value="Christian">Christian</option><option value="Others">Others</option>
+                        </select>
+                    </div>
+
                     <div class="col-md-4"><label>Category</label><input type="text" name="category" class="form-control"></div>
                     <div class="col-md-4"><label>Identification Mark</label><input type="text" name="identification_mark" class="form-control"></div>
-                    
                     <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="Indian"></div>
                     <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control"></div>
-                    
+
                     <div class="col-md-4"><label>Primary Mobile (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Alternative Mobile (10 Digits)</label><input type="text" name="alt_mobile_number" id="alt_mobile_number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Emergency Mobile (10 Digits)</label><input type="text" name="emergency_mobile" id="emergency_mobile" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
-                    
+
                     <div class="col-md-4"><label>Primary Email</label><input type="email" name="email_address" class="form-control"></div>
                     <div class="col-md-4"><label>Alternative Email</label><input type="email" name="alt_email" class="form-control"></div>
                     <div class="col-md-4"><label>Emergency Email</label><input type="email" name="emergency_email" class="form-control"></div>
@@ -69,21 +83,25 @@
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">3. Parent & Financial Details</h5></div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4"><label>Father's Name</label><input type="text" name="father_name" class="form-control"></div>
-                    <div class="col-md-4"><label>Father's Aadhaar No. (12 Digits)</label><input type="text" name="father_aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-3"><label>Father's Name</label><input type="text" name="father_name" class="form-control"></div>
+                    <div class="col-md-3"><label>Father's Aadhaar (12 Digits)</label><input type="text" name="father_aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
                     <div class="col-md-2"><label>Father's Education</label><input type="text" name="father_education" class="form-control"></div>
                     <div class="col-md-2"><label>Father's Occupation</label><input type="text" name="father_occupation" class="form-control"></div>
-                    
-                    <div class="col-md-4"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control"></div>
-                    <div class="col-md-4"><label>Mother's Aadhaar No. (12 Digits)</label><input type="text" name="mother_aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-2"><label>Father's Designation</label><input type="text" name="father_designation" class="form-control"></div>
+                    <div class="col-md-4"><label>Father's Organization</label><input type="text" name="father_organization" class="form-control"></div>
+
+                    <div class="col-12 m-0 p-0"></div> <div class="col-md-3"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control"></div>
+                    <div class="col-md-3"><label>Mother's Aadhaar (12 Digits)</label><input type="text" name="mother_aadhaar_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
                     <div class="col-md-2"><label>Mother's Education</label><input type="text" name="mother_education" class="form-control"></div>
                     <div class="col-md-2"><label>Mother's Occupation</label><input type="text" name="mother_occupation" class="form-control"></div>
-                    
+                    <div class="col-md-2"><label>Mother's Designation</label><input type="text" name="mother_designation" class="form-control"></div>
+                    <div class="col-md-4"><label>Mother's Organization</label><input type="text" name="mother_organization" class="form-control"></div>
+
                     <div class="col-md-4">
                         <label>Annual Family Income</label>
                         <select name="family_income" class="form-select">
                             <option value="">Select Income Bracket</option>
-                            {% for bracket in ['0 - 1 Lakh', '1 Lakh - 2 Lakhs', '2 Lakhs - 3 Lakhs', '3 Lakhs - 4 Lakhs', '4 Lakhs - 5 Lakhs', '5 Lakhs - 6 Lakhs', '6 Lakhs - 7 Lakhs', '7 Lakhs - 8 Lakhs', '8 Lakhs - 9 Lakhs', '9 Lakhs - 10 Lakhs', '10 Lakhs - 11 Lakhs', '11 Lakhs - 12 Lakhs', '12 Lakhs and above'] %}
+                            {% for bracket in ['0 - 1 Lakh', '1 Lakh - 2 Lakhs', '2 Lakhs - 3 Lakhs', '3 Lakhs - 4 Lakhs', '4 Lakhs - 5 Lakhs', '5 Lakhs - 6 Lakhs', '6 Lakhs - 7 Lakhs', '7 Lakhs - 8 Lakhs', '8 Lakhs - 9 Lakhs', '9 Lakhs - 10 Lakhs', '10 Lakhs - 11 Lakhs', '11 Lakhs - 12 Lakhs', '12 Lakhs - 13 Lakhs', '13 Lakhs - 14 Lakhs', '14 Lakhs - 15 Lakhs', '15 Lakhs - 16 Lakhs', '16 Lakhs - 17 Lakhs', '17 Lakhs - 18 Lakhs', '18 Lakhs - 19 Lakhs', '19 Lakhs - 20 Lakhs', '20 Lakhs and above'] %}
                                 <option value="{{ bracket }}">{{ bracket }}</option>
                             {% endfor %}
                         </select>
@@ -108,13 +126,19 @@
                     <div class="col-md-3"><label>Board</label><input type="text" name="class_10_board" class="form-control"></div>
                     <div class="col-md-3"><label>Roll No.</label><input type="text" name="class_10_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
                     <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_10_reg_no" class="form-control"></div>
-                    
+
                     <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_10_serial" class="form-control"></div>
                     <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_10_issue_date" class="form-control"></div>
-                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_10_school" class="form-control"></div>
+                    <div class="col-md-4"><label>School Name</label><input type="text" name="class_10_school" class="form-control"></div>
+                    <div class="col-md-2">
+                        <label>School Type</label>
+                        <select name="class_10_school_type" class="form-select">
+                            <option value="">Select</option><option value="Govt.">Govt.</option><option value="Private">Private</option><option value="Others">Others</option>
+                        </select>
+                    </div>
                     <div class="col-md-3"><label>State Name</label><input type="text" name="class_10_state" class="form-control"></div>
                 </div>
-                
+
                 <h6 class="bg-secondary text-white p-2 rounded">A. Main Subjects</h6>
                 <table class="table table-sm table-bordered text-center align-middle" id="table-c10-main">
                     <thead class="table-light"><tr><th width="50%">Subject</th><th width="25%">Max Marks</th><th width="25%">Obtained</th></tr></thead>
@@ -170,7 +194,6 @@
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">6. Class 12th Subjects & Marks</h5></div>
             <div class="card-body">
-                
                 <h6 class="border-bottom pb-2">Exam Status</h6>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4"><label>Passed / Appearing</label><select name="passed_appearing" class="form-select"><option value="Passed">Passed</option><option value="Appearing">Appearing</option></select></div>
@@ -184,11 +207,21 @@
                     <div class="col-md-3"><label>Board</label><input type="text" name="class_12_board" class="form-control"></div>
                     <div class="col-md-3"><label>Roll No.</label><input type="text" name="class_12_roll_no" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
                     <div class="col-md-3"><label>Regn. No.</label><input type="text" name="class_12_reg_no" class="form-control"></div>
-                    
+
                     <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_12_serial" class="form-control"></div>
                     <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_12_issue_date" class="form-control"></div>
-                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_12_school" class="form-control"></div>
+                    <div class="col-md-4"><label>School Name</label><input type="text" name="class_12_school" class="form-control"></div>
+                    <div class="col-md-2">
+                        <label>School Type</label>
+                        <select name="class_12_school_type" class="form-select">
+                            <option value="">Select</option><option value="Govt.">Govt.</option><option value="Private">Private</option><option value="Others">Others</option>
+                        </select>
+                    </div>
                     <div class="col-md-3"><label>State Name</label><input type="text" name="class_12_state" class="form-control"></div>
+
+                    <div class="col-md-3"><label>School Code</label><input type="text" name="class_12_school_code" class="form-control"></div>
+                    <div class="col-md-3"><label>Center Code</label><input type="text" name="class_12_center_code" class="form-control"></div>
+                    <div class="col-md-3"><label>Admit Card ID</label><input type="text" name="class_12_admit_card_id" class="form-control"></div>
                 </div>
 
                 <h6 class="bg-secondary text-white p-2 rounded">A. Main Subjects</h6>
@@ -235,18 +268,19 @@
             <div class="card-body">
                 <div class="row g-3">
                     {% set doc_list = [
-                        ('photo_url', 'Student Photo Link'), ('student_signature_url', 'Student Signature Link'), 
-                        ('aadhaar_card_url', 'Student Aadhaar Card Link'), ('father_aadhaar_url', 'Father Aadhaar Card Link'), 
+                        ('photo_url', 'Student Photo Link'), ('student_signature_url', 'Student Signature Link'),
+                        ('aadhaar_card_url', 'Student Aadhaar Card Link'), ('father_aadhaar_url', 'Father Aadhaar Card Link'),
                         ('mother_aadhaar_url', 'Mother Aadhaar Card Link'), ('student_pan_card_url', 'Student PAN Card Link'),
                         ('passport_url', 'Passport Link'), ('driving_license_url', 'Driving License Link'),
-                        ('birth_certificate_url', 'Birth Certificate Link'), ('residence_proof_url', 'Residence Proof Link'), 
+                        ('birth_certificate_url', 'Birth Certificate Link'), ('residence_proof_url', 'Residence Proof Link'),
                         ('family_id_url', 'Family ID Link'), ('apaar_id_doc_url', 'APAAR ID Document Link'),
-                        ('10th_marksheet_url', '10th Marksheet Link'), ('11th_marksheet_url', '11th Marksheet Link'), 
+                        ('10th_marksheet_url', '10th Marksheet Link'), ('11th_marksheet_url', '11th Marksheet Link'),
                         ('12th_marksheet_url', '12th Marksheet Link'), ('improvement_marksheet_url', '12th Improvement Marksheet Link'),
                         ('school_leaving_certificate_url', 'School Leaving Cert. (SLC) Link'), ('transfer_certificate_url', 'Transfer Cert. (TC) Link'),
-                        ('character_certificate_url', 'Character Certificate Link'), ('neet_jee_admit_card_url', 'NEET/JEE Admit Card Link'), 
-                        ('neet_jee_result_url', 'NEET/JEE Result Card Link'), ('fingerprints_url', 'Fingerprints Scans Link'),
-                        ('bank_proof_url', 'Bank Proof (Passbook) Link'), ('caste_certificate_url', 'Caste Certificate Link'), ('ews_certificate_url', 'EWS Certificate Link')
+                        ('character_certificate_url', 'Character Certificate Link'), ('neet_jee_admit_card_url', 'NEET/JEE Admit Card Link'),
+                        ('12th_admit_card_url', '12th Admit Card Link'), ('neet_jee_result_url', 'NEET/JEE Result Card Link'),
+                        ('fingerprints_url', 'Fingerprints Scans Link'), ('bank_proof_url', 'Bank Proof (Passbook) Link'),
+                        ('caste_certificate_url', 'Caste Certificate Link'), ('ews_certificate_url', 'EWS Certificate Link')
                     ] %}
                     {% for id, label in doc_list %}
                     <div class="col-md-4">
@@ -259,18 +293,12 @@
                         <h6 class="text-danger mb-0">Other Custom Documents</h6>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="addCustomDocBtn">+ Add Custom Document</button>
                     </div>
-                    
+
                     <div id="customDocsContainer" class="col-md-12 mt-2">
                         <div class="row g-2 mb-2 custom-doc-row">
-                            <div class="col-md-4">
-                                <input type="text" name="custom_doc_name[]" class="form-control form-control-sm" placeholder="Document Name (e.g. Gap Certificate)">
-                            </div>
-                            <div class="col-md-7">
-                                <input type="url" name="custom_doc_url[]" class="form-control form-control-sm" placeholder="Link (https://drive.google.com/...)">
-                            </div>
-                            <div class="col-md-1">
-                                <button type="button" class="btn btn-sm btn-danger remove-custom-doc w-100">X</button>
-                            </div>
+                            <div class="col-md-4"><input type="text" name="custom_doc_name[]" class="form-control form-control-sm" placeholder="Document Name (e.g. Gap Certificate)"></div>
+                            <div class="col-md-7"><input type="url" name="custom_doc_url[]" class="form-control form-control-sm" placeholder="Link (https://drive.google.com/...)"></div>
+                            <div class="col-md-1"><button type="button" class="btn btn-sm btn-danger remove-custom-doc w-100">X</button></div>
                         </div>
                     </div>
 
@@ -284,7 +312,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    
+
     let today = new Date().toISOString().split('T')[0];
     document.querySelectorAll('input[type="date"]').forEach(dateInput => {
         dateInput.setAttribute('max', today);
@@ -308,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function() {
         formsContainer.innerHTML = '';
         let forms = this.value === 'NEET' ? neetForms : (this.value === 'JEE' ? jeeForms : []);
         if(forms.length === 0) { formsContainer.innerHTML = '<em class="text-muted small">Select Target Exam first.</em>'; return; }
-        
+
         forms.forEach(form => {
             let idStr = form.replace(/\s+/g, '');
             formsContainer.innerHTML += `
@@ -319,7 +347,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // --- MULTIPLE CUSTOM DOCUMENTS LOGIC ---
     document.getElementById('addCustomDocBtn').addEventListener('click', function() {
         const container = document.getElementById('customDocsContainer');
         const newRow = document.createElement('div');
@@ -338,13 +365,12 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // --- DYNAMIC ROWS FOR MARKS ---
     document.querySelectorAll('.add-row').forEach(btn => {
         btn.addEventListener('click', function() {
             let targetId = this.getAttribute('data-target');
             let prefix = this.getAttribute('data-prefix');
             let tbody = document.getElementById(targetId);
-            
+
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><input type="text" name="${prefix}_name[]" class="form-control form-control-sm" placeholder="Subject Name" required></td>
@@ -364,7 +390,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // --- OVERALL MACRO CALCULATOR ---
     function attachCalcListeners() {
         document.querySelectorAll('.calc').forEach(input => {
             input.removeEventListener('input', calculateAllTotals);

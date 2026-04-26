@@ -40,9 +40,25 @@
                     </div>
 
                     <div class="col-md-4"><label>Student's Aadhaar No. (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" value="{{ student.aadhaar_no }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-4"><label>Blood Group</label>
+                        <select name="blood_group" class="form-select">
+                            <option value="">Select</option>
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                                <option value="{{ bg }}" {% if student.blood_group == bg %}selected{% endif %}>{{ bg }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4"><label>Religion</label>
+                        <select name="religion" class="form-select">
+                            <option value="">Select</option>
+                            {% for rel in ['Hindu', 'Muslim', 'Sikh', 'Christian', 'Others'] %}
+                                <option value="{{ rel }}" {% if student.religion == rel %}selected{% endif %}>{{ rel }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <div class="col-md-4"><label>Category</label><input type="text" name="category" class="form-control" value="{{ student.category }}"></div>
                     <div class="col-md-4"><label>Identification Mark</label><input type="text" name="identification_mark" class="form-control" value="{{ student.identification_mark or '' }}"></div>
-
                     <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="{{ student.nationality or 'Indian' }}"></div>
                     <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control" value="{{ student.nativity or '' }}"></div>
                     <div class="col-md-4"><label>Primary Mobile (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" value="{{ student.mobile_number }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
@@ -75,21 +91,25 @@
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">3. Parent & Financial Details</h5></div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4"><label>Father's Name</label><input type="text" name="father_name" class="form-control" value="{{ student.father_name or '' }}"></div>
-                    <div class="col-md-4"><label>Father's Aadhaar No. (12 Digits)</label><input type="text" name="father_aadhaar_no" class="form-control" value="{{ student.father_aadhaar_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-3"><label>Father's Name</label><input type="text" name="father_name" class="form-control" value="{{ student.father_name or '' }}"></div>
+                    <div class="col-md-3"><label>Father's Aadhaar (12 Digits)</label><input type="text" name="father_aadhaar_no" class="form-control" value="{{ student.father_aadhaar_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
                     <div class="col-md-2"><label>Father's Education</label><input type="text" name="father_education" class="form-control" value="{{ student.father_education or '' }}"></div>
                     <div class="col-md-2"><label>Father's Occupation</label><input type="text" name="father_occupation" class="form-control" value="{{ student.father_occupation or '' }}"></div>
+                    <div class="col-md-2"><label>Father's Designation</label><input type="text" name="father_designation" class="form-control" value="{{ student.father_designation or '' }}"></div>
+                    <div class="col-md-4"><label>Father's Organization</label><input type="text" name="father_organization" class="form-control" value="{{ student.father_organization or '' }}"></div>
 
-                    <div class="col-md-4"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control" value="{{ student.mother_name or '' }}"></div>
-                    <div class="col-md-4"><label>Mother's Aadhaar No. (12 Digits)</label><input type="text" name="mother_aadhaar_no" class="form-control" value="{{ student.mother_aadhaar_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-12 m-0 p-0"></div> <div class="col-md-3"><label>Mother's Name</label><input type="text" name="mother_name" class="form-control" value="{{ student.mother_name or '' }}"></div>
+                    <div class="col-md-3"><label>Mother's Aadhaar (12 Digits)</label><input type="text" name="mother_aadhaar_no" class="form-control" value="{{ student.mother_aadhaar_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
                     <div class="col-md-2"><label>Mother's Education</label><input type="text" name="mother_education" class="form-control" value="{{ student.mother_education or '' }}"></div>
                     <div class="col-md-2"><label>Mother's Occupation</label><input type="text" name="mother_occupation" class="form-control" value="{{ student.mother_occupation or '' }}"></div>
+                    <div class="col-md-2"><label>Mother's Designation</label><input type="text" name="mother_designation" class="form-control" value="{{ student.mother_designation or '' }}"></div>
+                    <div class="col-md-4"><label>Mother's Organization</label><input type="text" name="mother_organization" class="form-control" value="{{ student.mother_organization or '' }}"></div>
 
                     <div class="col-md-4">
                         <label>Annual Family Income</label>
                         <select name="family_income" class="form-select">
                             <option value="">Select Income Bracket</option>
-                            {% for bracket in ['0 - 1 Lakh', '1 Lakh - 2 Lakhs', '2 Lakhs - 3 Lakhs', '3 Lakhs - 4 Lakhs', '4 Lakhs - 5 Lakhs', '5 Lakhs - 6 Lakhs', '6 Lakhs - 7 Lakhs', '7 Lakhs - 8 Lakhs', '8 Lakhs - 9 Lakhs', '9 Lakhs - 10 Lakhs', '10 Lakhs - 11 Lakhs', '11 Lakhs - 12 Lakhs', '12 Lakhs and above'] %}
+                            {% for bracket in ['0 - 1 Lakh', '1 Lakh - 2 Lakhs', '2 Lakhs - 3 Lakhs', '3 Lakhs - 4 Lakhs', '4 Lakhs - 5 Lakhs', '5 Lakhs - 6 Lakhs', '6 Lakhs - 7 Lakhs', '7 Lakhs - 8 Lakhs', '8 Lakhs - 9 Lakhs', '9 Lakhs - 10 Lakhs', '10 Lakhs - 11 Lakhs', '11 Lakhs - 12 Lakhs', '12 Lakhs - 13 Lakhs', '13 Lakhs - 14 Lakhs', '14 Lakhs - 15 Lakhs', '15 Lakhs - 16 Lakhs', '16 Lakhs - 17 Lakhs', '17 Lakhs - 18 Lakhs', '18 Lakhs - 19 Lakhs', '19 Lakhs - 20 Lakhs', '20 Lakhs and above'] %}
                                 <option value="{{ bracket }}" {% if student.family_income == bracket %}selected{% endif %}>{{ bracket }}</option>
                             {% endfor %}
                         </select>
@@ -125,7 +145,16 @@
 
                     <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_10_serial" class="form-control" value="{{ student.class_10_serial or '' }}"></div>
                     <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_10_issue_date" class="form-control" value="{{ student.class_10_issue_date.strftime('%Y-%m-%d') if student.class_10_issue_date else '' }}"></div>
-                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_10_school" class="form-control" value="{{ student.class_10_school or '' }}"></div>
+                    <div class="col-md-4"><label>School Name</label><input type="text" name="class_10_school" class="form-control" value="{{ student.class_10_school or '' }}"></div>
+                    <div class="col-md-2">
+                        <label>School Type</label>
+                        <select name="class_10_school_type" class="form-select">
+                            <option value="">Select</option>
+                            {% for st in ['Govt.', 'Private', 'Others'] %}
+                                <option value="{{ st }}" {% if student.class_10_school_type == st %}selected{% endif %}>{{ st }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="col-md-3"><label>State Name</label><input type="text" name="class_10_state" class="form-control" value="{{ student.class_10_state or '' }}"></div>
                 </div>
 
@@ -245,8 +274,21 @@
 
                     <div class="col-md-3"><label>Serial No.</label><input type="text" name="class_12_serial" class="form-control" value="{{ student.class_12_serial or '' }}"></div>
                     <div class="col-md-3"><label>Issue Date</label><input type="date" name="class_12_issue_date" class="form-control" value="{{ student.class_12_issue_date.strftime('%Y-%m-%d') if student.class_12_issue_date else '' }}"></div>
-                    <div class="col-md-3"><label>School Name</label><input type="text" name="class_12_school" class="form-control" value="{{ student.class_12_school or '' }}"></div>
+                    <div class="col-md-4"><label>School Name</label><input type="text" name="class_12_school" class="form-control" value="{{ student.class_12_school or '' }}"></div>
+                    <div class="col-md-2">
+                        <label>School Type</label>
+                        <select name="class_12_school_type" class="form-select">
+                            <option value="">Select</option>
+                            {% for st in ['Govt.', 'Private', 'Others'] %}
+                                <option value="{{ st }}" {% if student.class_12_school_type == st %}selected{% endif %}>{{ st }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="col-md-3"><label>State Name</label><input type="text" name="class_12_state" class="form-control" value="{{ student.class_12_state or '' }}"></div>
+
+                    <div class="col-md-3"><label>School Code</label><input type="text" name="class_12_school_code" class="form-control" value="{{ student.class_12_school_code or '' }}"></div>
+                    <div class="col-md-3"><label>Center Code</label><input type="text" name="class_12_center_code" class="form-control" value="{{ student.class_12_center_code or '' }}"></div>
+                    <div class="col-md-3"><label>Admit Card ID</label><input type="text" name="class_12_admit_card_id" class="form-control" value="{{ student.class_12_admit_card_id or '' }}"></div>
                 </div>
 
                 <h6 class="bg-secondary text-white p-2 rounded">A. Main Subjects</h6>
@@ -321,8 +363,9 @@
                         ('12th_marksheet_url', '12th Marksheet Link'), ('improvement_marksheet_url', '12th Improvement Marksheet Link'),
                         ('school_leaving_certificate_url', 'School Leaving Cert. (SLC) Link'), ('transfer_certificate_url', 'Transfer Cert. (TC) Link'),
                         ('character_certificate_url', 'Character Certificate Link'), ('neet_jee_admit_card_url', 'NEET/JEE Admit Card Link'),
-                        ('neet_jee_result_url', 'NEET/JEE Result Card Link'), ('fingerprints_url', 'Fingerprints Scans Link'),
-                        ('bank_proof_url', 'Bank Proof (Passbook) Link'), ('caste_certificate_url', 'Caste Certificate Link'), ('ews_certificate_url', 'EWS Certificate Link')
+                        ('12th_admit_card_url', '12th Admit Card Link'), ('neet_jee_result_url', 'NEET/JEE Result Card Link'),
+                        ('fingerprints_url', 'Fingerprints Scans Link'), ('bank_proof_url', 'Bank Proof (Passbook) Link'),
+                        ('caste_certificate_url', 'Caste Certificate Link'), ('ews_certificate_url', 'EWS Certificate Link')
                     ] %}
                     {% for id, label in doc_list %}
                     <div class="col-md-4">
@@ -421,7 +464,6 @@ document.addEventListener("DOMContentLoaded", function() {
     renderForms();
     examSelect.addEventListener('change', renderForms);
 
-    // --- MULTIPLE CUSTOM DOCUMENTS LOGIC ---
     document.getElementById('addCustomDocBtn').addEventListener('click', function() {
         const container = document.getElementById('customDocsContainer');
         const newRow = document.createElement('div');
@@ -440,7 +482,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // --- DYNAMIC ROWS FOR MARKS ---
     document.querySelectorAll('.add-row').forEach(btn => {
         btn.addEventListener('click', function() {
             let targetId = this.getAttribute('data-target');
@@ -466,7 +507,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // --- OVERALL MACRO CALCULATOR ---
     function attachCalcListeners() {
         document.querySelectorAll('.calc').forEach(input => {
             input.removeEventListener('input', calculateAllTotals);
@@ -510,7 +550,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     attachCalcListeners();
 
-    // --- SAFE VALIDATION ---
     document.getElementById('studentForm').addEventListener('submit', function(e) {
         let invalidMarks = false;
         ['c10-main', 'c10_other', 'c10_add', 'c12-main', 'c12_other', 'c12_add'].forEach(prefix => {
