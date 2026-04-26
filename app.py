@@ -227,7 +227,8 @@ def add_student():
                 class_12_reg_no=request.form.get('class_12_reg_no'), class_12_board=request.form.get('class_12_board'),
                 class_12_issue_date=c12_issue_val, class_12_roll_no=request.form.get('class_12_roll_no'),
                 class_12_admit_card_id=request.form.get('class_12_admit_card_id'),  # NEW
-                class_12_marks_data=json.dumps(c12_marks)
+                class_12_marks_data=json.dumps(c12_marks),
+                created_by = request.form.get('created_by')
             )
             db.session.add(new_student)
             db.session.flush()

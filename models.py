@@ -106,6 +106,7 @@ class Student(db.Model):
 
     documents = db.relationship('Document', backref='student', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.String(50))
 
 
 class Document(db.Model):
