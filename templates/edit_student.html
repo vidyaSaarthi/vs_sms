@@ -12,6 +12,16 @@
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Target Exams</h5></div>
             <div class="card-body">
                 <div class="row g-3">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Counselor Name (Created By) *</strong></label>
+                        <select name="created_by" class="form-control" required>
+                            <option value="Krishna" {% if student.created_by == 'Krishna' %}selected{% endif %}>Krishna</option>
+                            <option value="Yasspreet" {% if student.created_by == 'Yasspreet' %}selected{% endif %}>Yasspreet</option>
+                            <option value="Shubham" {% if student.created_by == 'Shubham' %}selected{% endif %}>Shubham</option>
+                            <option value="Vivekam" {% if student.created_by == 'Vivekam' %}selected{% endif %}>Vivekam</option>
+                        </select>
+                    </div>
+
                     <div class="col-md-4">
                         <label>Target Exam</label>
                         <select name="exam_type" id="examTypeSelect" class="form-select border-danger" style="background-color: #fff0f0;">

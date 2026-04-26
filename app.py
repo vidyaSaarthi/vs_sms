@@ -404,6 +404,7 @@ def edit_student(id):
             student.class_12_roll_no = request.form.get('class_12_roll_no')
             student.class_12_admit_card_id = request.form.get('class_12_admit_card_id')  # NEW
             student.class_12_marks_data = json.dumps(c12_marks)
+            student.created_by = request.form.get('created_by')
 
             for doc_type in MASTER_DOC_TYPES:
                 raw_link = request.form.get(f"{doc_type}_url")

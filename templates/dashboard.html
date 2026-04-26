@@ -44,6 +44,18 @@
                     </span>
                 {% endif %}
 
+                <span class="badge bg-primary">{{ student.exam_type }}</span>
+
+                {% if student.created_by %}
+                    <span class="badge bg-light text-secondary border border-secondary ms-2" style="font-size: 0.8em;">
+                        👤 {{ student.created_by }}
+                    </span>
+                {% else %}
+                    <span class="badge bg-light text-secondary border border-secondary ms-2" style="font-size: 0.8em;">
+                        👤 Unknown
+                    </span>
+                {% endif %}
+
                 <div class="card-body mt-4">
                     <h4 class="card-title mb-3" style="color: var(--brand-primary); font-weight: 800;">{{ student.full_name }}</h4>
                     <p class="card-text mb-1" style="color: #333;"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</p>
