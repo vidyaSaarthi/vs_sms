@@ -90,13 +90,29 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # Grab the filter values from the URL
     exam_filter = request.args.get('exam_type', '')
     search_query = request.args.get('search', '').strip()
+    created_by_filter = request.args.get('created_by', '')  # 👤 NEW
+
     query = Student.query
-    if exam_filter in ['NEET', 'JEE']: query = query.filter(Student.exam_type == exam_filter)
-    if search_query: query = query.filter(Student.full_name.ilike(f'%{search_query}%'))
+
+    # Apply filters if they exist
+    if exam_filter in ['NEET', 'JEE']:
+        query = query.filter(Student.exam_type == exam_filter)
+    if search_query:
+        query = query.filter(Student.full_name.ilike(f'%{search_query}%'))
+    if created_by_filter:
+        query = query.filter(Student.created_by == created_by_filter)  # 👤 NEW
+
     students = query.order_by(Student.created_at.desc()).all()
-    return render_template('dashboard.html', students=students, exam_filter=exam_filter, search_query=search_query)
+
+    # Pass everything to the template so the dropdowns stay selected
+    return render_template('dashboard.html',
+                           students=students,
+                           exam_filter=exam_filter,
+                           search_query=search_query,
+                           created_by_filter=created_by_filter)  # 👤 NEW
 
 
 def extract_dynamic_marks(prefix, group):

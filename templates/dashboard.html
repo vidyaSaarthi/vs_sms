@@ -12,9 +12,10 @@
     <div class="card shadow-sm mb-4" style="border: none; border-radius: 12px;">
         <div class="card-body bg-light">
             <form method="GET" action="{{ url_for('dashboard') }}" class="row g-2">
-                <div class="col-md-8">
+                <div class="col-md-5">
                     <input type="text" name="search" class="form-control" placeholder="Search by student name..." value="{{ search_query }}">
                 </div>
+
                 <div class="col-md-3">
                     <select name="exam_type" class="form-select">
                         <option value="">All Exams</option>
@@ -22,8 +23,19 @@
                         <option value="NEET" {% if exam_filter == 'NEET' %}selected{% endif %}>NEET</option>
                     </select>
                 </div>
+
+                <div class="col-md-3">
+                    <select name="created_by" class="form-select">
+                        <option value="">All Counselors</option>
+                        <option value="Krishna" {% if created_by_filter == 'Krishna' %}selected{% endif %}>Krishna</option>
+                        <option value="Yasspreet" {% if created_by_filter == 'Yasspreet' %}selected{% endif %}>Yasspreet</option>
+                        <option value="Shubham" {% if created_by_filter == 'Shubham' %}selected{% endif %}>Shubham</option>
+                        <option value="Vivekam" {% if created_by_filter == 'Vivekam' %}selected{% endif %}>Vivekam</option>
+                    </select>
+                </div>
+
                 <div class="col-md-1">
-                    <button type="submit" class="btn w-100 fw-bold" style="background-color: #ccdfed; color: #333;">Filter</button>
+                    <button type="submit" class="btn w-100 fw-bold shadow-sm" style="background-color: #ccdfed; color: #333;">Filter</button>
                 </div>
             </form>
         </div>
