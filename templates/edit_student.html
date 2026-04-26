@@ -229,7 +229,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3"><label>Roll Number</label><input type="text" name="class_11_roll_no" class="form-control" value="{{ student.class_11_roll_no or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></div>
+                    <div class="col-md-3"><label>Roll Number</label><input type="text" name="class_11_roll_no" class="form-control" value="{{ student.class_11_roll_no or '' }}"></div>
                     <div class="col-md-3"><label>School Name</label><input type="text" name="class_11_school" class="form-control" value="{{ student.class_11_school or '' }}"></div>
                     <div class="col-md-3"><label>State Name</label><input type="text" name="class_11_state" class="form-control" value="{{ student.class_11_state or '' }}"></div>
                 </div>

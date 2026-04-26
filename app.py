@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vidyasaarthi_super_secret_key_2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vidyasaarthi.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['ADMIN_PIN'] = '8888'
+app.config['ADMIN_PIN'] = '2468'
 
 db.init_app(app)
 login_manager = LoginManager()
