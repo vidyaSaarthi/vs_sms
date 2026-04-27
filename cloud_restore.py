@@ -26,7 +26,7 @@ def run_restore():
 
     # 🧠 CRITICAL: The exact order matters for Foreign Keys!
     # Parents must exist before children. Staff > Students > Documents.
-    restore_order = ['staff_new', 'students_new', 'documents_new']
+    restore_order = ['students', 'documents']
 
     print(f"Reading {backup_file}...")
 

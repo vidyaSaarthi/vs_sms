@@ -2,34 +2,302 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VidyaSaarthi SMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidyaSaarthi ERP</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* === VIDYASAARTHI BRAND COLORS === */
+        :root {
+            --brand-red: #cc0000;
+            --brand-white: #ffffff;
+            --brand-yellow: #f6e89e;
+            --brand-blue: #ccdfed;
+
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 80px;
+            --topbar-height: 70px;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* === 1. SIDEBAR CSS === */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--sidebar-width);
+            background: var(--brand-red);
+            color: var(--brand-white);
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar .logo-details {
+            height: var(--topbar-height);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .logo-details i {
+            font-size: 28px;
+            color: var(--brand-yellow);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .sidebar .logo-details .logo_name {
+            font-size: 22px;
+            font-weight: 700;
+            white-space: nowrap;
+            opacity: 1;
+            transition: 0.3s ease;
+        }
+
+        .sidebar.collapsed .logo_name {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar .nav-links {
+            margin-top: 20px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .sidebar .nav-links li {
+            position: relative;
+            margin: 5px 10px;
+        }
+
+        .sidebar .nav-links li a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 12px 10px;
+            border-radius: 8px;
+            color: var(--brand-white);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar .nav-links li a:hover, .sidebar .nav-links li a.active {
+            background: var(--brand-blue);
+            color: var(--brand-red); /* Dark text on light blue hover */
+            font-weight: 600;
+        }
+
+        .sidebar .nav-links li i {
+            min-width: 40px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .sidebar.collapsed .link_name {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* === 2. MAIN CONTENT AREA === */
+        .main-content {
+            position: relative;
+            background: #f4f7f6;
+            min-height: 100vh;
+            left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            left: var(--sidebar-collapsed-width);
+            width: calc(100% - var(--sidebar-collapsed-width));
+        }
+
+        /* === 3. TOP NAVIGATION BAR === */
+        .top-nav {
+            height: var(--topbar-height);
+            background: var(--brand-white);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .top-nav .sidebar-toggle {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--brand-red);
+            transition: 0.3s;
+        }
+
+        .top-nav .sidebar-toggle:hover {
+            color: #990000;
+        }
+
+        .top-nav .search-box {
+            position: relative;
+            width: 400px;
+        }
+
+        .top-nav .search-box input {
+            width: 100%;
+            padding: 10px 20px 10px 45px;
+            border-radius: 30px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            outline: none;
+        }
+
+        .top-nav .search-box input:focus {
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 5px var(--brand-blue);
+        }
+
+        .top-nav .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .top-nav .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* === 4. DYNAMIC PAGE CONTENT === */
+        .page-content {
+            padding: 30px;
+        }
+    </style>
 </head>
 <body>
-    {% if current_user.is_authenticated %}
-    <div class="vidyasaarthi-header d-flex justify-content-between align-items-center no-print">
-        <h2 class="m-0">VidyaSaarthi</h2>
-        <div>
-            <span class="me-3" style="color: var(--brand-accent-yellow);">Welcome, {{ current_user.username }}</span>
-            <a href="{{ url_for('dashboard') }}" class="btn-3d-primary me-2" style="background: var(--brand-accent-blue); color: var(--brand-primary);">Dashboard</a>
-            <a href="{{ url_for('logout') }}" class="btn-3d-primary">Logout</a>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo-details">
+            <i class="fas fa-graduation-cap"></i>
+            <span class="logo_name">VidyaSaarthi</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="/dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="link_name">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/students">
+                    <i class="fas fa-users"></i>
+                    <span class="link_name">Student Pipeline</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admissions">
+                    <i class="fas fa-file-signature"></i>
+                    <span class="link_name">Admissions</span>
+                </a>
+            </li>
+            <li>
+                <a href="/colleges">
+                    <i class="fas fa-university"></i>
+                    <span class="link_name">College Directory</span>
+                </a>
+            </li>
+            <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 15px;">
+            <li>
+                <a href="/settings/master">
+                    <i class="fas fa-cogs"></i>
+                    <span class="link_name">Master Data</span>
+                </a>
+            </li>
+            <li>
+                <a href="/logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="link_name">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+
+        <nav class="top-nav">
+            <div class="sidebar-toggle">
+                <i class="fas fa-bars" id="toggle-btn"></i>
+            </div>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Global Search (Students, Colleges, Forms)...">
+            </div>
+
+            <div class="profile">
+                {% if current_user.is_authenticated %}
+                    <i class="fas fa-user-circle fa-2x" style="color: var(--brand-red);"></i>
+                    <span>Hello, {{ current_user.username | capitalize }}</span>
+                {% endif %}
+            </div>
+        </nav>
+
+        <div class="page-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
         </div>
     </div>
-    {% endif %}
 
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-info shadow-sm no-print">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        {% block content %}{% endblock %}
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // High-Speed Javascript to toggle the sidebar
+        document.addEventListener("DOMContentLoaded", function() {
+            let sidebar = document.querySelector(".sidebar");
+            let toggleBtn = document.querySelector("#toggle-btn");
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            toggleBtn.addEventListener("click", ()=>{
+                sidebar.classList.toggle("collapsed");
+            });
+
+            // Optional: Auto-highlight the active menu item based on current URL
+            let currentPath = window.location.pathname;
+            let navLinks = document.querySelectorAll(".nav-links li a");
+
+            navLinks.forEach(link => {
+                if(link.getAttribute("href") === currentPath) {
+                    link.classList.add("active");
+                }
+            });
+        });
+    </script>
 </body>
 </html>
