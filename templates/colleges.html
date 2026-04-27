@@ -73,38 +73,36 @@
 </div>
 
 <div class="modal fade" id="addCollegeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius: 15px;">
+    <div class="modal-dialog modal-xl"> <div class="modal-content" style="border-radius: 15px;">
             <form action="/colleges/add" method="POST">
                 <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold">Add New College Record</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2 text-warning"></i>Add New College to Directory</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-8">
+                    <div class="row g-3 mb-4">
+                        <div class="col-12"><h6 class="text-danger fw-bold border-bottom pb-2">Institutional Identity</h6></div>
+                        <div class="col-md-6">
                             <label class="form-label fw-bold small">College Name</label>
                             <input type="text" name="name" class="form-control" required placeholder="e.g. Maharaja Agrasen Institute of Technology">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Type</label>
+                            <select name="college_type" class="form-select" required>
+                                <option value="">Select Type...</option>
+                                <option value="Government">Government</option>
+                                <option value="Private">Private</option>
+                                <option value="Deemed">Deemed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label fw-bold small">Est. Year</label>
-                            <input type="number" name="established_year" class="form-control" placeholder="e.g. 1999">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Course / Stream</label>
-                            <input type="text" name="course" class="form-control" placeholder="e.g. B.Tech / MBBS">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Fees Structure</label>
-                            <input type="text" name="fees" class="form-control" placeholder="e.g. 1.2 Lakh per annum">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-bold small">College Information (About)</label>
-                            <textarea name="college_information" class="form-control" rows="3" placeholder="Brief history, campus area, ranking..."></textarea>
+                            <input type="number" name="established_year" class="form-control" placeholder="YYYY">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold small">State</label>
-                            <select name="state_id" class="form-select">
+                            <select name="state_id" class="form-select" required>
                                 <option value="">Select State...</option>
                                 {% for state in states %}
                                 <option value="{{ state.id }}">{{ state.name }}</option>
@@ -112,7 +110,7 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">University Link</label>
+                            <label class="form-label fw-bold small">University Name (Affiliation)</label>
                             <select name="university_id" class="form-select">
                                 <option value="">Select University...</option>
                                 {% for uni in universities %}
@@ -121,9 +119,43 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-12"><h6 class="text-danger fw-bold border-bottom pb-2">Academics & Financials</h6></div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Course(s)</label>
+                            <input type="text" name="course" class="form-control" placeholder="e.g. B.Tech / MBBS / MBA">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Fees Structure</label>
+                            <input type="text" name="fees" class="form-control" placeholder="e.g. 1.2 Lakh per annum / 40k Semester">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">General College Information</label>
+                            <textarea name="college_information" class="form-control" rows="2" placeholder="Brief history, campus highlights, rankings..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12"><h6 class="text-danger fw-bold border-bottom pb-2">Bonds & Joining Requirements</h6></div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Service Bond Details</label>
+                            <textarea name="service_bond" class="form-control" rows="3" placeholder="e.g. 1 year rural service or 5 Lakh penalty"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Discontinue Bond Details</label>
+                            <textarea name="discontinued_bond" class="form-control" rows="3" placeholder="Penalty for leaving the course midway..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Joining Documents (Mandatory List)</label>
+                            <textarea name="joining_documents" class="form-control" rows="3" placeholder="Allotment Letter, Admit Card, Rank Card, 10th/12th Marksheets..."></textarea>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-danger w-100 fw-bold py-2" style="background-color: var(--brand-red);">Commit to Directory</button>
+
+                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-5 fw-bold shadow" style="background-color: var(--brand-red);">Save College to VidyaSaarthi DB</button>
                 </div>
             </form>
         </div>
