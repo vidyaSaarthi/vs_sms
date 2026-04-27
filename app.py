@@ -689,7 +689,6 @@ def college_directory():
 
 
 @app.route('/colleges/add', methods=['POST'])
-# @login_required
 def add_college():
     new_college = College(
         name=request.form.get('name'),
@@ -698,14 +697,15 @@ def add_college():
         state_id=request.form.get('state_id'),
         university_id=request.form.get('university_id'),
         fees=request.form.get('fees'),
+        course=request.form.get('course'), # Added this
         service_bond=request.form.get('service_bond'),
         discontinued_bond=request.form.get('discontinued_bond'),
-        college_information=request.form.get('college_information'),
+        college_information=request.form.get('college_information'), # Added this
         joining_documents=request.form.get('joining_documents')
     )
     db.session.add(new_college)
     db.session.commit()
-    flash(f"College '{new_college.name}' added to directory!", "success")
+    flash(f"College '{new_college.name}' added successfully!", "success")
     return redirect(url_for('college_directory'))
 
 
