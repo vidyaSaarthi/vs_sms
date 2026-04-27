@@ -15,22 +15,42 @@
 
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
-            <form method="GET" action="/students" class="row g-3 align-items-center">
-                <div class="col-md-5">
+            <form method="GET" action="/students" class="row g-2 align-items-center">
+
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0" name="search" placeholder="Search by Name or Mobile Number..." value="{{ search_query }}">
+                        <input type="text" class="form-control border-start-0" name="search" placeholder="Search Name, Mobile, or Aadhaar..." value="{{ search_query }}">
                     </div>
                 </div>
-                <div class="col-md-4">
+
+                <div class="col-md-2">
                     <select class="form-select" name="exam">
-                        <option value="">All Exam Types</option>
+                        <option value="">All Exams</option>
                         <option value="JEE Main" {% if exam_filter == 'JEE Main' %}selected{% endif %}>JEE Main</option>
                         <option value="NEET" {% if exam_filter == 'NEET' %}selected{% endif %}>NEET</option>
                         <option value="CUET" {% if exam_filter == 'CUET' %}selected{% endif %}>CUET</option>
                     </select>
                 </div>
+
                 <div class="col-md-3">
+                    <select class="form-select" name="counsellor">
+                        <option value="">All Counsellors</option>
+                        {% for c in counsellors %}
+                            <option value="{{ c }}" {% if counsellor_filter == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="Fresher" {% if status_filter == 'Fresher' %}selected{% endif %}>Fresher</option>
+                        <option value="Dropper" {% if status_filter == 'Dropper' %}selected{% endif %}>Dropper</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
                     <button type="submit" class="btn w-100 text-dark" style="background-color: var(--brand-yellow); font-weight: 600;">
                         Apply Filters
                     </button>
@@ -42,32 +62,31 @@
     <div class="row">
         {% for student in students %}
         <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; border-left: 5px solid {% if student.is_approved %}#198754{% else %}#ffc107{% endif %} !important;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="badge" style="background-color: var(--brand-blue); color: var(--brand-red);">{{ student.exam_type }}</span>
-                        {% if student.is_approved %}
-                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Approved</span>
-                        {% else %}
-                            <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Pending</span>
-                        {% endif %}
+
+            <div class="card h-100 shadow-sm border-0" style="background-color: var(--brand-blue); border-radius: 12px;">
+                <div class="card-body pb-2">
+
+                    <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
+                        <h4 class="card-title fw-bold mb-0" style="color: var(--brand-red);">{{ student.full_name }}</h4>
+
+                        <span class="badge" style="background-color: var(--brand-red); color: white; font-size: 0.85rem;">{{ student.exam_type }}</span>
+                        <span class="badge bg-white text-dark shadow-sm" style="font-size: 0.85rem;"><i class="fas fa-user-tie me-1" style="color: #4a4a4a;"></i> {{ student.created_by or 'Unknown' }}</span>
+                        <span class="badge" style="background-color: #b5cadd; color: #333; font-size: 0.85rem;">{{ student.academic_status or 'Fresher' }}</span>
                     </div>
-                    
-                    <h5 class="card-title fw-bold mb-1">{{ student.full_name }}</h5>
-                    <p class="text-muted small mb-3"><i class="fas fa-fingerprint me-1"></i> ID: VS-{{ student.id }}</p>
-                    
-                    <div class="mb-3">
-                        <p class="mb-1" style="font-size: 0.9rem;"><i class="fas fa-phone-alt text-muted me-2"></i>{{ student.mobile_number }}</p>
-                        <p class="mb-1" style="font-size: 0.9rem;"><i class="fas fa-map-marker-alt text-muted me-2"></i>{{ student.state_ut or 'N/A' }}</p>
+
+                    <div class="mb-3 text-dark">
+                        <p class="mb-1 fw-bold" style="font-size: 1.05rem;">Aadhaar: <span class="fw-normal">{{ student.aadhaar_no }}</span></p>
+                        <p class="mb-1 fw-bold" style="font-size: 1.05rem;">Mobile: <span class="fw-normal">{{ student.mobile_number }}</span></p>
                     </div>
                 </div>
-                
-                <div class="card-footer bg-white border-top-0 pt-0 pb-3">
-                    <a href="/student/{{ student.id }}" class="btn btn-outline-dark btn-sm w-100">
-                        <i class="fas fa-user-circle me-1"></i> Open Profile
-                    </a>
+
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 d-flex gap-2">
+                    <a href="/student/{{ student.id }}" class="btn btn-sm flex-fill fw-bold text-dark" style="background-color: var(--brand-yellow); border: none;">Profile</a>
+                    <a href="/edit_student/{{ student.id }}" class="btn btn-sm flex-fill fw-bold text-dark" style="background-color: #ffc107; border: none;">Edit</a>
+                    <a href="/print_student/{{ student.id }}" class="btn btn-sm flex-fill fw-bold text-white" style="background-color: var(--brand-red); border: none;">Print</a>
                 </div>
             </div>
+
         </div>
         {% else %}
         <div class="col-12 text-center py-5">

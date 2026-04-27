@@ -4,7 +4,7 @@ import json
 from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Student, Staff, Document
+from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 
@@ -85,37 +85,66 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# @app.route('/')
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     # 1. Grab the filter values from the URL
+#     exam_filter = request.args.get('exam_type', '')
+#     search_query = request.args.get('search', '').strip()
+#     created_by_filter = request.args.get('created_by', '')
+#     status_filter = request.args.get('academic_status', '') # 🎓 NEW
+#
+#     query = Student.query
+#
+#     # 2. Apply filters if they exist
+#     if exam_filter in ['NEET', 'JEE']:
+#         query = query.filter(Student.exam_type == exam_filter)
+#     if search_query:
+#         query = query.filter(Student.full_name.ilike(f'%{search_query}%'))
+#     if created_by_filter:
+#         query = query.filter(Student.created_by == created_by_filter)
+#     if status_filter in ['Fresher', 'Dropper']: # 🎓 NEW
+#         query = query.filter(Student.academic_status == status_filter)
+#
+#     students = query.order_by(Student.created_at.desc()).all()
+#
+#     # 3. Pass everything to the template
+#     return render_template('dashboard.html',
+#                            students=students,
+#                            exam_filter=exam_filter,
+#                            search_query=search_query,
+#                            created_by_filter=created_by_filter,
+#                            status_filter=status_filter) # 🎓 NEW
+from datetime import date
+
+
 @app.route('/')
 @app.route('/dashboard')
-@login_required
+# @login_required  <-- Uncomment if using Flask-Login
 def dashboard():
-    # 1. Grab the filter values from the URL
-    exam_filter = request.args.get('exam_type', '')
-    search_query = request.args.get('search', '').strip()
-    created_by_filter = request.args.get('created_by', '')
-    status_filter = request.args.get('academic_status', '') # 🎓 NEW
+    # 1. Gather Student KPIs
+    total_students = Student.query.count()
+    pending_students = Student.query.filter_by(is_approved=False).count()
 
-    query = Student.query
+    # 2. Gather Admissions KPIs
+    total_forms = Form.query.count()
+    active_counselling = Counselling.query.count()
 
-    # 2. Apply filters if they exist
-    if exam_filter in ['NEET', 'JEE']:
-        query = query.filter(Student.exam_type == exam_filter)
-    if search_query:
-        query = query.filter(Student.full_name.ilike(f'%{search_query}%'))
-    if created_by_filter:
-        query = query.filter(Student.created_by == created_by_filter)
-    if status_filter in ['Fresher', 'Dropper']: # 🎓 NEW
-        query = query.filter(Student.academic_status == status_filter)
+    # 3. Get Upcoming Deadlines (Forms closing in the future)
+    today = date.today()
+    upcoming_forms = Form.query.filter(Form.end_date >= today).order_by(Form.end_date.asc()).limit(5).all()
 
-    students = query.order_by(Student.created_at.desc()).all()
+    # 4. Get Recently Added Students (For quick access)
+    recent_students = Student.query.order_by(Student.created_at.desc()).limit(5).all()
 
-    # 3. Pass everything to the template
     return render_template('dashboard.html',
-                           students=students,
-                           exam_filter=exam_filter,
-                           search_query=search_query,
-                           created_by_filter=created_by_filter,
-                           status_filter=status_filter) # 🎓 NEW
+                           total_students=total_students,
+                           pending_students=pending_students,
+                           total_forms=total_forms,
+                           active_counselling=active_counselling,
+                           upcoming_forms=upcoming_forms,
+                           recent_students=recent_students)
 
 
 def extract_dynamic_marks(prefix, group):
@@ -548,35 +577,54 @@ def init_db():
 
 from flask import request, render_template
 
+from flask import request, render_template
+
 
 @app.route('/students')
-# @login_required  <-- Uncomment this if you are using Flask-Login to protect the route!
+# @login_required  <-- Uncomment if you use login requirements
 def student_pipeline():
-    # 1. Grab search filters from the top search bar (if any)
+    # 1. Grab all 4 search filters
     search_query = request.args.get('search', '')
     exam_filter = request.args.get('exam', '')
+    counsellor_filter = request.args.get('counsellor', '')
+    status_filter = request.args.get('status', '')
 
-    # 2. Build the database query
+    # 2. Build the query dynamically
     query = Student.query
 
-    # Apply text search across Name and Mobile Number
     if search_query:
         query = query.filter(
             db.or_(
                 Student.full_name.ilike(f'%{search_query}%'),
-                Student.mobile_number.ilike(f'%{search_query}%')
+                Student.mobile_number.ilike(f'%{search_query}%'),
+                Student.aadhaar_no.ilike(f'%{search_query}%')  # Added Aadhaar search for you!
             )
         )
 
-    # Apply Exam Type dropdown filter
     if exam_filter:
         query = query.filter(Student.exam_type == exam_filter)
 
-    # 3. Fetch the results, newest students first
+    if counsellor_filter:
+        query = query.filter(Student.created_by == counsellor_filter)
+
+    if status_filter:
+        query = query.filter(Student.academic_status == status_filter)
+
+    # 3. Get a list of unique counselors who have actually added students
+    # This prevents the dropdown from being hardcoded
+    counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
+    counsellor_list = [c[0] for c in counsellors]
+
+    # 4. Fetch the results
     students = query.order_by(Student.created_at.desc()).all()
 
-    # 4. Send the data to your beautiful new front-end
-    return render_template('students.html', students=students, search_query=search_query, exam_filter=exam_filter)
+    return render_template('students.html',
+                           students=students,
+                           search_query=search_query,
+                           exam_filter=exam_filter,
+                           counsellor_filter=counsellor_filter,
+                           status_filter=status_filter,
+                           counsellors=counsellor_list)
 
 
 if __name__ == '__main__':

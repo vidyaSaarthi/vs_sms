@@ -1,109 +1,218 @@
 {% extends "layout.html" %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold" style="color: #cc0000;">Student Dashboard</h2>
-        <a href="{{ url_for('add_student') }}" class="btn fw-bold shadow-sm" style="background-color: #f6e89e; color: #333;">
-            + Add New Student
-        </a>
+    <div class="mb-4">
+        <h2 class="fw-bold" style="color: var(--brand-red);">Welcome to Mission Control</h2>
+        <p class="text-muted">Here is what is happening across VidyaSaarthi today.</p>
     </div>
 
-    <div class="card shadow-sm mb-4" style="border: none; border-radius: 12px;">
-        <div class="card-body bg-light">
-            <form method="GET" action="{{ url_for('dashboard') }}" class="row g-2">
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Search by student name..." value="{{ search_query }}">
-                </div>
-
-                <div class="col-md-2">
-                    <select name="exam_type" class="form-select">
-                        <option value="">All Exams</option>
-                        <option value="JEE" {% if exam_filter == 'JEE' %}selected{% endif %}>JEE</option>
-                        <option value="NEET" {% if exam_filter == 'NEET' %}selected{% endif %}>NEET</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <select name="created_by" class="form-select">
-                        <option value="">All Counselors</option>
-                        <option value="Krishna" {% if created_by_filter == 'Krishna' %}selected{% endif %}>Krishna</option>
-                        <option value="Yashpreet" {% if created_by_filter == 'Yashpreet' %}selected{% endif %}>Yashpreet</option>
-                        <option value="Shubham" {% if created_by_filter == 'Shubham' %}selected{% endif %}>Shubham</option>
-                        <option value="Vivekam" {% if created_by_filter == 'Vivekam' %}selected{% endif %}>Vivekam</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <select name="academic_status" class="form-select">
-                        <option value="">All Status</option>
-                        <option value="Fresher" {% if status_filter == 'Fresher' %}selected{% endif %}>Fresher</option>
-                        <option value="Dropper" {% if status_filter == 'Dropper' %}selected{% endif %}>Dropper</option>
-                    </select>
-                </div>
-
-                <div class="col-md-1">
-                    <button type="submit" class="btn w-100 fw-bold shadow-sm" style="background-color: #ccdfed; color: #333;">Filter</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="row">
-        {% for student in students %}
-
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100" style="background-color: #ccdfed; border: none; border-radius: 12px; overflow: hidden;">
-                <div class="card-body pb-3 pt-3 d-flex flex-column">
-
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h5 class="card-title fw-bold mb-0" style="color: #cc0000; font-size: 1.3rem;">
-                            {{ student.full_name }}
-                        </h5>
-                        <div class="text-end" style="white-space: nowrap;">
-                            <span class="badge shadow-sm" style="background-color: #cc0000; color: #ffffff; font-size: 0.85em;">
-                                {{ student.exam_type }}
-                            </span>
-                            <span class="badge bg-white text-dark shadow-sm ms-1 border" style="font-size: 0.85em;">
-                                👤 {{ student.created_by or 'Unknown' }}
-                            </span>
-
-                            <span class="badge shadow-sm ms-1 border" style="background-color: {% if student.academic_status == 'Dropper' %}#f6e89e{% else %}#ccdfed{% endif %}; color: #333; font-size: 0.85em;">
-                                {{ student.academic_status or 'Fresher' }}
-                            </span>
-
-                        </div>
-                    </div>
-
-                    <p class="mb-1 text-dark" style="font-size: 0.95rem;"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</p>
-                    <p class="mb-3 text-dark" style="font-size: 0.95rem;"><strong>Mobile:</strong> {{ student.mobile_number }}</p>
-
-                    <div class="mt-auto">
-                        <div class="d-flex gap-2">
-                            <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-sm w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #333; border: none;">
-                                Profile
-                            </a>
-                            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-warning btn-sm w-100 fw-bold shadow-sm" style="border: none;">
-                                Edit
-                            </a>
-                            <button class="btn btn-sm w-100 fw-bold shadow-sm" style="background-color: #cc0000; color: #ffffff; border: none;">
-                                Print
-                            </button>
-                        </div>
-                    </div>
-
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid var(--brand-blue);">
+                <div class="card-body">
+                    <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--brand-blue);">Total Pipeline</div>
+                    <div class="h2 mb-0 fw-bold text-dark">{{ total_students }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Students</span></div>
                 </div>
             </div>
         </div>
 
-        {% else %}
-        <div class="col-12 text-center mt-5 mb-5">
-            <h4 class="text-muted fw-bold">No students found</h4>
-            <p class="text-muted">Click "Add New Student" to get started.</p>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid #ffc107;">
+                <div class="card-body">
+                    <div class="text-xs fw-bold text-warning text-uppercase mb-1">Pending Approvals</div>
+                    <div class="h2 mb-0 fw-bold text-dark">{{ pending_students }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Requires Action</span></div>
+                </div>
+            </div>
         </div>
 
-        {% endfor %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid var(--brand-red);">
+                <div class="card-body">
+                    <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--brand-red);">Tracked Forms</div>
+                    <div class="h2 mb-0 fw-bold text-dark">{{ total_forms }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Exams/Counselling</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid var(--brand-yellow);">
+                <div class="card-body">
+                    <div class="text-xs fw-bold text-uppercase mb-1" style="color: #b3a000;">Active Counselling</div>
+                    <div class="h2 mb-0 fw-bold text-dark">{{ active_counselling }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Processes</span></div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <div class="row">
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-red);">
+                    <i class="fas fa-calendar-alt me-2"></i> Upcoming Form Deadlines
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for form in upcoming_forms %}
+                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ form.name }}</h6>
+                                <small class="text-muted">Closes: {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'TBD' }}</small>
+                            </div>
+                            <span class="badge" style="background-color: var(--brand-blue); color: var(--brand-red);">{{ form.form_type }}</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item px-4 py-4 text-center text-muted">
+                            <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                            <p class="mb-0">No urgent deadlines approaching!</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold py-3" style="color: #333;">
+                    <i class="fas fa-history me-2"></i> Recently Added Students
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for student in recent_students %}
+                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ student.full_name }}</h6>
+                                <small class="text-muted">{{ student.exam_type }} | {{ student.mobile_number }}</small>
+                            </div>
+                            <a href="/student/{{ student.id }}" class="btn btn-sm btn-outline-dark">View</a>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item px-4 py-4 text-center text-muted">
+                            <p class="mb-0">No students added yet.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-white text-center py-2">
+                    <a href="/students" class="text-decoration-none" style="color: var(--brand-red); font-size: 0.9rem fw-bold;">View Entire Pipeline &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 {% endblock %}
+
+
+<!--{% extends "layout.html" %}-->
+<!--{% block content %}-->
+<!--<div class="container mt-4">-->
+
+<!--    <div class="d-flex justify-content-between align-items-center mb-4">-->
+<!--        <h2 class="fw-bold" style="color: #cc0000;">Student Dashboard</h2>-->
+<!--        <a href="{{ url_for('add_student') }}" class="btn fw-bold shadow-sm" style="background-color: #f6e89e; color: #333;">-->
+<!--            + Add New Student-->
+<!--        </a>-->
+<!--    </div>-->
+
+<!--    <div class="card shadow-sm mb-4" style="border: none; border-radius: 12px;">-->
+<!--        <div class="card-body bg-light">-->
+<!--            <form method="GET" action="{{ url_for('dashboard') }}" class="row g-2">-->
+<!--                <div class="col-md-4">-->
+<!--                    <input type="text" name="search" class="form-control" placeholder="Search by student name..." value="{{ search_query }}">-->
+<!--                </div>-->
+
+<!--                <div class="col-md-2">-->
+<!--                    <select name="exam_type" class="form-select">-->
+<!--                        <option value="">All Exams</option>-->
+<!--                        <option value="JEE" {% if exam_filter == 'JEE' %}selected{% endif %}>JEE</option>-->
+<!--                        <option value="NEET" {% if exam_filter == 'NEET' %}selected{% endif %}>NEET</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+
+<!--                <div class="col-md-3">-->
+<!--                    <select name="created_by" class="form-select">-->
+<!--                        <option value="">All Counselors</option>-->
+<!--                        <option value="Krishna" {% if created_by_filter == 'Krishna' %}selected{% endif %}>Krishna</option>-->
+<!--                        <option value="Yashpreet" {% if created_by_filter == 'Yashpreet' %}selected{% endif %}>Yashpreet</option>-->
+<!--                        <option value="Shubham" {% if created_by_filter == 'Shubham' %}selected{% endif %}>Shubham</option>-->
+<!--                        <option value="Vivekam" {% if created_by_filter == 'Vivekam' %}selected{% endif %}>Vivekam</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+
+<!--                <div class="col-md-2">-->
+<!--                    <select name="academic_status" class="form-select">-->
+<!--                        <option value="">All Status</option>-->
+<!--                        <option value="Fresher" {% if status_filter == 'Fresher' %}selected{% endif %}>Fresher</option>-->
+<!--                        <option value="Dropper" {% if status_filter == 'Dropper' %}selected{% endif %}>Dropper</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+
+<!--                <div class="col-md-1">-->
+<!--                    <button type="submit" class="btn w-100 fw-bold shadow-sm" style="background-color: #ccdfed; color: #333;">Filter</button>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div class="row">-->
+<!--        {% for student in students %}-->
+
+<!--        <div class="col-md-4 mb-4">-->
+<!--            <div class="card shadow-sm h-100" style="background-color: #ccdfed; border: none; border-radius: 12px; overflow: hidden;">-->
+<!--                <div class="card-body pb-3 pt-3 d-flex flex-column">-->
+
+<!--                    <div class="d-flex justify-content-between align-items-start mb-3">-->
+<!--                        <h5 class="card-title fw-bold mb-0" style="color: #cc0000; font-size: 1.3rem;">-->
+<!--                            {{ student.full_name }}-->
+<!--                        </h5>-->
+<!--                        <div class="text-end" style="white-space: nowrap;">-->
+<!--                            <span class="badge shadow-sm" style="background-color: #cc0000; color: #ffffff; font-size: 0.85em;">-->
+<!--                                {{ student.exam_type }}-->
+<!--                            </span>-->
+<!--                            <span class="badge bg-white text-dark shadow-sm ms-1 border" style="font-size: 0.85em;">-->
+<!--                                👤 {{ student.created_by or 'Unknown' }}-->
+<!--                            </span>-->
+
+<!--                            <span class="badge shadow-sm ms-1 border" style="background-color: {% if student.academic_status == 'Dropper' %}#f6e89e{% else %}#ccdfed{% endif %}; color: #333; font-size: 0.85em;">-->
+<!--                                {{ student.academic_status or 'Fresher' }}-->
+<!--                            </span>-->
+
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    <p class="mb-1 text-dark" style="font-size: 0.95rem;"><strong>Aadhaar:</strong> {{ student.aadhaar_no }}</p>-->
+<!--                    <p class="mb-3 text-dark" style="font-size: 0.95rem;"><strong>Mobile:</strong> {{ student.mobile_number }}</p>-->
+
+<!--                    <div class="mt-auto">-->
+<!--                        <div class="d-flex gap-2">-->
+<!--                            <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-sm w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #333; border: none;">-->
+<!--                                Profile-->
+<!--                            </a>-->
+<!--                            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-warning btn-sm w-100 fw-bold shadow-sm" style="border: none;">-->
+<!--                                Edit-->
+<!--                            </a>-->
+<!--                            <button class="btn btn-sm w-100 fw-bold shadow-sm" style="background-color: #cc0000; color: #ffffff; border: none;">-->
+<!--                                Print-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        {% else %}-->
+<!--        <div class="col-12 text-center mt-5 mb-5">-->
+<!--            <h4 class="text-muted fw-bold">No students found</h4>-->
+<!--            <p class="text-muted">Click "Add New Student" to get started.</p>-->
+<!--        </div>-->
+
+<!--        {% endfor %}-->
+<!--    </div>-->
+
+<!--</div>-->
+<!--{% endblock %}-->
