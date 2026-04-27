@@ -666,6 +666,7 @@ def college_directory():
     # 1. Get search and filter parameters
     search_query = request.args.get('search', '')
     state_filter = request.args.get('state_id', '')
+    course_filter = request.args.get('course_id', '')  # <--- Make sure this is 'course_id'
     type_filter = request.args.get('type', '')
 
     # 2. Build the query
@@ -674,44 +675,55 @@ def college_directory():
         query = query.filter(College.name.ilike(f'%{search_query}%'))
     if state_filter:
         query = query.filter(College.state_id == state_filter)
+    if course_filter: # ADD THIS BLOCK to make the course search work
+        query = query.filter(College.course_id == course_filter)
     if type_filter:
         query = query.filter(College.college_type == type_filter)
 
     colleges = query.order_by(College.name.asc()).all()
 
-    # 3. Master data for filters and the "Add" modal
+    # 3. Master data
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
-    courses = Course.query.order_by(Course.name.asc()).all()  # Fetch all courses
+    courses = Course.query.order_by(Course.name.asc()).all()
 
     return render_template('colleges.html',
                            colleges=colleges,
                            states=states,
                            universities=universities,
+                           courses=courses,
                            search_query=search_query,
                            state_filter=state_filter,
-                           type_filter=type_filter,
-                           courses=courses)
-
+                           course_filter=course_filter, # <--- Pass this back to the HTML
+                           type_filter=type_filter)
 
 @app.route('/colleges/add', methods=['POST'])
+@login_required  # Recommended to keep this secure
 def add_college():
-    new_college = College(
-        name=request.form.get('name'),
-        college_type=request.form.get('college_type'),
-        established_year=request.form.get('established_year'),
-        state_id=request.form.get('state_id'),
-        university_id=request.form.get('university_id'),
-        fees=request.form.get('fees'),
-        course=request.form.get('course'), # Added this
-        service_bond=request.form.get('service_bond'),
-        discontinued_bond=request.form.get('discontinued_bond'),
-        college_information=request.form.get('college_information'), # Added this
-        joining_documents=request.form.get('joining_documents')
-    )
-    db.session.add(new_college)
-    db.session.commit()
-    flash(f"College '{new_college.name}' added successfully!", "success")
+    try:
+        # Get the ID from the dropdown, not text
+        course_id_val = request.form.get('course_id')
+
+        new_college = College(
+            name=request.form.get('name'),
+            college_type=request.form.get('college_type'),
+            established_year=request.form.get('established_year'),
+            state_id=request.form.get('state_id'),
+            university_id=request.form.get('university_id'),
+            course_id=int(course_id_val) if course_id_val else None,  # SAVING THE ID
+            fees=request.form.get('fees'),
+            service_bond=request.form.get('service_bond'),
+            discontinued_bond=request.form.get('discontinued_bond'),
+            college_information=request.form.get('college_information'),
+            joining_documents=request.form.get('joining_documents')
+        )
+        db.session.add(new_college)
+        db.session.commit()
+        flash(f"College '{new_college.name}' added successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error saving college: {str(e)}", "error")
+
     return redirect(url_for('college_directory'))
 
 

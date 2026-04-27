@@ -239,27 +239,45 @@ class RoundSchedule(db.Model):
 
 
 # ==========================================
-# 5. COLLEGES DIRECTORY
+# 5. COURSE & COLLEGES DIRECTORY
 # ==========================================
+
+class Course(db.Model):
+    __tablename__ = 'courses'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+
+    # Links back to colleges
+    colleges = db.relationship('College', backref='course_ref', lazy=True)
+
+    def __repr__(self):
+        return f'<Course {self.name}>'
+
 
 class College(db.Model):
     __tablename__ = 'colleges'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
-    college_type = db.Column(db.String(50), nullable=False)  # 'Government', 'Private', 'Deemed', 'Other'
+    college_type = db.Column(db.String(50), nullable=False)
     established_year = db.Column(db.Integer, nullable=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
 
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
     state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
     university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=True)
 
-    fees = db.Column(db.String(200), nullable=True)  # String allows "1.5L/Year"
+    fees = db.Column(db.String(200), nullable=True)
     service_bond = db.Column(db.Text, nullable=True)
     discontinued_bond = db.Column(db.Text, nullable=True)
     college_information = db.Column(db.Text, nullable=True)
-    courses_offered = db.Column(db.Text, nullable=True)
     joining_documents = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships - renamed backrefs to be specific and avoid conflicts
+    state = db.relationship('State', backref='state_colleges', lazy=True)
+    university = db.relationship('University', backref='uni_colleges', lazy=True)
+
+    def __repr__(self):
+        return f'<College {self.name}>'
 
 
 # ==========================================
@@ -274,11 +292,13 @@ class StudentCounsellingRegistration(db.Model):
 
     application_number = db.Column(db.String(100), nullable=True)
     registration_date = db.Column(db.Date, nullable=True)
-    fee_status = db.Column(db.String(50), default='Pending')  # 'Pending', 'Paid'
+    fee_status = db.Column(db.String(50), default='Pending')
     documents_verified = db.Column(db.Boolean, default=False)
 
-    # Allows us to do `registration.counselling.name` easily in the UI
     counselling = db.relationship('Counselling', backref='student_registrations', lazy=True)
+
+    def __repr__(self):
+        return f'<Reg {self.application_number}>'
 
 
 class StudentRoundResult(db.Model):
@@ -292,19 +312,11 @@ class StudentRoundResult(db.Model):
     allotted_branch = db.Column(db.String(150), nullable=True)
     allotted_category = db.Column(db.String(100), nullable=True)
 
-    post_allotment_action = db.Column(db.String(50), nullable=True)  # 'Freeze', 'Float', 'Slide', 'Surrender', etc.
+    post_allotment_action = db.Column(db.String(50), nullable=True)
     seat_acceptance_fee_paid = db.Column(db.Boolean, default=False)
     reporting_status = db.Column(db.String(100), default='Not Reported')
 
-    # Allows us to do `result.round.round_number` easily in the UI
     round = db.relationship('CounsellingRound', backref='student_results', lazy=True)
 
-class Course(db.Model):
-    __tablename__ = 'courses'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    # Relationship to link back to colleges
-    colleges = db.relationship('College', backref='course_ref', lazy=True)
-
     def __repr__(self):
-        return f'<Course {self.name}>'
+        return f'<Result {self.allotted_institute}>'  # Corrected this!
