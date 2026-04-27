@@ -59,6 +59,11 @@
                             <span class="badge bg-white text-dark shadow-sm ms-1 border" style="font-size: 0.85em;">
                                 👤 {{ student.created_by or 'Unknown' }}
                             </span>
+
+                            <span class="badge shadow-sm ms-1 border" style="background-color: {% if student.academic_status == 'Dropper' %}#f6e89e{% else %}#ccdfed{% endif %}; color: #333; font-size: 0.85em;">
+                                {{ student.academic_status or 'Fresher' }}
+                            </span>
+
                         </div>
                     </div>
 

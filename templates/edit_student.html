@@ -29,6 +29,15 @@
                             <option value="JEE" {% if student.exam_type == 'JEE' %}selected{% endif %}>JEE (Engineering)</option>
                         </select>
                     </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Academic Status *</label>
+                        <select name="academic_status" class="form-select" required>
+                            <option value="Fresher" {% if student and student.academic_status == 'Fresher' %}selected{% endif %}>Fresher</option>
+                            <option value="Dropper" {% if student and student.academic_status == 'Dropper' %}selected{% endif %}>Dropper</option>
+                        </select>
+                    </div>
+
                     <div class="col-md-8">
                         <label>Forms Filled</label>
                         <div id="formsCheckboxes" class="border p-2 rounded bg-light" style="min-height: 38px;">
