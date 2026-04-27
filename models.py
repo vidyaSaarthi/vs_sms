@@ -106,7 +106,7 @@ class Student(db.Model):
 
     documents = db.relationship('Document', backref='student', lazy=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    created_by = db.Column(db.String(50)),
+    created_by = db.Column(db.String(50))
     academic_status = db.Column(db.String(50), default='Fresher')  # Will store 'Fresher' or 'Dropper'
 
 
