@@ -91,6 +91,7 @@ from flask import request, redirect, url_for, flash
 
 # 1. Route to display the Master Data page
 @app.route('/settings/master')
+@login_required
 def master_data():
     exams = Exam.query.order_by(Exam.name.asc()).all()
     states = State.query.order_by(State.name.asc()).all()
@@ -146,7 +147,7 @@ from datetime import datetime
 
 # 1. Main Admissions Hub Route
 @app.route('/admissions')
-# @login_required
+@login_required
 def admissions_hub():
     # Fetch data for the display tables
     forms = Form.query.order_by(Form.end_date.asc()).all()
@@ -216,7 +217,7 @@ def add_form():
 
 @app.route('/')
 @app.route('/dashboard')
-# @login_required  <-- Uncomment if using Flask-Login
+@login_required
 def dashboard():
     # 1. Gather Student KPIs
     total_students = Student.query.count()
@@ -661,7 +662,7 @@ def approve_student(id):
 
 
 @app.route('/colleges')
-# @login_required
+@login_required
 def college_directory():
     # 1. Get search and filter parameters
     search_query = request.args.get('search', '')
@@ -783,7 +784,7 @@ from flask import request, render_template
 
 
 @app.route('/students')
-# @login_required  <-- Uncomment if you use login requirements
+@login_required
 def student_pipeline():
     # 1. Grab all 4 search filters
     search_query = request.args.get('search', '')
