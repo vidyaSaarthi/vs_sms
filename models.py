@@ -248,6 +248,7 @@ class College(db.Model):
     name = db.Column(db.String(250), nullable=False)
     college_type = db.Column(db.String(50), nullable=False)  # 'Government', 'Private', 'Deemed', 'Other'
     established_year = db.Column(db.Integer, nullable=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
 
     state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
     university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=True)
