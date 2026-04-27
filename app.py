@@ -153,13 +153,16 @@ def admissions_hub():
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
 
+    # Calculate today's date as a string to pass to the frontend
+    today_str = date.today().strftime('%Y-%m-%d')
+
     return render_template('admissions.html',
                            forms=forms,
                            counsellings=counsellings,
                            exams=exams,
                            states=states,
-                           universities=universities)
-
+                           universities=universities,
+                           today=today_str)  # <-- The missing piece!
 
 # 2. Add New Counselling Process
 @app.route('/admissions/add_counselling', methods=['POST'])
