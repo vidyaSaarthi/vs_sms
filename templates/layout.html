@@ -94,7 +94,7 @@
 
         /* Hover & Active States */
         .nav-link:hover, .nav-link.active {
-            background-color: #fff0f0; /* Very light brand red */
+            background-color: #fff0f0;
             color: var(--brand-red);
             transform: translateX(5px);
         }
@@ -164,7 +164,6 @@
         {% endif %}
     {% endwith %}
 
-
     {% if current_user.is_authenticated %}
 
         <div class="sidebar">
@@ -233,19 +232,18 @@
             </div>
 
             <div class="content-area">
-                {% block content %}{% endblock %}
-            </div>
-
-        </div>
-
     {% else %}
-
         <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--bg-color);">
             <div class="container">
-                {% block content %}{% endblock %} </div>
-        </div>
-
     {% endif %}
+
+
+                {% block content %}{% endblock %}
+
+
+    {% if current_user.is_authenticated %}
+            </div> </div> {% else %}
+            </div> </div> {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
