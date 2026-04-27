@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold" style="color: var(--brand-red);">College Directory</h2>
+            <p class="text-muted">Search and manage institutional data, fees, and bonds.</p>
+        </div>
+        <button class="btn btn-danger px-4 fw-bold" style="background-color: var(--brand-red); border: none;" data-bs-toggle="modal" data-bs-target="#addCollegeModal">
+            <i class="fas fa-plus me-2"></i>Add New College
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body">
+            <form method="GET" action="/colleges" class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" name="search" class="form-control" placeholder="Search by college name..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="state_id" class="form-select">
+                        <option value="">All States</option>
+                        {% for state in states %}
+                        <option value="{{ state.id }}" {% if state_filter == state.id|string %}selected{% endif %}>{{ state.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="Government" {% if type_filter == 'Government' %}selected{% endif %}>Government</option>
+                        <option value="Private" {% if type_filter == 'Private' %}selected{% endif %}>Private</option>
+                        <option value="Deemed" {% if type_filter == 'Deemed' %}selected{% endif %}>Deemed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn w-100 fw-bold" style="background-color: var(--brand-yellow);">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for college in colleges %}
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                <div class="card-header border-0 py-3 d-flex justify-content-between align-items-center" style="background-color: var(--brand-blue); border-radius: 15px 15px 0 0;">
+                    <h6 class="fw-bold mb-0 text-truncate" style="color: var(--brand-red); max-width: 70%;">{{ college.name }}</h6>
+                    <span class="badge bg-white text-dark border">{{ college.college_type }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2 small">
+                        <i class="fas fa-map-marker-alt text-muted me-2"></i><strong>State:</strong> {{ college.state.name if college.state else 'N/A' }}
+                    </div>
+                    <div class="mb-2 small">
+                        <i class="fas fa-money-bill-wave text-muted me-2"></i><strong>Fees:</strong> {{ college.fees or 'Contact Office' }}
+                    </div>
+                    <div class="mb-3 p-2 bg-light rounded" style="font-size: 0.85rem;">
+                        <strong>Service Bond:</strong><br>
+                        <span class="text-muted">{{ college.service_bond[:100] }}{% if college.service_bond|length > 100 %}...{% endif %}</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 pb-3">
+                    <button class="btn btn-outline-danger btn-sm w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#viewCollege{{ college.id }}">View Full Details</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="viewCollege{{ college.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: var(--brand-red); color: white;">
+                        <h5 class="modal-title fw-bold">{{ college.name }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Established:</strong> {{ college.established_year or 'N/A' }}</p>
+                                <p><strong>University:</strong> {{ college.university.name if college.university else 'N/A' }}</p>
+                                <p><strong>Fees:</strong> {{ college.fees }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Service Bond:</strong><br>{{ college.service_bond or 'None' }}</p>
+                                <p><strong>Discontinued Bond:</strong><br>{{ college.discontinued_bond or 'None' }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6><strong>Joining Documents:</strong></h6>
+                        <p class="small">{{ college.joining_documents or 'Contact college for list.' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No colleges found matching your search.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="addCollegeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="/colleges/add" method="POST">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold">Add New College to Directory</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">College Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Type</label>
+                            <select name="college_type" class="form-select" required>
+                                <option value="Government">Government</option>
+                                <option value="Private">Private</option>
+                                <option value="Deemed">Deemed</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">State</label>
+                            <select name="state_id" class="form-select">
+                                <option value="">Select State...</option>
+                                {% for state in states %}
+                                <option value="{{ state.id }}">{{ state.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">University</label>
+                            <select name="university_id" class="form-select">
+                                <option value="">Select University...</option>
+                                {% for uni in universities %}
+                                <option value="{{ uni.id }}">{{ uni.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Fees</label>
+                            <input type="text" name="fees" class="form-control" placeholder="e.g. 15L Total">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Bond</label>
+                            <textarea name="service_bond" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Discontinued Bond</label>
+                            <textarea name="discontinued_bond" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Joining Documents</label>
+                            <textarea name="joining_documents" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold">Save College to Directory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

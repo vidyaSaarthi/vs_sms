@@ -656,6 +656,59 @@ def approve_student(id):
     return redirect(url_for('view_student', id=student.id))
 
 
+@app.route('/colleges')
+# @login_required
+def college_directory():
+    # 1. Get search and filter parameters
+    search_query = request.args.get('search', '')
+    state_filter = request.args.get('state_id', '')
+    type_filter = request.args.get('type', '')
+
+    # 2. Build the query
+    query = College.query
+    if search_query:
+        query = query.filter(College.name.ilike(f'%{search_query}%'))
+    if state_filter:
+        query = query.filter(College.state_id == state_filter)
+    if type_filter:
+        query = query.filter(College.college_type == type_filter)
+
+    colleges = query.order_by(College.name.asc()).all()
+
+    # 3. Master data for filters and the "Add" modal
+    states = State.query.order_by(State.name.asc()).all()
+    universities = University.query.order_by(University.name.asc()).all()
+
+    return render_template('colleges.html',
+                           colleges=colleges,
+                           states=states,
+                           universities=universities,
+                           search_query=search_query,
+                           state_filter=state_filter,
+                           type_filter=type_filter)
+
+
+@app.route('/colleges/add', methods=['POST'])
+# @login_required
+def add_college():
+    new_college = College(
+        name=request.form.get('name'),
+        college_type=request.form.get('college_type'),
+        established_year=request.form.get('established_year'),
+        state_id=request.form.get('state_id'),
+        university_id=request.form.get('university_id'),
+        fees=request.form.get('fees'),
+        service_bond=request.form.get('service_bond'),
+        discontinued_bond=request.form.get('discontinued_bond'),
+        college_information=request.form.get('college_information'),
+        joining_documents=request.form.get('joining_documents')
+    )
+    db.session.add(new_college)
+    db.session.commit()
+    flash(f"College '{new_college.name}' added to directory!", "success")
+    return redirect(url_for('college_directory'))
+
+
 @app.route('/student/<int:id>/delete', methods=['POST'])
 @login_required
 def delete_student(id):
