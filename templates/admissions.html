@@ -40,7 +40,7 @@
                                     <th class="text-dark">Type</th>
                                     <th class="text-dark">Linked To</th>
                                     <th class="text-dark">Deadline</th>
-                                    <th class="text-dark text-center">Action</th>
+                                    <th class="text-dark text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,9 +61,16 @@
                                         {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}
                                     </td>
                                     <td class="text-center">
-                                        {% if form.document_link %}
-                                            <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-link"></i></a>
-                                        {% endif %}
+                                        <div class="d-flex justify-content-center gap-2">
+                                            {% if form.document_link %}
+                                                <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Open Link"><i class="fas fa-link"></i></a>
+                                            {% endif %}
+                                            <form action="/admissions/delete/form/{{ form.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this form tracking deadline?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -92,7 +99,7 @@
                                     <th class="ps-4 text-dark">Counselling Name</th>
                                     <th class="text-dark">Type</th>
                                     <th class="text-dark">Date Created</th>
-                                    <th class="text-dark text-center">Manage Rounds</th>
+                                    <th class="text-dark text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,7 +109,14 @@
                                     <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
                                     <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '-' }}</td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-secondary">Open</button>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button class="btn btn-sm btn-outline-secondary">Open</button>
+                                            <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -199,7 +213,6 @@
 </div>
 
 <script>
-    // Master Data stored safely from Python for JS to use
     const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
     const unisData = [ {% for u in universities %}{ id: {{ u.id }}, name: "{{ u.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
     const examsData = [ {% for e in exams %}{ id: {{ e.id }}, name: "{{ e.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];

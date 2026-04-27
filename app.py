@@ -829,6 +829,65 @@ def student_pipeline():
                            counsellors=counsellor_list)
 
 
+# ==========================================
+# UNIVERSAL MASTER DATA DELETE
+# ==========================================
+@app.route('/settings/master/delete/<data_type>/<int:item_id>', methods=['POST'])
+# @login_required
+def delete_master_data(data_type, item_id):
+    # Map the string from the URL to the actual Python Class
+    model_map = {
+        'exam': Exam,
+        'state': State,
+        'university': University,
+        'course': Course
+    }
+
+    model = model_map.get(data_type)
+    if not model:
+        return redirect(url_for('master_data'))
+
+    item = model.query.get_or_404(item_id)
+    item_name = item.name
+
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        flash(f"Deleted '{item_name}' successfully!", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash(f"⚠️ Cannot delete '{item_name}' because it is actively being used by a College or Student record.",
+              "error")
+
+    return redirect(url_for('master_data'))
+
+
+# ==========================================
+# ADMISSIONS DATA DELETE
+# ==========================================
+@app.route('/admissions/delete/counselling/<int:item_id>', methods=['POST'])
+# @login_required
+def delete_counselling_record(item_id):
+    item = Counselling.query.get_or_404(item_id)
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        flash("Counselling process deleted.", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash("⚠️ Cannot delete this counselling process as students are registered to it.", "error")
+    return redirect(url_for('admissions_hub'))
+
+
+@app.route('/admissions/delete/form/<int:item_id>', methods=['POST'])
+# @login_required
+def delete_form_record(item_id):
+    item = Form.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash("Form deadline removed.", "success")
+    return redirect(url_for('admissions_hub'))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)

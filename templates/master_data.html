@@ -28,7 +28,10 @@
                     <ul class="list-group list-group-flush">
                         {% for exam in exams %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            {{ exam.name }}
+                            <span>{{ exam.name }}</span>
+                            <form action="/settings/master/delete/exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam from the master list?');">
+                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                            </form>
                         </li>
                         {% else %}
                         <li class="list-group-item text-muted text-center py-3">No exams added yet.</li>
@@ -43,7 +46,7 @@
                 <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-blue);">
                     <i class="fas fa-map-marker-alt me-2" style="color: #4a6b8c;"></i> States (State Counselling)
                 </div>
-                
+
                 <div class="card-body bg-light border-bottom p-3">
                     <form action="/settings/master/add" method="POST" class="d-flex gap-2">
                         <input type="hidden" name="data_type" value="state">
@@ -56,7 +59,10 @@
                     <ul class="list-group list-group-flush">
                         {% for state in states %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            {{ state.name }}
+                            <span>{{ state.name }}</span>
+                            <form action="/settings/master/delete/state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state from the master list?');">
+                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                            </form>
                         </li>
                         {% else %}
                         <li class="list-group-item text-muted text-center py-3">No states added yet.</li>
@@ -71,7 +77,7 @@
                 <div class="card-header bg-white fw-bold py-3" style="color: #b3a000;">
                     <i class="fas fa-university me-2"></i> Independent Universities
                 </div>
-                
+
                 <div class="card-body bg-light border-bottom p-3">
                     <form action="/settings/master/add" method="POST" class="d-flex gap-2">
                         <input type="hidden" name="data_type" value="university">
@@ -84,7 +90,10 @@
                     <ul class="list-group list-group-flush">
                         {% for uni in universities %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            {{ uni.name }}
+                            <span>{{ uni.name }}</span>
+                            <form action="/settings/master/delete/university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university from the master list?');">
+                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                            </form>
                         </li>
                         {% else %}
                         <li class="list-group-item text-muted text-center py-3">No universities added yet.</li>
@@ -109,13 +118,17 @@
                 <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
                     <ul class="list-group list-group-flush">
                         {% for course in courses %}
-                        <li class="list-group-item px-4 py-2">{{ course.name }}</li>
+                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+                            <span>{{ course.name }}</span>
+                            <form action="/settings/master/delete/course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course from the master list?');">
+                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                        </li>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
         </div>
-
 
     </div>
 </div>
