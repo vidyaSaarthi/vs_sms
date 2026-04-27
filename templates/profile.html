@@ -87,6 +87,143 @@
 
     </div>
   </div>
+
+<div class="container-fluid mt-5">
+    <hr class="mb-5" style="border-top: 2px solid var(--brand-blue); opacity: 0.5;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0" style="color: var(--brand-red);">
+            <i class="fas fa-route me-2"></i>Counselling & Admission Journey
+        </h3>
+        <button class="btn btn-dark fw-bold px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#regCounsellingModal">
+            <i class="fas fa-plus-circle me-2"></i>Register New Counselling
+        </button>
+    </div>
+
+    <div class="row">
+        {% for reg in student.counselling_registrations %}
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px; background-color: #ffffff;">
+                <div class="card-header border-0 py-3 d-flex justify-content-between align-items-center" style="background-color: var(--brand-blue); border-radius: 15px 15px 0 0;">
+                    <h5 class="fw-bold mb-0" style="color: var(--brand-red);">{{ reg.counselling.name }}</h5>
+                    <span class="badge bg-white text-dark shadow-sm">ID: {{ reg.application_number }}</span>
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted small mb-4">
+                        <i class="fas fa-calendar-alt me-1"></i> Registered on: {{ reg.registration_date.strftime('%d %b %Y') if reg.registration_date else 'Date N/A' }}
+                    </p>
+
+                    <h6 class="fw-bold text-uppercase mb-3" style="font-size: 0.8rem; color: #666; letter-spacing: 1px;">Round-wise Results</h6>
+
+                    <div class="round-history">
+                        {% for res in student.round_results if res.round.counselling_id == reg.counselling_id %}
+                        <div class="p-3 mb-3 rounded shadow-sm" style="background-color: #f8f9fa; border-left: 5px solid var(--brand-red);">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-bold text-dark" style="font-size: 1.1rem;">{{ res.round.round_number }}</span>
+                                <span class="badge {% if res.post_allotment_action == 'Freeze' %}bg-success{% else %}bg-warning text-dark{% endif %} px-3 py-2">
+                                    {{ res.post_allotment_action }}
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="text-dark fw-semibold"><i class="fas fa-university me-2 text-muted"></i>{{ res.allotted_institute or 'No Allotment' }}</span>
+                                <span class="text-muted small mt-1"><i class="fas fa-microchip me-2"></i>{{ res.allotted_branch or 'N/A' }}</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 rounded" style="background-color: #fafafa; border: 1px dashed #ddd;">
+                            <p class="text-muted mb-0 small">No round results logged yet for this counselling.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white border-0 pt-0 pb-4 px-4">
+                    <button class="btn btn-sm w-100 fw-bold py-2 shadow-sm" style="background-color: var(--brand-yellow); color: #333;" data-bs-toggle="modal" data-bs-target="#addResultModal{{ reg.id }}">
+                        <i class="fas fa-edit me-2"></i>Log New Round Result
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addResultModal{{ reg.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+                    <form action="/student/{{ student.id }}/add_round_result" method="POST">
+                        <div class="modal-header border-0" style="background-color: var(--brand-blue); border-radius: 15px 15px 0 0;">
+                            <h5 class="modal-title fw-bold">Result for {{ reg.counselling.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Which Round?</label>
+                                <select name="round_id" class="form-select border-2" required>
+                                    <option value="">Select Round...</option>
+                                    {% for round in reg.counselling.rounds %}
+                                    <option value="{{ round.id }}">{{ round.round_number }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Institute Name</label>
+                                <input type="text" name="allotted_institute" class="form-control border-2" placeholder="e.g. YMCA Faridabad">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Branch / Course</label>
+                                <input type="text" name="allotted_branch" class="form-control border-2" placeholder="e.g. Computer Science">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Status / Action</label>
+                                <select name="post_allotment_action" class="form-select border-2">
+                                    <option value="Freeze">Freeze (Seat Confirmed)</option>
+                                    <option value="Float">Float (Upgradation)</option>
+                                    <option value="Slide">Slide (Branch Upgrade)</option>
+                                    <option value="Not Allotted">Not Allotted</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="submit" class="btn text-white fw-bold w-100 py-2" style="background-color: var(--brand-red); border-radius: 8px;">Save Result</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="regCounsellingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+            <form action="/student/{{ student.id }}/register_counselling" method="POST">
+                <div class="modal-header border-0" style="background-color: var(--brand-red); border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title fw-bold text-white">New Counselling Enrollment</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Counselling Process</label>
+                        <select name="counselling_id" class="form-select border-2" required>
+                            <option value="">Choose from active processes...</option>
+                            {% for c in active_counsellings %}
+                            <option value="{{ c.id }}">{{ c.name }} ({{ c.counselling_type }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Application / Roll Number</label>
+                        <input type="text" name="application_number" class="form-control border-2" placeholder="Enter Registration ID" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn text-dark fw-bold w-100 py-2" style="background-color: var(--brand-yellow); border-radius: 8px;">Confirm Enrollment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </div>
 
 {% endblock %}
