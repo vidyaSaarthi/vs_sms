@@ -1,0 +1,249 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="mb-4">
+        <h2 class="fw-bold" style="color: var(--brand-red);"><i class="fas fa-file-signature me-2"></i>Admissions Hub</h2>
+        <p class="text-muted">Track all application deadlines and manage master counselling processes.</p>
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="admissionsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="forms-tab" data-bs-toggle="tab" data-bs-target="#forms" type="button" role="tab" style="color: var(--brand-red);">
+                <i class="fas fa-calendar-check me-1"></i> Forms & Deadlines
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="counselling-tab" data-bs-toggle="tab" data-bs-target="#counselling" type="button" role="tab">
+                <i class="fas fa-sitemap me-1"></i> Master Counselling Processes
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="admissionsTabsContent">
+        
+        <div class="tab-pane fade show active" id="forms" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">Upcoming Deadlines</h5>
+                    <button class="btn btn-sm text-white fw-bold" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addFormModal">
+                        <i class="fas fa-plus me-1"></i> Add New Form
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background-color: var(--brand-blue);">
+                                <tr>
+                                    <th class="ps-4 text-dark">Form Name</th>
+                                    <th class="text-dark">Type</th>
+                                    <th class="text-dark">Linked To</th>
+                                    <th class="text-dark">Deadline</th>
+                                    <th class="text-dark text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in forms %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ form.name }}</td>
+                                    <td><span class="badge bg-secondary">{{ form.form_type }}</span></td>
+                                    <td>
+                                        {% if form.form_type == 'Exam' and form.exam_id %}
+                                            <i class="fas fa-pen-alt text-muted me-1"></i> Exam DB
+                                        {% elif form.form_type == 'Counselling' and form.counselling_id %}
+                                            <i class="fas fa-university text-muted me-1"></i> Counselling DB
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="{% if form.end_date and form.end_date.strftime('%Y-%m-%d') < today %}text-danger fw-bold{% endif %}">
+                                        {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if form.document_link %}
+                                            <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark"><i class="fas fa-link"></i></a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No active forms being tracked.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="counselling" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">Active Counselling Systems</h5>
+                    <button class="btn btn-sm text-dark fw-bold" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addCounsellingModal">
+                        <i class="fas fa-plus me-1"></i> Add Process
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background-color: var(--brand-blue);">
+                                <tr>
+                                    <th class="ps-4 text-dark">Counselling Name</th>
+                                    <th class="text-dark">Type</th>
+                                    <th class="text-dark">Date Created</th>
+                                    <th class="text-dark text-center">Manage Rounds</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in counsellings %}
+                                <tr>
+                                    <td class="ps-4 fw-bold" style="color: var(--brand-red);">{{ c.name }}</td>
+                                    <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
+                                    <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '-' }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-secondary">Open</button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No counselling processes added.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="addCounsellingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admissions/add_counselling" method="POST">
+                <div class="modal-header" style="background-color: var(--brand-blue);">
+                    <h5 class="modal-title fw-bold text-dark">New Counselling Process</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Process Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Type</label>
+                        <select name="counselling_type" id="counTypeSelect" class="form-select" required onchange="toggleCounsellingTarget()">
+                            <option value="">Select Type...</option>
+                            <option value="State">State Counselling</option>
+                            <option value="University">Independent University</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="counTargetDiv" style="display: none;">
+                        <label class="form-label fw-bold" id="counTargetLabel">Select Entity</label>
+                        <select name="target_id" id="counTargetSelect" class="form-select">
+                            </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Process</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addFormModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admissions/add_form" method="POST">
+                <div class="modal-header" style="background-color: var(--brand-blue);">
+                    <h5 class="modal-title fw-bold text-dark">Track New Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Form Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., JEE Main Session 2 Reg" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Form Type</label>
+                            <select name="form_type" id="formTypeSelect" class="form-select" required onchange="toggleFormTarget()">
+                                <option value="">Select...</option>
+                                <option value="Exam">Entrance Exam</option>
+                                <option value="Counselling">Counselling Reg.</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-danger">Deadline</label>
+                            <input type="date" name="end_date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="formTargetDiv" style="display: none;">
+                        <label class="form-label fw-bold" id="formTargetLabel">Link To</label>
+                        <select name="target_id" id="formTargetSelect" class="form-select">
+                            </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Official Link (Optional)</label>
+                        <input type="url" name="document_link" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-white w-100" style="background-color: var(--brand-red);">Add to Tracker</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Master Data stored safely from Python for JS to use
+    const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const unisData = [ {% for u in universities %}{ id: {{ u.id }}, name: "{{ u.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const examsData = [ {% for e in exams %}{ id: {{ e.id }}, name: "{{ e.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const counsData = [ {% for c in counsellings %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+
+    function toggleCounsellingTarget() {
+        const type = document.getElementById('counTypeSelect').value;
+        const div = document.getElementById('counTargetDiv');
+        const select = document.getElementById('counTargetSelect');
+        const label = document.getElementById('counTargetLabel');
+        
+        select.innerHTML = '<option value="">Select...</option>';
+        if (type === 'State') {
+            label.innerText = 'Which State?';
+            statesData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else if (type === 'University') {
+            label.innerText = 'Which University?';
+            unisData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+
+    function toggleFormTarget() {
+        const type = document.getElementById('formTypeSelect').value;
+        const div = document.getElementById('formTargetDiv');
+        const select = document.getElementById('formTargetSelect');
+        const label = document.getElementById('formTargetLabel');
+        
+        select.innerHTML = '<option value="">Select...</option>';
+        if (type === 'Exam') {
+            label.innerText = 'Which Exam?';
+            examsData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else if (type === 'Counselling') {
+            label.innerText = 'Which Counselling Process?';
+            counsData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+</script>
+
+{% endblock %}

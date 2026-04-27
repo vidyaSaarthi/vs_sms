@@ -136,6 +136,77 @@ def add_master_data():
     return redirect(url_for('master_data'))
 
 
+from flask import request, redirect, url_for, flash
+from datetime import datetime
+
+
+# 1. Main Admissions Hub Route
+@app.route('/admissions')
+# @login_required
+def admissions_hub():
+    # Fetch data for the display tables
+    forms = Form.query.order_by(Form.end_date.asc()).all()
+    counsellings = Counselling.query.order_by(Counselling.created_at.desc()).all()
+
+    # Fetch Master Data to populate the "Add New" dropdowns
+    exams = Exam.query.order_by(Exam.name.asc()).all()
+    states = State.query.order_by(State.name.asc()).all()
+    universities = University.query.order_by(University.name.asc()).all()
+
+    return render_template('admissions.html',
+                           forms=forms,
+                           counsellings=counsellings,
+                           exams=exams,
+                           states=states,
+                           universities=universities)
+
+
+# 2. Add New Counselling Process
+@app.route('/admissions/add_counselling', methods=['POST'])
+# @login_required
+def add_counselling():
+    name = request.form.get('name')
+    counselling_type = request.form.get('counselling_type')  # 'State' or 'University'
+    target_id = request.form.get('target_id')  # Will be either state_id or university_id
+
+    new_counselling = Counselling(
+        name=name,
+        counselling_type=counselling_type,
+        state_id=target_id if counselling_type == 'State' else None,
+        university_id=target_id if counselling_type == 'University' else None
+    )
+    db.session.add(new_counselling)
+    db.session.commit()
+    flash(f"Counselling process '{name}' created successfully!", "success")
+    return redirect(url_for('admissions_hub'))
+
+
+# 3. Add New Form / Deadline
+@app.route('/admissions/add_form', methods=['POST'])
+# @login_required
+def add_form():
+    name = request.form.get('name')
+    form_type = request.form.get('form_type')  # 'Exam' or 'Counselling'
+    target_id = request.form.get('target_id')
+
+    # Convert string dates from HTML to Python Date objects
+    end_date_str = request.form.get('end_date')
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+
+    new_form = Form(
+        name=name,
+        form_type=form_type,
+        exam_id=target_id if form_type == 'Exam' else None,
+        counselling_id=target_id if form_type == 'Counselling' else None,
+        end_date=end_date,
+        document_link=request.form.get('document_link')
+    )
+    db.session.add(new_form)
+    db.session.commit()
+    flash(f"Form tracking for '{name}' added successfully!", "success")
+    return redirect(url_for('admissions_hub'))
+
+
 @app.route('/')
 @app.route('/dashboard')
 # @login_required  <-- Uncomment if using Flask-Login
