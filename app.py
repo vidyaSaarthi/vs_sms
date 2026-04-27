@@ -4,7 +4,7 @@ import json
 from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult
+from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course
 from sqlalchemy.exc import IntegrityError
 from datetime import date
 
@@ -91,14 +91,13 @@ from flask import request, redirect, url_for, flash
 
 # 1. Route to display the Master Data page
 @app.route('/settings/master')
-# @login_required
 def master_data():
-    # Fetch all existing master data to display on the screen
     exams = Exam.query.order_by(Exam.name.asc()).all()
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
+    courses = Course.query.order_by(Course.name.asc()).all()  # Added this
 
-    return render_template('master_data.html', exams=exams, states=states, universities=universities)
+    return render_template('master_data.html', exams=exams, states=states, universities=universities, courses=courses)
 
 
 # 2. Universal Route to process new additions
@@ -127,6 +126,11 @@ def add_master_data():
             new_entry = University(name=name)
             db.session.add(new_entry)
             flash(f"University '{name}' added successfully!", "success")
+
+        elif data_type == 'course':
+            new_entry = Course(name=name)
+            db.session.add(new_entry)
+            flash(f"Course '{name}' added successfully!", "success")
 
         db.session.commit()
     except Exception as e:
@@ -678,6 +682,7 @@ def college_directory():
     # 3. Master data for filters and the "Add" modal
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
+    courses = Course.query.order_by(Course.name.asc()).all()  # Fetch all courses
 
     return render_template('colleges.html',
                            colleges=colleges,

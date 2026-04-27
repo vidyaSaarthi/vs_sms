@@ -297,3 +297,13 @@ class StudentRoundResult(db.Model):
 
     # Allows us to do `result.round.round_number` easily in the UI
     round = db.relationship('CounsellingRound', backref='student_results', lazy=True)
+
+class Course(db.Model):
+    __tablename__ = 'courses'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    # Relationship to link back to colleges
+    colleges = db.relationship('College', backref='course_ref', lazy=True)
+
+    def __repr__(self):
+        return f'<Course {self.name}>'

@@ -123,8 +123,13 @@
                     <div class="row g-3 mb-4">
                         <div class="col-12"><h6 class="text-danger fw-bold border-bottom pb-2">Academics & Financials</h6></div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold small">Course(s)</label>
-                            <input type="text" name="course" class="form-control" placeholder="e.g. B.Tech / MBBS / MBA">
+                            <label class="form-label fw-bold small">Course / Stream</label>
+                            <select name="course_id" class="form-select" required>
+                                <option value="">Select Course...</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold small">Fees Structure</label>
