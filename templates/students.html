@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #333;">Student Pipeline</h2>
+            <p class="text-muted mb-0">Manage all registrations and active leads.</p>
+        </div>
+        <a href="/add_student" class="btn btn-danger px-4 py-2" style="background-color: var(--brand-red); border: none; font-weight: 600;">
+            <i class="fas fa-plus me-2"></i> Add New Student
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body">
+            <form method="GET" action="/students" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0" name="search" placeholder="Search by Name or Mobile Number..." value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="exam">
+                        <option value="">All Exam Types</option>
+                        <option value="JEE Main" {% if exam_filter == 'JEE Main' %}selected{% endif %}>JEE Main</option>
+                        <option value="NEET" {% if exam_filter == 'NEET' %}selected{% endif %}>NEET</option>
+                        <option value="CUET" {% if exam_filter == 'CUET' %}selected{% endif %}>CUET</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn w-100 text-dark" style="background-color: var(--brand-yellow); font-weight: 600;">
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for student in students %}
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; border-left: 5px solid {% if student.is_approved %}#198754{% else %}#ffc107{% endif %} !important;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge" style="background-color: var(--brand-blue); color: var(--brand-red);">{{ student.exam_type }}</span>
+                        {% if student.is_approved %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Approved</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Pending</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title fw-bold mb-1">{{ student.full_name }}</h5>
+                    <p class="text-muted small mb-3"><i class="fas fa-fingerprint me-1"></i> ID: VS-{{ student.id }}</p>
+                    
+                    <div class="mb-3">
+                        <p class="mb-1" style="font-size: 0.9rem;"><i class="fas fa-phone-alt text-muted me-2"></i>{{ student.mobile_number }}</p>
+                        <p class="mb-1" style="font-size: 0.9rem;"><i class="fas fa-map-marker-alt text-muted me-2"></i>{{ student.state_ut or 'N/A' }}</p>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white border-top-0 pt-0 pb-3">
+                    <a href="/student/{{ student.id }}" class="btn btn-outline-dark btn-sm w-100">
+                        <i class="fas fa-user-circle me-1"></i> Open Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="text-muted">
+                <i class="fas fa-folder-open fa-3x mb-3" style="color: var(--brand-blue);"></i>
+                <h4>No students found</h4>
+                <p>Try adjusting your search filters or add a new student.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

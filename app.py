@@ -546,5 +546,38 @@ def init_db():
         print("Database initialized! Default login is admin / admin123")
 
 
+from flask import request, render_template
+
+
+@app.route('/students')
+# @login_required  <-- Uncomment this if you are using Flask-Login to protect the route!
+def student_pipeline():
+    # 1. Grab search filters from the top search bar (if any)
+    search_query = request.args.get('search', '')
+    exam_filter = request.args.get('exam', '')
+
+    # 2. Build the database query
+    query = Student.query
+
+    # Apply text search across Name and Mobile Number
+    if search_query:
+        query = query.filter(
+            db.or_(
+                Student.full_name.ilike(f'%{search_query}%'),
+                Student.mobile_number.ilike(f'%{search_query}%')
+            )
+        )
+
+    # Apply Exam Type dropdown filter
+    if exam_filter:
+        query = query.filter(Student.exam_type == exam_filter)
+
+    # 3. Fetch the results, newest students first
+    students = query.order_by(Student.created_at.desc()).all()
+
+    # 4. Send the data to your beautiful new front-end
+    return render_template('students.html', students=students, search_query=search_query, exam_filter=exam_filter)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
