@@ -85,34 +85,37 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-
 @app.route('/')
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Grab the filter values from the URL
+    # 1. Grab the filter values from the URL
     exam_filter = request.args.get('exam_type', '')
     search_query = request.args.get('search', '').strip()
-    created_by_filter = request.args.get('created_by', '')  # 👤 NEW
+    created_by_filter = request.args.get('created_by', '')
+    status_filter = request.args.get('academic_status', '') # 🎓 NEW
 
     query = Student.query
 
-    # Apply filters if they exist
+    # 2. Apply filters if they exist
     if exam_filter in ['NEET', 'JEE']:
         query = query.filter(Student.exam_type == exam_filter)
     if search_query:
         query = query.filter(Student.full_name.ilike(f'%{search_query}%'))
     if created_by_filter:
-        query = query.filter(Student.created_by == created_by_filter)  # 👤 NEW
+        query = query.filter(Student.created_by == created_by_filter)
+    if status_filter in ['Fresher', 'Dropper']: # 🎓 NEW
+        query = query.filter(Student.academic_status == status_filter)
 
     students = query.order_by(Student.created_at.desc()).all()
 
-    # Pass everything to the template so the dropdowns stay selected
+    # 3. Pass everything to the template
     return render_template('dashboard.html',
                            students=students,
                            exam_filter=exam_filter,
                            search_query=search_query,
-                           created_by_filter=created_by_filter)  # 👤 NEW
+                           created_by_filter=created_by_filter,
+                           status_filter=status_filter) # 🎓 NEW
 
 
 def extract_dynamic_marks(prefix, group):
