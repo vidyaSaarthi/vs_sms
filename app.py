@@ -690,7 +690,8 @@ def college_directory():
                            universities=universities,
                            search_query=search_query,
                            state_filter=state_filter,
-                           type_filter=type_filter)
+                           type_filter=type_filter,
+                           courses=courses)
 
 
 @app.route('/colleges/add', methods=['POST'])
