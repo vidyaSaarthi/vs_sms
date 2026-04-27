@@ -6,7 +6,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
+from datetime import date
 
 # app = Flask(__name__)
 # app.config['SECRET_KEY'] = 'vidyasaarthi_super_secret_key_2026'
@@ -85,38 +85,55 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# @app.route('/')
-# @app.route('/dashboard')
+
+from flask import request, redirect, url_for, flash
+
+
+# 1. Route to display the Master Data page
+@app.route('/settings/master')
 # @login_required
-# def dashboard():
-#     # 1. Grab the filter values from the URL
-#     exam_filter = request.args.get('exam_type', '')
-#     search_query = request.args.get('search', '').strip()
-#     created_by_filter = request.args.get('created_by', '')
-#     status_filter = request.args.get('academic_status', '') # 🎓 NEW
-#
-#     query = Student.query
-#
-#     # 2. Apply filters if they exist
-#     if exam_filter in ['NEET', 'JEE']:
-#         query = query.filter(Student.exam_type == exam_filter)
-#     if search_query:
-#         query = query.filter(Student.full_name.ilike(f'%{search_query}%'))
-#     if created_by_filter:
-#         query = query.filter(Student.created_by == created_by_filter)
-#     if status_filter in ['Fresher', 'Dropper']: # 🎓 NEW
-#         query = query.filter(Student.academic_status == status_filter)
-#
-#     students = query.order_by(Student.created_at.desc()).all()
-#
-#     # 3. Pass everything to the template
-#     return render_template('dashboard.html',
-#                            students=students,
-#                            exam_filter=exam_filter,
-#                            search_query=search_query,
-#                            created_by_filter=created_by_filter,
-#                            status_filter=status_filter) # 🎓 NEW
-from datetime import date
+def master_data():
+    # Fetch all existing master data to display on the screen
+    exams = Exam.query.order_by(Exam.name.asc()).all()
+    states = State.query.order_by(State.name.asc()).all()
+    universities = University.query.order_by(University.name.asc()).all()
+
+    return render_template('master_data.html', exams=exams, states=states, universities=universities)
+
+
+# 2. Universal Route to process new additions
+@app.route('/settings/master/add', methods=['POST'])
+# @login_required
+def add_master_data():
+    data_type = request.form.get('data_type')
+    name = request.form.get('name')
+
+    if not name:
+        flash("Name cannot be empty!", "error")
+        return redirect(url_for('master_data'))
+
+    try:
+        if data_type == 'exam':
+            new_entry = Exam(name=name)
+            db.session.add(new_entry)
+            flash(f"Exam '{name}' added successfully!", "success")
+
+        elif data_type == 'state':
+            new_entry = State(name=name)
+            db.session.add(new_entry)
+            flash(f"State '{name}' added successfully!", "success")
+
+        elif data_type == 'university':
+            new_entry = University(name=name)
+            db.session.add(new_entry)
+            flash(f"University '{name}' added successfully!", "success")
+
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Error saving data. It might already exist.", "error")
+
+    return redirect(url_for('master_data'))
 
 
 @app.route('/')
@@ -574,9 +591,6 @@ def init_db():
         db.session.commit()
         print("Database initialized! Default login is admin / admin123")
 
-
-from flask import request, render_template
-
 from flask import request, render_template
 
 
@@ -625,6 +639,7 @@ def student_pipeline():
                            counsellor_filter=counsellor_filter,
                            status_filter=status_filter,
                            counsellors=counsellor_list)
+
 
 
 if __name__ == '__main__':

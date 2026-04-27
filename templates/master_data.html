@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="mb-4">
+        <h2 class="fw-bold" style="color: var(--brand-red);"><i class="fas fa-cogs me-2"></i>Master Data Configuration</h2>
+        <p class="text-muted">Manage the foundational data that populates dropdowns across the ERP.</p>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-red);">
+                    <i class="fas fa-edit me-2"></i> Entrance Exams
+                </div>
+                
+                <div class="card-body bg-light border-bottom p-3">
+                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
+                        <input type="hidden" name="data_type" value="exam">
+                        <input type="text" class="form-control" name="name" placeholder="e.g. NEET 2026" required>
+                        <button type="submit" class="btn text-white" style="background-color: var(--brand-red);"><i class="fas fa-plus"></i></button>
+                    </form>
+                </div>
+
+                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush">
+                        {% for exam in exams %}
+                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+                            {{ exam.name }}
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted text-center py-3">No exams added yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-blue);">
+                    <i class="fas fa-map-marker-alt me-2" style="color: #4a6b8c;"></i> States (State Counselling)
+                </div>
+                
+                <div class="card-body bg-light border-bottom p-3">
+                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
+                        <input type="hidden" name="data_type" value="state">
+                        <input type="text" class="form-control" name="name" placeholder="e.g. Haryana" required>
+                        <button type="submit" class="btn text-dark fw-bold" style="background-color: var(--brand-blue);"><i class="fas fa-plus"></i></button>
+                    </form>
+                </div>
+
+                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush">
+                        {% for state in states %}
+                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+                            {{ state.name }}
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted text-center py-3">No states added yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-bold py-3" style="color: #b3a000;">
+                    <i class="fas fa-university me-2"></i> Independent Universities
+                </div>
+                
+                <div class="card-body bg-light border-bottom p-3">
+                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
+                        <input type="hidden" name="data_type" value="university">
+                        <input type="text" class="form-control" name="name" placeholder="e.g. VIT Vellore" required>
+                        <button type="submit" class="btn text-dark fw-bold" style="background-color: var(--brand-yellow);"><i class="fas fa-plus"></i></button>
+                    </form>
+                </div>
+
+                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush">
+                        {% for uni in universities %}
+                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+                            {{ uni.name }}
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-muted text-center py-3">No universities added yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
