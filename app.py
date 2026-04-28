@@ -426,26 +426,6 @@ def register_student_counselling(student_id):
 
 
 # 2. Record Round Result
-@app.route('/student/<int:student_id>/add_round_result', methods=['POST'])
-# @login_required
-def add_round_result(student_id):
-    round_id = request.form.get('round_id')
-    institute = request.form.get('allotted_institute')
-    branch = request.form.get('allotted_branch')
-    action = request.form.get('post_allotment_action')  # Freeze/Float/Slide
-
-    result = StudentRoundResult(
-        student_id=student_id,
-        round_id=round_id,
-        allotted_institute=institute,
-        allotted_branch=branch,
-        post_allotment_action=action,
-        reporting_status='Reported' if action == 'Freeze' else 'Pending'
-    )
-    db.session.add(result)
-    db.session.commit()
-    flash("Round result recorded successfully!", "success")
-    return redirect(url_for('view_student', student_id=student_id))
 
 
 @app.route('/student/<int:id>/edit', methods=['GET', 'POST'])
