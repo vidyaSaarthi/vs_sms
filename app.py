@@ -1021,7 +1021,7 @@ def delete_master_data(data_type, item_id):
     return redirect(url_for('master_data'))
 
 
-# ==========================================
+## ==========================================
 # ADMISSIONS DATA DELETE
 # ==========================================
 @app.route('/admissions/delete/counselling/<int:item_id>', methods=['POST'])
@@ -1032,9 +1032,20 @@ def delete_counselling_record(item_id):
         db.session.delete(item)
         db.session.commit()
         flash("Counselling process deleted.", "success")
-    except Exception as e: # <--- CHANGE THIS FROM IntegrityError to Exception
+    except Exception as e:
         db.session.rollback()
-        flash("⚠️ Cannot delete this counselling process because students are actively registered to it.", "error")
+
+        # Capture the actual Postgres Database Error
+        error_str = str(e).lower()
+
+        # Translate the ugly SQL error into a human-readable ERP instruction
+        if 'forms' in error_str:
+            flash("⚠️ Cannot delete: There is a Form/Deadline linked to this process. Please delete or edit the Form first.", error_str)
+        elif 'student_counselling_registrations' in error_str:
+            flash("⚠️ Cannot delete: There is still at least one student registered for this process.", error_str)
+        else:
+            flash(f"⚠️ Cannot delete due to database constraint.", error_str)
+
     return redirect(url_for('admissions_hub'))
 
 
