@@ -935,7 +935,7 @@ def student_pipeline():
     # NEW: Filter students who have a registration matching the ID
     if counselling_filter:
         query = query.join(StudentCounsellingRegistration).filter(
-            StudentCounsellingRegistration.counselling_id == counselling_filter
+            StudentCounsellingRegistration.counselling_id == int(counselling_filter)
         )
 
     counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
