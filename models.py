@@ -120,9 +120,10 @@ class Student(db.Model):
 
 
 class StudentExamResult(db.Model):
+    __tablename__ = 'student_exam_result'
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)  # Links to your Master Data
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=False)  # Links to your Master Data
 
     application_number = db.Column(db.String(100), nullable=True)  # E.g., JEE App No
     score = db.Column(db.Float, nullable=True)
