@@ -110,7 +110,9 @@
                                     <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '-' }}</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
-                                            <button class="btn btn-sm btn-outline-secondary">Open</button>
+                                            <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}">
+                                                <i class="fas fa-layer-group me-1"></i> Rounds
+                                            </button>
                                             <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                                                     <i class="fas fa-trash"></i>
@@ -130,7 +132,88 @@
         </div>
 
     </div>
+</div> {% for c in counsellings %}
+<div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1" aria-labelledby="manageRoundsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content text-start" style="border-radius: 15px;">
+            <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-sitemap me-2 text-warning"></i>Manage Rounds: {{ c.name }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                <h6 class="fw-bold text-primary mb-3">Active Rounds</h6>
+                {% if c.rounds %}
+                <div class="table-responsive mb-4">
+                    <table class="table table-sm table-hover border">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 text-muted">Round Name</th>
+                                <th class="text-muted">Important Links</th>
+                                <th class="text-end pe-3 text-muted">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in c.rounds %}
+                            <tr>
+                                <td class="ps-3 fw-bold align-middle">{{ r.round_number }}</td>
+                                <td class="align-middle">
+                                    {% if r.seat_matrix_link %}
+                                        <a href="{{ r.seat_matrix_link }}" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-table me-1"></i>Seat Matrix</a>
+                                    {% endif %}
+                                    {% if r.result_link %}
+                                        <a href="{{ r.result_link }}" target="_blank" class="badge bg-success text-decoration-none"><i class="fas fa-trophy me-1"></i>Result</a>
+                                    {% endif %}
+                                    {% if not r.seat_matrix_link and not r.result_link %}
+                                        <span class="text-muted small">No links added</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3 align-middle">
+                                    <form action="/admissions/delete_round/{{ r.id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ r.round_number }}?');">
+                                        <button type="submit" class="btn btn-sm text-danger border-0 p-1" title="Delete Round"><i class="fas fa-trash-alt"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light border text-center mb-4 text-muted small">
+                    <i class="fas fa-info-circle me-1"></i> No rounds have been configured for this process yet.
+                </div>
+                {% endif %}
+
+                <h6 class="fw-bold text-danger mb-3 border-top pt-4">Add a New Round</h6>
+                <form action="{{ url_for('add_counselling_round', counselling_id=c.id) }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold small text-muted">Round Name / Phase</label>
+                            <input type="text" name="round_number" class="form-control bg-light" placeholder="e.g. Round 1, Mock Allotment, Mop-Up" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Seat Matrix URL <span class="fw-normal">(Optional)</span></label>
+                            <input type="url" name="seat_matrix_link" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Cutoffs URL <span class="fw-normal">(Optional)</span></label>
+                            <input type="url" name="cutoffs_link" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Official Result URL <span class="fw-normal">(Optional)</span></label>
+                            <input type="url" name="result_link" class="form-control" placeholder="https://...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn text-white fw-bold w-100 mt-2" style="background-color: var(--brand-red);">
+                        <i class="fas fa-plus-circle me-2"></i>Create Round
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
 </div>
+{% endfor %}
 
 <div class="modal fade" id="addCounsellingModal" tabindex="-1">
     <div class="modal-dialog">
@@ -156,7 +239,7 @@
                     <div class="mb-3" id="counTargetDiv" style="display: none;">
                         <label class="form-label fw-bold" id="counTargetLabel">Select Entity</label>
                         <select name="target_id" id="counTargetSelect" class="form-select">
-                            </select>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -197,7 +280,7 @@
                     <div class="mb-3" id="formTargetDiv" style="display: none;">
                         <label class="form-label fw-bold" id="formTargetLabel">Link To</label>
                         <select name="target_id" id="formTargetSelect" class="form-select">
-                            </select>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Official Link (Optional)</label>

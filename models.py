@@ -113,10 +113,25 @@ class Student(db.Model):
     academic_status = db.Column(db.String(50), default='Fresher')
 
     # Relationships
-    documents = db.relationship('Document', backref='student', lazy=True, cascade="all, delete-orphan")
-    counselling_registrations = db.relationship('StudentCounsellingRegistration', backref='student', lazy=True)
-    round_results = db.relationship('StudentRoundResult', backref='student', lazy=True)
+    documents = db.relationship('Document', backref='students', lazy=True, cascade="all, delete-orphan")
+    counselling_registrations = db.relationship('StudentCounsellingRegistration', backref='students', lazy=True)
+    round_results = db.relationship('StudentRoundResult', backref='students', lazy=True)
+    exam_results = db.relationship('StudentExamResult', backref='students', lazy=True, cascade="all, delete-orphan")
 
+
+class StudentExamResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)  # Links to your Master Data
+
+    application_number = db.Column(db.String(100), nullable=True)  # E.g., JEE App No
+    score = db.Column(db.Float, nullable=True)
+    percentile = db.Column(db.Float, nullable=True)
+    all_india_rank = db.Column(db.Integer, nullable=True)
+    state_rank = db.Column(db.Integer, nullable=True)  # Highly useful for HSTES/State Counselling
+
+    # Allows us to easily grab the exam name in HTML (e.g., result.exam_ref.name)
+    exam_ref = db.relationship('Exam', backref='student_results')
 
 class Document(db.Model):
     __tablename__ = 'documents'

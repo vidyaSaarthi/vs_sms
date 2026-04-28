@@ -81,11 +81,11 @@
                 </div>
 
                 <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 d-flex gap-2">
-                    <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-sm flex-fill fw-bold text-dark" style="background-color: var(--brand-yellow); border: none;">Profile</a>
+                    <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-danger">Admissions Journey</a>
 
-                    <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-sm flex-fill fw-bold text-dark" style="background-color: #ffc107; border: none;">Edit</a>
+                    <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-warning">Edit</a>
 
-                    <a href="{{ url_for('export_verification', id=student.id) }}" class="btn btn-sm flex-fill fw-bold text-white" style="background-color: var(--brand-red); border: none;">Print</a>
+                    <a href="{{ url_for('export_verification', id=student.id) }}" class="btn btn-outline-dark">Profile Sheet</a>
                 </div>
             </div>
 

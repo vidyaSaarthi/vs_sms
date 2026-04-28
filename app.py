@@ -5,6 +5,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course
+from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult
 from sqlalchemy.exc import IntegrityError
 from datetime import date
 
@@ -757,7 +758,8 @@ def delete_student(id):
 def view_student(id):
     student = Student.query.get_or_404(id)
     active_counsellings = Counselling.query.all()
-    return render_template('profile.html', student=student,active_counsellings=active_counsellings)
+    exams = Exam.query.order_by(Exam.name.asc()).all()  # Fetch Master Exams
+    return render_template('profile.html', student=student, active_counsellings=active_counsellings, exams=exams)
 
 
 @app.route('/student/<int:id>/export')
@@ -895,6 +897,115 @@ def delete_form_record(item_id):
     db.session.delete(item)
     db.session.commit()
     flash("Form deadline removed.", "success")
+    return redirect(url_for('admissions_hub'))
+
+
+# ==========================================
+# ADMISSIONS JOURNEY: SAVE EXAM RESULT
+# ==========================================
+@app.route('/student/<int:student_id>/add_exam_result', methods=['POST'])
+@login_required
+def add_exam_result(student_id):
+    score_val = request.form.get('score')
+    percentile_val = request.form.get('percentile')
+    air_val = request.form.get('all_india_rank')
+    state_rank_val = request.form.get('state_rank')
+
+    try:
+        result = StudentExamResult(
+            student_id=student_id,
+            exam_id=request.form.get('exam_id'),
+            application_number=request.form.get('application_number'),
+            score=float(score_val) if score_val else None,
+            percentile=float(percentile_val) if percentile_val else None,
+            all_india_rank=int(air_val) if air_val else None,
+            state_rank=int(state_rank_val) if state_rank_val else None
+        )
+        db.session.add(result)
+        db.session.commit()
+        flash("Exam result added successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error saving exam result: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
+
+# Optional: Delete Exam Result Route
+@app.route('/student/delete_exam_result/<int:result_id>', methods=['POST'])
+@login_required
+def delete_exam_result(result_id):
+    result = StudentExamResult.query.get_or_404(result_id)
+    student_id = result.student_id
+    db.session.delete(result)
+    db.session.commit()
+    flash("Exam result removed.", "success")
+    return redirect(url_for('view_student', id=student_id))
+
+
+# ==========================================
+# ADMISSIONS JOURNEY: SAVE ROUND RESULT
+# ==========================================
+@app.route('/student/<int:student_id>/add_round_result', methods=['POST'])
+@login_required
+def add_round_result(student_id):
+    try:
+        result = StudentRoundResult(
+            student_id=student_id,
+            round_id=request.form.get('round_id'),
+            choices_submitted=request.form.get('choices_submitted') == 'yes',
+            allotted_institute=request.form.get('allotted_institute'),
+            allotted_branch=request.form.get('allotted_branch'),
+            allotted_category=request.form.get('allotted_category'),
+            post_allotment_action=request.form.get('post_allotment_action'),
+            seat_acceptance_fee_paid=request.form.get('seat_acceptance_fee_paid') == 'yes',
+            reporting_status=request.form.get('reporting_status')
+        )
+        db.session.add(result)
+        db.session.commit()
+        flash("Round result recorded successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error saving round result: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
+# ==========================================
+# ADMISSIONS HUB: MANAGE ROUNDS
+# ==========================================
+@app.route('/admissions/counselling/<int:counselling_id>/add_round', methods=['POST'])
+@login_required
+def add_counselling_round(counselling_id):
+    try:
+        new_round = CounsellingRound(
+            counselling_id=counselling_id,
+            round_number=request.form.get('round_number'),
+            rules=request.form.get('rules'),
+            seat_matrix_link=request.form.get('seat_matrix_link'),
+            cutoffs_link=request.form.get('cutoffs_link'),
+            result_link=request.form.get('result_link')
+        )
+        db.session.add(new_round)
+        db.session.commit()
+        flash(f"Round '{new_round.round_number}' added successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding round: {str(e)}", "error")
+
+    return redirect(url_for('admissions_hub'))
+
+
+@app.route('/admissions/delete_round/<int:round_id>', methods=['POST'])
+@login_required
+def delete_counselling_round(round_id):
+    c_round = CounsellingRound.query.get_or_404(round_id)
+    try:
+        db.session.delete(c_round)
+        db.session.commit()
+        flash("Round removed successfully.", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash("⚠️ Cannot delete this round because students already have seat allotments saved under it.", "error")
     return redirect(url_for('admissions_hub'))
 
 
