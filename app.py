@@ -411,22 +411,32 @@ def add_student():
 
 
 # 1. Register Student for a Counselling Process
+# ==========================================
+# ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
+# ==========================================
 @app.route('/student/<int:student_id>/register_counselling', methods=['POST'])
 @login_required
 def register_student_counselling(student_id):
-    counselling_id = request.form.get('counselling_id')
-    app_no = request.form.get('application_number')
+    try:
+        counselling_id = request.form.get('counselling_id')
+        app_no = request.form.get('application_number')
+        reg_status = request.form.get('registration_status', 'Planned')
 
-    registration = StudentCounsellingRegistration(
-        student_id=student_id,
-        counselling_id=counselling_id,
-        application_number=app_no,
-        registration_date=date.today()
-    )
-    db.session.add(registration)
-    db.session.commit()
-    flash("Student successfully registered for counselling!", "success")
-    return redirect(url_for('view_student', student_id=student_id))
+        registration = StudentCounsellingRegistration(
+            student_id=student_id,
+            counselling_id=counselling_id,
+            application_number=app_no if app_no and app_no.strip() else None,
+            registration_status=reg_status,
+            registration_date=date.today()
+        )
+        db.session.add(registration)
+        db.session.commit()
+        flash(f"Counselling process marked as {reg_status}!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error registering process: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
 
 
 # 2. Record Round Result

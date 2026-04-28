@@ -307,6 +307,7 @@ class StudentCounsellingRegistration(db.Model):
     counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=False)
 
     application_number = db.Column(db.String(100), nullable=True)
+    registration_status = db.Column(db.String(50), default='Planned')  # <-- NEW FIELD
     registration_date = db.Column(db.Date, nullable=True)
     fee_status = db.Column(db.String(50), default='Pending')
     documents_verified = db.Column(db.Boolean, default=False)

@@ -80,100 +80,58 @@
                 <div class="card-body">
                     {% for reg in student.counselling_registrations %}
                     <div class="mb-4 border border-secondary rounded p-3">
+
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                             <h6 class="fw-bold text-dark mb-0">{{ reg.counselling.name }}</h6>
-                            <span class="badge bg-secondary">App: {{ reg.application_number }}</span>
-                        </div>
-
-                        <div class="alert alert-info py-2 small mb-2">
-                            <i class="fas fa-info-circle me-2"></i> Ready for Round 1 Allotment
-                        </div>
-
-                        <button class="btn btn-sm btn-outline-dark w-100 mt-2" data-bs-toggle="modal" data-bs-target="#addRoundResultModal{{ reg.id }}">
-                            <i class="fas fa-plus-circle me-1"></i> Add Round Result
-                        </button>
-
-                        <div class="modal fade" id="addRoundResultModal{{ reg.id }}" tabindex="-1">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content" style="border-radius: 15px;">
-                                    <form action="{{ url_for('add_round_result', student_id=student.id) }}" method="POST">
-                                        <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-                                            <h5 class="modal-title fw-bold">Record Allotment: {{ reg.counselling.name }}</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body p-4">
-
-                                            <div class="row g-3 border-bottom pb-3 mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-bold small">Select Round</label>
-                                                    <select name="round_id" class="form-select" required>
-                                                        <option value="">Select Round...</option>
-                                                        {% for r in reg.counselling.rounds %}
-                                                        <option value="{{ r.id }}">{{ r.round_number }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6 d-flex align-items-end">
-                                                    <div class="form-check form-switch fs-5">
-                                                        <input class="form-check-input" type="checkbox" name="choices_submitted" value="yes" id="choicesCheck{{ reg.id }}">
-                                                        <label class="form-check-label ms-2 small fw-bold mt-1" for="choicesCheck{{ reg.id }}">Choices Submitted?</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <h6 class="text-danger fw-bold mb-3">Allotment Details</h6>
-                                            <div class="row g-3 mb-3 border-bottom pb-3">
-                                                <div class="col-12">
-                                                    <label class="form-label fw-bold small">Allotted Institute (Leave blank if not allotted)</label>
-                                                    <input type="text" name="allotted_institute" class="form-control" placeholder="e.g. PGIMS Rohtak">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-bold small">Allotted Branch/Course</label>
-                                                    <input type="text" name="allotted_branch" class="form-control" placeholder="e.g. MBBS">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-bold small">Allotted Category</label>
-                                                    <input type="text" name="allotted_category" class="form-control" placeholder="e.g. BC-A / General">
-                                                </div>
-                                            </div>
-
-                                            <h6 class="text-primary fw-bold mb-3">Post-Allotment Actions</h6>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label class="form-label fw-bold small">Action Taken</label>
-                                                    <select name="post_allotment_action" class="form-select">
-                                                        <option value="None">No Action Yet</option>
-                                                        <option value="Freeze">Freeze (Accepted)</option>
-                                                        <option value="Float">Float (Upgrade)</option>
-                                                        <option value="Slide">Slide</option>
-                                                        <option value="Surrender">Surrender/Withdraw</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label fw-bold small">Reporting Status</label>
-                                                    <select name="reporting_status" class="form-select">
-                                                        <option value="Not Reported">Not Reported</option>
-                                                        <option value="Reported Online">Reported Online</option>
-                                                        <option value="Reported Physically">Reported Physically</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4 d-flex align-items-end">
-                                                    <div class="form-check form-switch fs-5">
-                                                        <input class="form-check-input" type="checkbox" name="seat_acceptance_fee_paid" value="yes" id="safCheck{{ reg.id }}">
-                                                        <label class="form-check-label ms-2 small fw-bold mt-1 text-success" for="safCheck{{ reg.id }}">SAF Paid?</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                        <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                                            <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Allotment Record</button>
-                                        </div>
-                                    </form>
-                                </div>
+                            <div>
+                                {% if reg.registration_status == 'Planned' %}
+                                    <span class="badge bg-warning text-dark shadow-sm"><i class="fas fa-clock me-1"></i>Planned</span>
+                                {% else %}
+                                    <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle me-1"></i>Registered</span>
+                                    {% if reg.application_number %}
+                                        <span class="badge bg-secondary ms-1 border shadow-sm">App: {{ reg.application_number }}</span>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            {% set has_results = false %}
+                            {% for res in student.round_results %}
+                                {% if res.round.counselling_id == reg.counselling_id %}
+                                    {% set has_results = true %}
+                                    <div class="p-3 mb-2 rounded shadow-sm" style="background-color: #f8fbff; border: 1px solid #ccdfed;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-dark">{{ res.round.round_number }}</span>
+                                            {% if res.seat_acceptance_fee_paid %}
+                                                <span class="badge bg-success small"><i class="fas fa-rupee-sign me-1"></i>SAF Paid</span>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if res.allotted_institute %}
+                                            <p class="mb-1 fw-bold text-danger">{{ res.allotted_institute }}</p>
+                                            <p class="mb-2 small text-muted fw-bold">{{ res.allotted_branch }} ({{ res.allotted_category }})</p>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge border border-dark text-dark">Action: {{ res.post_allotment_action }}</span>
+                                                <span class="badge border border-secondary text-secondary">Status: {{ res.reporting_status }}</span>
+                                            </div>
+                                        {% else %}
+                                            <p class="mb-0 small text-muted fst-italic">No seat allotted in this round.</p>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if not has_results %}
+                                <div class="alert alert-info py-2 small mb-0">
+                                    <i class="fas fa-info-circle me-2"></i> Tracking initiated. Awaiting round allotments.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button class="btn btn-sm btn-outline-dark w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#addRoundResultModal{{ reg.id }}">
+                            <i class="fas fa-plus-circle me-1"></i> Add Round Result
+                        </button>
                     </div>
                     {% else %}
                     <div class="text-center py-5 text-muted">
@@ -241,29 +199,138 @@
         <div class="modal-content" style="border-radius: 15px;">
             <form action="{{ url_for('register_student_counselling', student_id=student.id) }}" method="POST">
                 <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold">Register for Counselling</h5>
+                    <h5 class="modal-title fw-bold">Plan or Register Counselling</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Counselling Process</label>
-                        <select name="counselling_id" class="form-select" required>
-                            <option value="">Select...</option>
+                        <select name="counselling_id" class="form-select bg-light" required>
+                            <option value="">Select Process...</option>
                             {% for c in active_counsellings %}
                             <option value="{{ c.id }}">{{ c.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Counselling Application No.</label>
-                        <input type="text" name="application_number" class="form-control" required>
+
+                    <div class="mb-3 border-top pt-3">
+                        <label class="form-label fw-bold small text-primary">Current Status</label>
+                        <select name="registration_status" id="regStatusSelect" class="form-select" required onchange="toggleAppNumberField()">
+                            <option value="Planned">Planned (Will Register Later)</option>
+                            <option value="Completed">Completed (Form is Filled)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="appNumberDiv" style="display: none;">
+                        <label class="form-label fw-bold small text-success">Official Application No.</label>
+                        <input type="text" name="application_number" id="appNumberInput" class="form-control" placeholder="Enter Registration ID">
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                    <button type="submit" class="btn fw-bold w-100" style="background-color: var(--brand-yellow);">Confirm Registration</button>
+                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Process to Journey</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+{% for reg in student.counselling_registrations %}
+<div class="modal fade" id="addRoundResultModal{{ reg.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 15px;">
+            <form action="{{ url_for('add_round_result', student_id=student.id) }}" method="POST">
+                <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title fw-bold">Record Allotment: {{ reg.counselling.name }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+
+                    <div class="row g-3 border-bottom pb-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Select Round</label>
+                            <select name="round_id" class="form-select" required>
+                                <option value="">Select Round...</option>
+                                {% for r in reg.counselling.rounds %}
+                                <option value="{{ r.id }}">{{ r.round_number }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch fs-5">
+                                <input class="form-check-input" type="checkbox" name="choices_submitted" value="yes" id="choicesCheck{{ reg.id }}">
+                                <label class="form-check-label ms-2 small fw-bold mt-1" for="choicesCheck{{ reg.id }}">Choices Submitted?</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-danger fw-bold mb-3">Allotment Details</h6>
+                    <div class="row g-3 mb-3 border-bottom pb-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Allotted Institute (Leave blank if not allotted)</label>
+                            <input type="text" name="allotted_institute" class="form-control" placeholder="e.g. PGIMS Rohtak">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Allotted Branch/Course</label>
+                            <input type="text" name="allotted_branch" class="form-control" placeholder="e.g. MBBS">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Allotted Category</label>
+                            <input type="text" name="allotted_category" class="form-control" placeholder="e.g. BC-A / General">
+                        </div>
+                    </div>
+
+                    <h6 class="text-primary fw-bold mb-3">Post-Allotment Actions</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Action Taken</label>
+                            <select name="post_allotment_action" class="form-select">
+                                <option value="None">No Action Yet</option>
+                                <option value="Freeze">Freeze (Accepted)</option>
+                                <option value="Float">Float (Upgrade)</option>
+                                <option value="Slide">Slide</option>
+                                <option value="Surrender">Surrender/Withdraw</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small">Reporting Status</label>
+                            <select name="reporting_status" class="form-select">
+                                <option value="Not Reported">Not Reported</option>
+                                <option value="Reported Online">Reported Online</option>
+                                <option value="Reported Physically">Reported Physically</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check form-switch fs-5">
+                                <input class="form-check-input" type="checkbox" name="seat_acceptance_fee_paid" value="yes" id="safCheck{{ reg.id }}">
+                                <label class="form-check-label ms-2 small fw-bold mt-1 text-success" for="safCheck{{ reg.id }}">SAF Paid?</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
+                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Allotment Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function toggleAppNumberField() {
+    const status = document.getElementById('regStatusSelect').value;
+    const appDiv = document.getElementById('appNumberDiv');
+    const appInput = document.getElementById('appNumberInput');
+
+    if(status === 'Completed') {
+        appDiv.style.display = 'block';
+        appInput.setAttribute('required', 'required');
+    } else {
+        appDiv.style.display = 'none';
+        appInput.removeAttribute('required');
+        appInput.value = '';
+    }
+}
+</script>
 {% endblock %}
