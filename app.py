@@ -542,6 +542,7 @@ def register_student_counselling(student_id):
             login_username=request.form.get('login_username'),
             login_password=request.form.get('login_password'),
             registered_email=request.form.get('registered_email'),
+            registered_mobile=request.form.get('registered_mobile'), # <-- NEW FIELD
             form_confirmation_link=request.form.get('form_confirmation_link'),
             registration_date=date.today()
         )

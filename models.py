@@ -324,6 +324,7 @@ class StudentCounsellingRegistration(db.Model):
     login_username = db.Column(db.String(150), nullable=True)
     login_password = db.Column(db.String(150), nullable=True)
     registered_email = db.Column(db.String(150), nullable=True)
+    registered_mobile = db.Column(db.String(20), nullable=True)  # <-- NEW FIELD
     form_confirmation_link = db.Column(db.String(500), nullable=True)
 
     registration_date = db.Column(db.Date, nullable=True)
