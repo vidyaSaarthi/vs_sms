@@ -395,17 +395,9 @@ def add_student():
             flash(f"Student {new_student.full_name} added successfully!")
             return redirect(url_for('dashboard'))
 
-
-        except IntegrityError as e:
+        except IntegrityError:
             db.session.rollback()
-
-            # This prints the EXACT SQL error to your Railway/Terminal logs
-
-            print(f"🚨 INTEGRITY ERROR DETAILS: {str(e.orig)}")
-
-            flash("Database Error: A required field is missing or duplicated. Check your terminal logs for details.",
-                  "error")
-
+            flash("Error: Duplicate Aadhaar or Mobile Number detected.")
         except Exception as e:
             db.session.rollback()
             flash(f"Error saving student: {str(e)}")
@@ -629,9 +621,17 @@ def edit_student(id):
             flash(f"Student {student.full_name} updated successfully!")
             return redirect(url_for('view_student', id=student.id))
 
-        except IntegrityError:
+
+        except IntegrityError as e:
+
             db.session.rollback()
-            flash("Error: That Aadhaar or Mobile Number is already used by another student.")
+
+            # This prints the EXACT SQL error to your Railway/Terminal logs
+
+            print(f"🚨 INTEGRITY ERROR DETAILS: {str(e.orig)}")
+
+            flash("Database Error: A required field is missing or duplicated. Check your terminal logs for details.",
+                  "error")
         except Exception as e:
             db.session.rollback()
             flash(f"Error updating student: {str(e)}")
