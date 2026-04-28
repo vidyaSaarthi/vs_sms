@@ -395,9 +395,17 @@ def add_student():
             flash(f"Student {new_student.full_name} added successfully!")
             return redirect(url_for('dashboard'))
 
-        except IntegrityError:
+
+        except IntegrityError as e:
             db.session.rollback()
-            flash("Error: Duplicate Aadhaar or Mobile Number detected.")
+
+            # This prints the EXACT SQL error to your Railway/Terminal logs
+
+            print(f"🚨 INTEGRITY ERROR DETAILS: {str(e.orig)}")
+
+            flash("Database Error: A required field is missing or duplicated. Check your terminal logs for details.",
+                  "error")
+
         except Exception as e:
             db.session.rollback()
             flash(f"Error saving student: {str(e)}")
