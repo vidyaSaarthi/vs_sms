@@ -70,9 +70,11 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
+                                            {% if form.form_type == 'Exam' %}
                                             <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
                                                 <i class="fas fa-id-badge"></i>
                                             </button>
+                                            {% endif %}
 
                                             {% if form.document_link %}
                                                 <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>
@@ -157,34 +159,35 @@
     </div>
 </div>
 
-
 {% for form in forms %}
-<div class="modal fade" id="viewAdmitCardModal{{ form.id }}" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h6 class="modal-title fw-bold"><i class="fas fa-id-badge me-2"></i>Admit Card Details</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center p-4">
-                <h6 class="fw-bold mb-3">{{ form.name }}</h6>
-                <div class="p-3 bg-light rounded border mb-3">
-                    <small class="d-block text-muted text-uppercase fw-bold mb-1">Expected Release Date</small>
-                    <strong class="fs-5 text-dark">
-                        {{ form.admit_card_date.strftime('%d %b %Y') if form.admit_card_date else 'Not Announced Yet' }}
-                    </strong>
+    {% if form.form_type == 'Exam' %}
+    <div class="modal fade" id="viewAdmitCardModal{{ form.id }}" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-id-badge me-2"></i>Admit Card Details</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                {% if form.admit_card_link %}
-                    <a href="{{ form.admit_card_link }}" target="_blank" class="btn btn-info w-100 fw-bold text-white shadow-sm">
-                        <i class="fas fa-download me-2"></i>Download Portal Link
-                    </a>
-                {% else %}
-                    <button class="btn btn-secondary w-100 fw-bold disabled">No Link Available Yet</button>
-                {% endif %}
+                <div class="modal-body text-center p-4">
+                    <h6 class="fw-bold mb-3">{{ form.name }}</h6>
+                    <div class="p-3 bg-light rounded border mb-3">
+                        <small class="d-block text-muted text-uppercase fw-bold mb-1">Expected Release Date</small>
+                        <strong class="fs-5 text-dark">
+                            {{ form.admit_card_date.strftime('%d %b %Y') if form.admit_card_date else 'Not Announced Yet' }}
+                        </strong>
+                    </div>
+                    {% if form.admit_card_link %}
+                        <a href="{{ form.admit_card_link }}" target="_blank" class="btn btn-info w-100 fw-bold text-white shadow-sm">
+                            <i class="fas fa-download me-2"></i>Download Portal
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary w-100 fw-bold disabled">No Link Available Yet</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
+    {% endif %}
 {% endfor %}
 
 {% for c in counsellings %}
@@ -391,6 +394,20 @@
                             </select>
                         </div>
 
+                        <div class="col-12" id="admitCardDiv" style="display: none;">
+                            <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Admit Card Tracking</h6>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-warning">Release Date</label>
+                                    <input type="date" name="admit_card_date" class="form-control">
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label small fw-bold text-warning">Download Link</label>
+                                    <input type="url" name="admit_card_link" class="form-control" placeholder="https://...">
+                                </div>
+                            </div>
+                        </div>
+
                         <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Form Fees (₹)</h6>
                         <div class="col-md-3">
                             <label class="form-label small text-muted fw-bold">General</label>
@@ -451,6 +468,7 @@
                             <input type="date" name="end_date" class="form-control" value="{{ form.end_date.strftime('%Y-%m-%d') if form.end_date else '' }}">
                         </div>
 
+                        {% if form.form_type == 'Exam' %}
                         <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Admit Card Tracking</h6>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-warning">Release Date</label>
@@ -460,6 +478,7 @@
                             <label class="form-label small fw-bold text-warning">Download Link</label>
                             <input type="url" name="admit_card_link" class="form-control" value="{{ form.admit_card_link or '' }}" placeholder="https://...">
                         </div>
+                        {% endif %}
 
                         <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Form Fees (₹)</h6>
                         <div class="col-md-3">
@@ -505,7 +524,7 @@
         const div = document.getElementById('counTargetDiv');
         const select = document.getElementById('counTargetSelect');
         const label = document.getElementById('counTargetLabel');
-        
+
         select.innerHTML = '<option value="">Select...</option>';
         if (type === 'State') {
             label.innerText = 'Which State?';
@@ -525,18 +544,22 @@
         const div = document.getElementById('formTargetDiv');
         const select = document.getElementById('formTargetSelect');
         const label = document.getElementById('formTargetLabel');
-        
+        const admitDiv = document.getElementById('admitCardDiv');
+
         select.innerHTML = '<option value="">Select...</option>';
         if (type === 'Exam') {
             label.innerText = 'Which Exam?';
             examsData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
             div.style.display = 'block';
+            admitDiv.style.display = 'block';
         } else if (type === 'Counselling') {
             label.innerText = 'Which Counselling Process?';
             counsData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
             div.style.display = 'block';
+            admitDiv.style.display = 'none';
         } else {
             div.style.display = 'none';
+            admitDiv.style.display = 'none';
         }
     }
 </script>

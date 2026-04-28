@@ -161,36 +161,35 @@ def edit_form(item_id):
     try:
         form.name = request.form.get('name')
 
-        # Parse Dates
         start_date_str = request.form.get('start_date')
         end_date_str = request.form.get('end_date')
-        admit_date_str = request.form.get('admit_card_date')
-
         form.start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
         form.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
-        form.admit_card_date = datetime.strptime(admit_date_str, '%Y-%m-%d').date() if admit_date_str else None
 
-        # Parse Fees safely
-        def safe_float(val):
-            return float(val) if val and val.strip() else None
-
-        form.fee_general = safe_float(request.form.get('fee_general'))
-        form.fee_obc = safe_float(request.form.get('fee_obc'))
-        form.fee_sc_st = safe_float(request.form.get('fee_sc_st'))
-        form.fee_female = safe_float(request.form.get('fee_female'))
-
-        # Links
-        form.document_link = request.form.get('document_link')
-        form.admit_card_link = request.form.get('admit_card_link')
-
-        # Type & Target Links
         form.form_type = request.form.get('form_type')
         target_id = request.form.get('target_id')
         form.exam_id = target_id if form.form_type == 'Exam' else None
         form.counselling_id = target_id if form.form_type == 'Counselling' else None
 
+        # NEW LOGIC: Only update Admit Card if it's an Exam
+        if form.form_type == 'Exam':
+            admit_date_str = request.form.get('admit_card_date')
+            form.admit_card_date = datetime.strptime(admit_date_str, '%Y-%m-%d').date() if admit_date_str else None
+            form.admit_card_link = request.form.get('admit_card_link')
+        else:
+            form.admit_card_date = None
+            form.admit_card_link = None
+
+        def safe_float(val): return float(val) if val and val.strip() else None
+        form.fee_general = safe_float(request.form.get('fee_general'))
+        form.fee_obc = safe_float(request.form.get('fee_obc'))
+        form.fee_sc_st = safe_float(request.form.get('fee_sc_st'))
+        form.fee_female = safe_float(request.form.get('fee_female'))
+
+        form.document_link = request.form.get('document_link')
+
         db.session.commit()
-        flash("Form and Admit Card details updated!", "success")
+        flash("Form details updated!", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error updating form: {str(e)}", "error")
@@ -301,7 +300,15 @@ def add_form():
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
 
-    # Helper function to safely convert string fees to float
+    # NEW LOGIC: Only process Admit Cards if it's an Exam
+    if form_type == 'Exam':
+        admit_date_str = request.form.get('admit_card_date')
+        admit_card_date = datetime.strptime(admit_date_str, '%Y-%m-%d').date() if admit_date_str else None
+        admit_card_link = request.form.get('admit_card_link')
+    else:
+        admit_card_date = None
+        admit_card_link = None
+
     def safe_float(val): return float(val) if val and val.strip() else None
 
     new_form = Form(
@@ -311,6 +318,8 @@ def add_form():
         counselling_id=target_id if form_type == 'Counselling' else None,
         start_date=start_date,
         end_date=end_date,
+        admit_card_date=admit_card_date,
+        admit_card_link=admit_card_link,
         fee_general=safe_float(request.form.get('fee_general')),
         fee_obc=safe_float(request.form.get('fee_obc')),
         fee_sc_st=safe_float(request.form.get('fee_sc_st')),
