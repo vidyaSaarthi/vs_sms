@@ -555,6 +555,37 @@ def register_student_counselling(student_id):
     return redirect(url_for('view_student', id=student_id))
 
 
+# ==========================================
+# ADMISSIONS JOURNEY: DELETE COUNSELLING REGISTRATION
+# ==========================================
+@app.route('/student/delete_counselling_reg/<int:reg_id>', methods=['POST'])
+@login_required
+def delete_counselling_reg(reg_id):
+    reg = StudentCounsellingRegistration.query.get_or_404(reg_id)
+    student_id = reg.student_id
+    counselling_name = reg.counselling.name
+
+    try:
+        # Step 1: Clean up any saved Round Results for this specific counselling process
+        associated_rounds = StudentRoundResult.query.join(CounsellingRound).filter(
+            StudentRoundResult.student_id == student_id,
+            CounsellingRound.counselling_id == reg.counselling_id
+        ).all()
+
+        for res in associated_rounds:
+            db.session.delete(res)
+
+        # Step 2: Delete the registration itself
+        db.session.delete(reg)
+        db.session.commit()
+
+        flash(f"Removed {counselling_name} from the student's journey.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error removing participation: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
 # 2. Record Round Result
 
 

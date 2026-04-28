@@ -83,15 +83,20 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                             <h6 class="fw-bold text-dark mb-0">{{ reg.counselling.name }}</h6>
-                            <div>
-                                {% if reg.registration_status == 'Planned' %}
-                                    <span class="badge bg-warning text-dark shadow-sm"><i class="fas fa-clock me-1"></i>Planned</span>
-                                {% else %}
-                                    <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle me-1"></i>Registered</span>
-                                    {% if reg.application_number %}
-                                        <span class="badge bg-secondary ms-1 border shadow-sm">App: {{ reg.application_number }}</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <div>
+                                    {% if reg.registration_status == 'Planned' %}
+                                        <span class="badge bg-warning text-dark shadow-sm"><i class="fas fa-clock me-1"></i>Planned</span>
+                                    {% else %}
+                                        <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle me-1"></i>Registered</span>
+                                        {% if reg.application_number %}
+                                            <span class="badge bg-secondary ms-1 border shadow-sm">App: {{ reg.application_number }}</span>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
+                                </div>
+                                <form action="/student/delete_counselling_reg/{{ reg.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this student from {{ reg.counselling.name }}? This will also delete any saved round allotments for this process.');">
+                                    <button type="submit" class="btn btn-sm text-danger border-0 p-0" title="Remove Participation"><i class="fas fa-trash-alt fs-5"></i></button>
+                                </form>
                             </div>
                         </div>
 
