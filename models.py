@@ -113,10 +113,10 @@ class Student(db.Model):
     academic_status = db.Column(db.String(50), default='Fresher')
 
     # Relationships
-    documents = db.relationship('Document', backref='students', lazy=True, cascade="all, delete-orphan")
-    counselling_registrations = db.relationship('StudentCounsellingRegistration', backref='students', lazy=True)
-    round_results = db.relationship('StudentRoundResult', backref='students', lazy=True)
-    exam_results = db.relationship('StudentExamResult', backref='students', lazy=True, cascade="all, delete-orphan")
+    documents = db.relationship('Document', backref='student', lazy=True, cascade="all, delete-orphan")
+    counselling_registrations = db.relationship('StudentCounsellingRegistration', backref='student', lazy=True)
+    round_results = db.relationship('StudentRoundResult', backref='student', lazy=True)
+    exam_results = db.relationship('StudentExamResult', backref='student', lazy=True, cascade="all, delete-orphan")
 
 
 class StudentExamResult(db.Model):
@@ -221,6 +221,13 @@ class Form(db.Model):
 
     start_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)
+
+    fee_general = db.Column(db.Numeric(10, 2), nullable=True)
+    fee_obc = db.Column(db.Numeric(10, 2), nullable=True)
+    fee_sc_st = db.Column(db.Numeric(10, 2), nullable=True)
+    fee_female = db.Column(db.Numeric(10, 2), nullable=True)
+
+
     admit_card_date = db.Column(db.Date, nullable=True)
     admit_card_link = db.Column(db.String(500), nullable=True)
     document_link = db.Column(db.String(500), nullable=True)
@@ -308,6 +315,12 @@ class StudentCounsellingRegistration(db.Model):
 
     application_number = db.Column(db.String(100), nullable=True)
     registration_status = db.Column(db.String(50), default='Planned')  # <-- NEW FIELD
+
+    login_username = db.Column(db.String(150), nullable=True)
+    login_password = db.Column(db.String(150), nullable=True)
+    registered_email = db.Column(db.String(150), nullable=True)
+    form_confirmation_link = db.Column(db.String(500), nullable=True)
+
     registration_date = db.Column(db.Date, nullable=True)
     fee_status = db.Column(db.String(50), default='Pending')
     documents_verified = db.Column(db.Boolean, default=False)

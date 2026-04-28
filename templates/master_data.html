@@ -29,9 +29,14 @@
                         {% for exam in exams %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
                             <span>{{ exam.name }}</span>
-                            <form action="/settings/master/delete/exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam from the master list?');">
-                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_exam_{{ exam.id }}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/settings/master/delete/exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam from the master list?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
                         </li>
                         {% else %}
                         <li class="list-group-item text-muted text-center py-3">No exams added yet.</li>
@@ -60,9 +65,14 @@
                         {% for state in states %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
                             <span>{{ state.name }}</span>
-                            <form action="/settings/master/delete/state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state from the master list?');">
-                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_state_{{ state.id }}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/settings/master/delete/state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state from the master list?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
                         </li>
                         {% else %}
                         <li class="list-group-item text-muted text-center py-3">No states added yet.</li>
@@ -91,9 +101,14 @@
                         {% for uni in universities %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
                             <span>{{ uni.name }}</span>
-                            <form action="/settings/master/delete/university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university from the master list?');">
-                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_university_{{ uni.id }}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/settings/master/delete/university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university from the master list?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
                         </li>
                         {% else %}
                         <li class="list-group-item text-muted text-center py-3">No universities added yet.</li>
@@ -103,7 +118,7 @@
             </div>
         </div>
 
-        <div class="col-lg-3 mb-4">
+        <div class="col-lg-4 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-red);">
                     <i class="fas fa-graduation-cap me-2"></i> Degree Courses
@@ -120,9 +135,14 @@
                         {% for course in courses %}
                         <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
                             <span>{{ course.name }}</span>
-                            <form action="/settings/master/delete/course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course from the master list?');">
-                                <button type="submit" class="btn btn-sm text-danger p-0" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                            </form>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_course_{{ course.id }}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/settings/master/delete/course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course from the master list?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
                         </li>
                         {% endfor %}
                     </ul>
@@ -132,4 +152,36 @@
 
     </div>
 </div>
+
+{% macro render_edit_modal(items, data_type_label, data_type_slug) %}
+    {% for item in items %}
+    <div class="modal fade" id="editMasterModal_{{ data_type_slug }}_{{ item.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/settings/master/edit/{{ data_type_slug }}/{{ item.id }}" method="POST">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title fw-bold text-dark"><i class="fas fa-edit me-2"></i>Edit {{ data_type_label }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ item.name }}" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endmacro %}
+
+{{ render_edit_modal(exams, 'Exam', 'exam') }}
+{{ render_edit_modal(states, 'State', 'state') }}
+{{ render_edit_modal(universities, 'University', 'university') }}
+{{ render_edit_modal(courses, 'Course', 'course') }}
+
 {% endblock %}

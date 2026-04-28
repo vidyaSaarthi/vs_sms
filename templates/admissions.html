@@ -39,7 +39,9 @@
                                     <th class="ps-4 text-dark">Form Name</th>
                                     <th class="text-dark">Type</th>
                                     <th class="text-dark">Linked To</th>
-                                    <th class="text-dark">Deadline</th>
+                                    <th class="text-dark">Start Date</th>
+                                    <th class="text-dark text-danger">Deadline</th>
+                                    <th class="text-dark">Fees (Gen/OBC/SC)</th>
                                     <th class="text-dark text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -57,14 +59,23 @@
                                             -
                                         {% endif %}
                                     </td>
+                                    <td>{{ form.start_date.strftime('%d %b %Y') if form.start_date else '-' }}</td>
                                     <td class="{% if form.end_date and form.end_date.strftime('%Y-%m-%d') < today %}text-danger fw-bold{% endif %}">
                                         {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            ₹{{ form.fee_general or '0' }} / ₹{{ form.fee_obc or '0' }} / ₹{{ form.fee_sc_st or '0' }}
+                                        </small>
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             {% if form.document_link %}
                                                 <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Open Link"><i class="fas fa-link"></i></a>
                                             {% endif %}
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
                                             <form action="/admissions/delete/form/{{ form.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this form tracking deadline?');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                                                     <i class="fas fa-trash"></i>
@@ -74,7 +85,7 @@
                                     </td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="5" class="text-center py-4 text-muted">No active forms being tracked.</td></tr>
+                                <tr><td colspan="7" class="text-center py-4 text-muted">No active forms being tracked.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -113,6 +124,9 @@
                                             <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}">
                                                 <i class="fas fa-layer-group me-1"></i> Rounds
                                             </button>
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCounsellingModal{{ c.id }}" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
                                             <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                                                     <i class="fas fa-trash"></i>
@@ -132,7 +146,9 @@
         </div>
 
     </div>
-</div> {% for c in counsellings %}
+</div>
+
+{% for c in counsellings %}
 <div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1" aria-labelledby="manageRoundsLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content text-start" style="border-radius: 15px;">
@@ -213,6 +229,33 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="editCounsellingModal{{ c.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admissions/edit_counselling/{{ c.id }}" method="POST">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fas fa-edit me-2"></i>Edit Process</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Process Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ c.name }}" required>
+                    </div>
+                    <input type="hidden" name="counselling_type" value="{{ c.counselling_type }}">
+                    <input type="hidden" name="target_id" value="{{ c.state_id if c.counselling_type == 'State' else c.university_id }}">
+                    <div class="alert alert-light border small text-muted">
+                        <i class="fas fa-info-circle me-1"></i> To change the Type (State/University), please delete and recreate this process.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endfor %}
 
 <div class="modal fade" id="addCounsellingModal" tabindex="-1">
@@ -223,7 +266,7 @@
                     <h5 class="modal-title fw-bold text-dark">New Counselling Process</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Process Name</label>
                         <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
@@ -251,20 +294,20 @@
 </div>
 
 <div class="modal fade" id="addFormModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form action="/admissions/add_form" method="POST">
                 <div class="modal-header" style="background-color: var(--brand-blue);">
                     <h5 class="modal-title fw-bold text-dark">Track New Form</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Form Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g., JEE Main Session 2 Reg" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Form Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., JEE Main Session 2 Reg" required>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-bold">Form Type</label>
                             <select name="form_type" id="formTypeSelect" class="form-select" required onchange="toggleFormTarget()">
                                 <option value="">Select...</option>
@@ -272,19 +315,43 @@
                                 <option value="Counselling">Counselling Reg.</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-primary">Start Date (Optional)</label>
+                            <input type="date" name="start_date" class="form-control">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-bold text-danger">Deadline</label>
                             <input type="date" name="end_date" class="form-control">
                         </div>
-                    </div>
-                    <div class="mb-3" id="formTargetDiv" style="display: none;">
-                        <label class="form-label fw-bold" id="formTargetLabel">Link To</label>
-                        <select name="target_id" id="formTargetSelect" class="form-select">
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Official Link (Optional)</label>
-                        <input type="url" name="document_link" class="form-control" placeholder="https://...">
+
+                        <div class="col-md-12" id="formTargetDiv" style="display: none;">
+                            <label class="form-label fw-bold" id="formTargetLabel">Link To</label>
+                            <select name="target_id" id="formTargetSelect" class="form-select">
+                            </select>
+                        </div>
+
+                        <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Form Fees (₹)</h6>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">General</label>
+                            <input type="number" step="0.01" name="fee_general" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">OBC</label>
+                            <input type="number" step="0.01" name="fee_obc" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">SC/ST</label>
+                            <input type="number" step="0.01" name="fee_sc_st" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">Female</label>
+                            <input type="number" step="0.01" name="fee_female" class="form-control">
+                        </div>
+
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label fw-bold">Official Link (Optional)</label>
+                            <input type="url" name="document_link" class="form-control" placeholder="https://...">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -294,6 +361,77 @@
         </div>
     </div>
 </div>
+
+{% for form in forms %}
+<div class="modal fade" id="editFormModal{{ form.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="/admissions/edit_form/{{ form.id }}" method="POST">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fas fa-edit me-2"></i>Edit Form: {{ form.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Form Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ form.name }}" required>
+                        </div>
+
+                        <input type="hidden" name="form_type" value="{{ form.form_type }}">
+                        <input type="hidden" name="target_id" value="{{ form.exam_id if form.form_type == 'Exam' else form.counselling_id }}">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-primary">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ form.start_date.strftime('%Y-%m-%d') if form.start_date else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-danger">Deadline</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ form.end_date.strftime('%Y-%m-%d') if form.end_date else '' }}">
+                        </div>
+
+                        <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Admit Card Tracking</h6>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-warning">Release Date</label>
+                            <input type="date" name="admit_card_date" class="form-control" value="{{ form.admit_card_date.strftime('%Y-%m-%d') if form.admit_card_date else '' }}">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-warning">Download Link</label>
+                            <input type="url" name="admit_card_link" class="form-control" value="{{ form.admit_card_link or '' }}" placeholder="https://...">
+                        </div>
+
+                        <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Form Fees (₹)</h6>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">General</label>
+                            <input type="number" step="0.01" name="fee_general" class="form-control" value="{{ form.fee_general or '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">OBC</label>
+                            <input type="number" step="0.01" name="fee_obc" class="form-control" value="{{ form.fee_obc or '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">SC/ST</label>
+                            <input type="number" step="0.01" name="fee_sc_st" class="form-control" value="{{ form.fee_sc_st or '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted fw-bold">Female</label>
+                            <input type="number" step="0.01" name="fee_female" class="form-control" value="{{ form.fee_female or '' }}">
+                        </div>
+
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label fw-bold">Official Registration Link</label>
+                            <input type="url" name="document_link" class="form-control" value="{{ form.document_link or '' }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <script>
     const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];

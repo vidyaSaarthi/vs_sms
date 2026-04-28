@@ -106,6 +106,94 @@ def master_data():
     return render_template('master_data.html', exams=exams, states=states, universities=universities, courses=courses)
 
 
+# ==========================================
+# EDIT MASTER DATA (Exams, States, Unis, Courses)
+# ==========================================
+@app.route('/settings/master/edit/<data_type>/<int:item_id>', methods=['POST'])
+@login_required
+def edit_master_data(data_type, item_id):
+    model_map = {'exam': Exam, 'state': State, 'university': University, 'course': Course}
+    model = model_map.get(data_type)
+    if not model:
+        return redirect(url_for('master_data'))
+
+    item = model.query.get_or_404(item_id)
+    new_name = request.form.get('name')
+
+    if new_name and new_name.strip():
+        item.name = new_name.strip()
+        db.session.commit()
+        flash(f"Updated successfully to '{item.name}'!", "success")
+    return redirect(url_for('master_data'))
+
+
+# ==========================================
+# EDIT ADMISSIONS DATA (Counselling)
+# ==========================================
+@app.route('/admissions/edit_counselling/<int:item_id>', methods=['POST'])
+@login_required
+def edit_counselling(item_id):
+    c = Counselling.query.get_or_404(item_id)
+    c.name = request.form.get('name')
+
+    # Update type and target if changed
+    c.counselling_type = request.form.get('counselling_type')
+    target_id = request.form.get('target_id')
+    c.state_id = target_id if c.counselling_type == 'State' else None
+    c.university_id = target_id if c.counselling_type == 'University' else None
+
+    db.session.commit()
+    flash("Counselling process updated successfully!", "success")
+    return redirect(url_for('admissions_hub'))
+
+
+# ==========================================
+# EDIT ADMISSIONS DATA (Forms & Admit Cards)
+# ==========================================
+@app.route('/admissions/edit_form/<int:item_id>', methods=['POST'])
+@login_required
+def edit_form(item_id):
+    form = Form.query.get_or_404(item_id)
+    try:
+        form.name = request.form.get('name')
+
+        # Parse Dates
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
+        admit_date_str = request.form.get('admit_card_date')
+
+        form.start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
+        form.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+        form.admit_card_date = datetime.strptime(admit_date_str, '%Y-%m-%d').date() if admit_date_str else None
+
+        # Parse Fees safely
+        def safe_float(val):
+            return float(val) if val and val.strip() else None
+
+        form.fee_general = safe_float(request.form.get('fee_general'))
+        form.fee_obc = safe_float(request.form.get('fee_obc'))
+        form.fee_sc_st = safe_float(request.form.get('fee_sc_st'))
+        form.fee_female = safe_float(request.form.get('fee_female'))
+
+        # Links
+        form.document_link = request.form.get('document_link')
+        form.admit_card_link = request.form.get('admit_card_link')
+
+        # Type & Target Links
+        form.form_type = request.form.get('form_type')
+        target_id = request.form.get('target_id')
+        form.exam_id = target_id if form.form_type == 'Exam' else None
+        form.counselling_id = target_id if form.form_type == 'Counselling' else None
+
+        db.session.commit()
+        flash("Form and Admit Card details updated!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating form: {str(e)}", "error")
+
+    return redirect(url_for('admissions_hub'))
+
+
 # 2. Universal Route to process new additions
 @app.route('/settings/master/add', methods=['POST'])
 @login_required
@@ -199,19 +287,28 @@ def add_counselling():
 @login_required
 def add_form():
     name = request.form.get('name')
-    form_type = request.form.get('form_type')  # 'Exam' or 'Counselling'
+    form_type = request.form.get('form_type')
     target_id = request.form.get('target_id')
 
-    # Convert string dates from HTML to Python Date objects
+    start_date_str = request.form.get('start_date')
     end_date_str = request.form.get('end_date')
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+
+    # Helper function to safely convert string fees to float
+    def safe_float(val): return float(val) if val and val.strip() else None
 
     new_form = Form(
         name=name,
         form_type=form_type,
         exam_id=target_id if form_type == 'Exam' else None,
         counselling_id=target_id if form_type == 'Counselling' else None,
+        start_date=start_date,
         end_date=end_date,
+        fee_general=safe_float(request.form.get('fee_general')),
+        fee_obc=safe_float(request.form.get('fee_obc')),
+        fee_sc_st=safe_float(request.form.get('fee_sc_st')),
+        fee_female=safe_float(request.form.get('fee_female')),
         document_link=request.form.get('document_link')
     )
     db.session.add(new_form)
@@ -425,8 +522,12 @@ def register_student_counselling(student_id):
         registration = StudentCounsellingRegistration(
             student_id=student_id,
             counselling_id=counselling_id,
-            application_number=app_no if app_no and app_no.strip() else None,
             registration_status=reg_status,
+            application_number=app_no if app_no and app_no.strip() else None,
+            login_username=request.form.get('login_username'),
+            login_password=request.form.get('login_password'),
+            registered_email=request.form.get('registered_email'),
+            form_confirmation_link=request.form.get('form_confirmation_link'),
             registration_date=date.today()
         )
         db.session.add(registration)
