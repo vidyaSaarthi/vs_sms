@@ -70,8 +70,12 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
+                                                <i class="fas fa-id-badge"></i>
+                                            </button>
+
                                             {% if form.document_link %}
-                                                <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Open Link"><i class="fas fa-link"></i></a>
+                                                <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>
                                             {% endif %}
                                             <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit">
                                                 <i class="fas fa-edit"></i>
@@ -116,7 +120,12 @@
                             <tbody>
                                 {% for c in counsellings %}
                                 <tr>
-                                    <td class="ps-4 fw-bold" style="color: var(--brand-red);">{{ c.name }}</td>
+                                    <td class="ps-4">
+                                        <div class="fw-bold" style="color: var(--brand-red);">{{ c.name }}</div>
+                                        {% if c.exam %}
+                                            <span class="badge bg-danger mt-1" style="font-size: 0.7rem;"><i class="fas fa-pen-nib me-1"></i>{{ c.exam.name }}</span>
+                                        {% endif %}
+                                    </td>
                                     <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
                                     <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '-' }}</td>
                                     <td class="text-center">
@@ -148,13 +157,43 @@
     </div>
 </div>
 
+
+{% for form in forms %}
+<div class="modal fade" id="viewAdmitCardModal{{ form.id }}" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h6 class="modal-title fw-bold"><i class="fas fa-id-badge me-2"></i>Admit Card Details</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <h6 class="fw-bold mb-3">{{ form.name }}</h6>
+                <div class="p-3 bg-light rounded border mb-3">
+                    <small class="d-block text-muted text-uppercase fw-bold mb-1">Expected Release Date</small>
+                    <strong class="fs-5 text-dark">
+                        {{ form.admit_card_date.strftime('%d %b %Y') if form.admit_card_date else 'Not Announced Yet' }}
+                    </strong>
+                </div>
+                {% if form.admit_card_link %}
+                    <a href="{{ form.admit_card_link }}" target="_blank" class="btn btn-info w-100 fw-bold text-white shadow-sm">
+                        <i class="fas fa-download me-2"></i>Download Portal Link
+                    </a>
+                {% else %}
+                    <button class="btn btn-secondary w-100 fw-bold disabled">No Link Available Yet</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 {% for c in counsellings %}
-<div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1" aria-labelledby="manageRoundsLabel" aria-hidden="true">
+<div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content text-start" style="border-radius: 15px;">
             <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
                 <h5 class="modal-title fw-bold"><i class="fas fa-sitemap me-2 text-warning"></i>Manage Rounds: {{ c.name }}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
 
@@ -243,10 +282,21 @@
                         <label class="form-label fw-bold">Process Name</label>
                         <input type="text" name="name" class="form-control" value="{{ c.name }}" required>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
+                        <select name="exam_id" class="form-select">
+                            <option value="">None / Not Applicable</option>
+                            {% for exam in exams %}
+                            <option value="{{ exam.id }}" {% if c.exam_id == exam.id %}selected{% endif %}>{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <input type="hidden" name="counselling_type" value="{{ c.counselling_type }}">
                     <input type="hidden" name="target_id" value="{{ c.state_id if c.counselling_type == 'State' else c.university_id }}">
-                    <div class="alert alert-light border small text-muted">
-                        <i class="fas fa-info-circle me-1"></i> To change the Type (State/University), please delete and recreate this process.
+                    <div class="alert alert-light border small text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i> To change the Type (State/University), please delete and recreate this process to preserve database integrity.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -271,6 +321,17 @@
                         <label class="form-label fw-bold">Process Name</label>
                         <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
                     </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
+                        <select name="exam_id" class="form-select">
+                            <option value="">None / Not Applicable</option>
+                            {% for exam in exams %}
+                            <option value="{{ exam.id }}">{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Type</label>
                         <select name="counselling_type" id="counTypeSelect" class="form-select" required onchange="toggleCounsellingTarget()">

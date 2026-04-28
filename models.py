@@ -207,7 +207,7 @@ class Counselling(db.Model):
 
     # Relationships
     rounds = db.relationship('CounsellingRound', backref='counselling', lazy=True, cascade="all, delete-orphan")
-
+    exam = db.relationship('Exam', backref='counsellings', lazy=True) # <-- Allows c.exam.name in HTML
 
 class Form(db.Model):
     __tablename__ = 'forms'

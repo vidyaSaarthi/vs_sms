@@ -142,6 +142,10 @@ def edit_counselling(item_id):
     c.state_id = target_id if c.counselling_type == 'State' else None
     c.university_id = target_id if c.counselling_type == 'University' else None
 
+    # Update the Exam Link
+    exam_id_val = request.form.get('exam_id')
+    c.exam_id = int(exam_id_val) if exam_id_val else None
+
     db.session.commit()
     flash("Counselling process updated successfully!", "success")
     return redirect(url_for('admissions_hub'))
@@ -267,14 +271,16 @@ def admissions_hub():
 @login_required
 def add_counselling():
     name = request.form.get('name')
-    counselling_type = request.form.get('counselling_type')  # 'State' or 'University'
-    target_id = request.form.get('target_id')  # Will be either state_id or university_id
+    counselling_type = request.form.get('counselling_type')
+    target_id = request.form.get('target_id')
+    exam_id_val = request.form.get('exam_id') # <-- Grab the Exam
 
     new_counselling = Counselling(
         name=name,
         counselling_type=counselling_type,
         state_id=target_id if counselling_type == 'State' else None,
-        university_id=target_id if counselling_type == 'University' else None
+        university_id=target_id if counselling_type == 'University' else None,
+        exam_id=int(exam_id_val) if exam_id_val else None # <-- Save it
     )
     db.session.add(new_counselling)
     db.session.commit()
