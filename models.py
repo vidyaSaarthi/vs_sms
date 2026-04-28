@@ -196,18 +196,23 @@ class Counselling(db.Model):
     name = db.Column(db.String(200), nullable=False)
     counselling_type = db.Column(db.String(50), nullable=False)  # 'State' or 'University'
 
+    # 🚨 CRITICAL FIX: Make sure this line is here, and it says 'exams.id' (PLURAL)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=True)
+
     # Exclusive Foreign Keys based on type
     state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
     university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=True)
 
     eligibility_criteria = db.Column(db.Text, nullable=True)
     security_fees = db.Column(db.Numeric(10, 2), nullable=True)
-    required_documents = db.Column(db.Text, nullable=True)  # JSON or Comma separated
+    required_documents = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     rounds = db.relationship('CounsellingRound', backref='counselling', lazy=True, cascade="all, delete-orphan")
-    exam = db.relationship('Exam', backref='counsellings', lazy=True) # <-- Allows c.exam.name in HTML
+
+    # 🚨 CRITICAL FIX: Make sure this relationship is here to match the column above
+    exam = db.relationship('Exam', backref='counsellings', lazy=True)
 
 class Form(db.Model):
     __tablename__ = 'forms'
