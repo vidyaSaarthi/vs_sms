@@ -906,13 +906,12 @@ from flask import request, render_template
 @app.route('/students')
 @login_required
 def student_pipeline():
-    # 1. Grab all 4 search filters
     search_query = request.args.get('search', '')
     exam_filter = request.args.get('exam', '')
     counsellor_filter = request.args.get('counsellor', '')
     status_filter = request.args.get('status', '')
+    counselling_filter = request.args.get('counselling', '')  # <-- NEW FILTER
 
-    # 2. Build the query dynamically
     query = Student.query
 
     if search_query:
@@ -920,7 +919,7 @@ def student_pipeline():
             db.or_(
                 Student.full_name.ilike(f'%{search_query}%'),
                 Student.mobile_number.ilike(f'%{search_query}%'),
-                Student.aadhaar_no.ilike(f'%{search_query}%')  # Added Aadhaar search for you!
+                Student.aadhaar_no.ilike(f'%{search_query}%')
             )
         )
 
@@ -933,12 +932,18 @@ def student_pipeline():
     if status_filter:
         query = query.filter(Student.academic_status == status_filter)
 
-    # 3. Get a list of unique counselors who have actually added students
-    # This prevents the dropdown from being hardcoded
+    # NEW: Filter students who have a registration matching the ID
+    if counselling_filter:
+        query = query.join(StudentCounsellingRegistration).filter(
+            StudentCounsellingRegistration.counselling_id == counselling_filter
+        )
+
     counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
     counsellor_list = [c[0] for c in counsellors]
 
-    # 4. Fetch the results
+    # NEW: Fetch counselling processes for the dropdown menu
+    active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
     students = query.order_by(Student.created_at.desc()).all()
 
     return render_template('students.html',
@@ -947,7 +952,9 @@ def student_pipeline():
                            exam_filter=exam_filter,
                            counsellor_filter=counsellor_filter,
                            status_filter=status_filter,
-                           counsellors=counsellor_list)
+                           counselling_filter=counselling_filter,  # <-- Added to template
+                           counsellors=counsellor_list,
+                           active_counsellings=active_counsellings)  # <-- Added to template
 
 
 # ==========================================

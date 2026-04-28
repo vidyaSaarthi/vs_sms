@@ -42,6 +42,17 @@
                     </select>
                 </div>
 
+                <div class="col-md-3">
+                    <select name="counselling" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Counselling Processes</option>
+                        {% for c in active_counsellings %}
+                            <option value="{{ c.id }}" {% if counselling_filter == c.id|string %}selected{% endif %}>
+                                {{ c.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div class="col-md-2">
                     <select class="form-select" name="status">
                         <option value="">All Statuses</option>
