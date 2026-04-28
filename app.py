@@ -994,9 +994,9 @@ def delete_counselling_record(item_id):
         db.session.delete(item)
         db.session.commit()
         flash("Counselling process deleted.", "success")
-    except IntegrityError:
+    except Exception as e: # <--- CHANGE THIS FROM IntegrityError to Exception
         db.session.rollback()
-        flash("⚠️ Cannot delete this counselling process as students are registered to it.", "error")
+        flash("⚠️ Cannot delete this counselling process because students are actively registered to it.", "error")
     return redirect(url_for('admissions_hub'))
 
 
