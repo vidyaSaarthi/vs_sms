@@ -562,6 +562,34 @@
             admitDiv.style.display = 'none';
         }
     }
+
+    // ==========================================
+    // TAB MEMORY: Remember active tab on reload
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Check if the browser remembers a previously clicked tab
+        let activeTabId = localStorage.getItem('admissionsActiveTab');
+
+        if (activeTabId) {
+            // Find that specific tab button
+            let tabElement = document.querySelector(activeTabId);
+            if (tabElement) {
+                // Use Bootstrap's built-in tab engine to switch to it
+                let tab = new bootstrap.Tab(tabElement);
+                tab.show();
+            }
+        }
+
+        // 2. Whenever a counselor clicks a tab, save its ID to browser memory
+        let tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabButtons.forEach(function(btn) {
+            btn.addEventListener('shown.bs.tab', function(event) {
+                // Save the ID (e.g., '#counselling-tab')
+                localStorage.setItem('admissionsActiveTab', '#' + event.target.id);
+            });
+        });
+    });
+
 </script>
 
 {% endblock %}
