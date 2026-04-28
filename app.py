@@ -1091,6 +1091,66 @@ def add_exam_result(student_id):
     return redirect(url_for('view_student', id=student_id))
 
 
+# ==========================================
+# ADMISSIONS JOURNEY: EDIT EXAM RESULT
+# ==========================================
+@app.route('/student/edit_exam_result/<int:result_id>', methods=['POST'])
+@login_required
+def edit_exam_result(result_id):
+    result = StudentExamResult.query.get_or_404(result_id)
+    student_id = result.student_id
+
+    try:
+        result.exam_id = request.form.get('exam_id')
+        result.application_number = request.form.get('application_number')
+
+        score_val = request.form.get('score')
+        percentile_val = request.form.get('percentile')
+        air_val = request.form.get('all_india_rank')
+        state_rank_val = request.form.get('state_rank')
+
+        result.score = float(score_val) if score_val and score_val.strip() else None
+        result.percentile = float(percentile_val) if percentile_val and percentile_val.strip() else None
+        result.all_india_rank = int(air_val) if air_val and air_val.strip() else None
+        result.state_rank = int(state_rank_val) if state_rank_val and state_rank_val.strip() else None
+
+        db.session.commit()
+        flash("Exam result updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating exam result: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
+
+# ==========================================
+# ADMISSIONS JOURNEY: EDIT COUNSELLING REG
+# ==========================================
+@app.route('/student/edit_counselling_reg/<int:reg_id>', methods=['POST'])
+@login_required
+def edit_counselling_reg(reg_id):
+    reg = StudentCounsellingRegistration.query.get_or_404(reg_id)
+    student_id = reg.student_id
+
+    try:
+        reg.counselling_id = request.form.get('counselling_id')
+        reg.registration_status = request.form.get('registration_status')
+        reg.application_number = request.form.get('application_number')
+        reg.login_username = request.form.get('login_username')
+        reg.login_password = request.form.get('login_password')
+        reg.registered_email = request.form.get('registered_email')
+        reg.registered_mobile = request.form.get('registered_mobile')
+        reg.form_confirmation_link = request.form.get('form_confirmation_link')
+
+        db.session.commit()
+        flash("Counselling registration updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating registration: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
+
 # Optional: Delete Exam Result Route
 @app.route('/student/delete_exam_result/<int:result_id>', methods=['POST'])
 @login_required
