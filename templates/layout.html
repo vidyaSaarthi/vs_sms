@@ -239,9 +239,18 @@
                     </h5>
                 </div>
                 <div class="d-flex align-items-center">
-                    <div class="bg-light rounded-pill px-3 py-2 border shadow-sm">
-                        <i class="fas fa-user-circle text-muted me-2"></i>
-                        <span class="fw-bold text-dark">Counselor: <span style="color: var(--brand-red);">{{ current_user.username|capitalize }}</span></span>
+                    <div class="dropdown">
+                        <div class="bg-light rounded-pill px-3 py-2 border shadow-sm dropdown-toggle" data-bs-toggle="dropdown" style="cursor: pointer;">
+                            <i class="fas fa-user-circle text-muted me-2"></i>
+                            <span class="fw-bold text-dark">Counselor: <span style="color: var(--brand-red);">{{ current_user.username|capitalize }}</span></span>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 10px;">
+                            <li>
+                                <a class="dropdown-item fw-bold text-dark py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    <i class="fas fa-key me-2 text-warning"></i> Change Password
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -259,6 +268,38 @@
     {% if current_user.is_authenticated %}
             </div> </div> {% else %}
             </div> </div> {% endif %}
+
+    {% if current_user.is_authenticated %}
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px;">
+                <form action="{{ url_for('change_password') }}" method="POST">
+                    <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-lock me-2 text-warning"></i>Update Security Credentials</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Current Password</label>
+                            <input type="password" name="current_password" class="form-control bg-light" required>
+                        </div>
+                        <div class="mb-3 border-top pt-3">
+                            <label class="form-label fw-bold small text-primary">New Password</label>
+                            <input type="password" name="new_password" class="form-control" required minlength="6">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small text-primary">Confirm New Password</label>
+                            <input type="password" name="confirm_password" class="form-control" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
+                        <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

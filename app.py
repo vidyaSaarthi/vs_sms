@@ -84,6 +84,33 @@ def login():
     return render_template('login.html')
 
 
+# ==========================================
+# SECURITY: CHANGE PASSWORD
+# ==========================================
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    current_pw = request.form.get('current_password')
+    new_pw = request.form.get('new_password')
+    confirm_pw = request.form.get('confirm_password')
+
+    # 1. Verify current password
+    if not check_password_hash(current_user.password_hash, current_pw):
+        flash("Security Alert: Current password is incorrect.", "error")
+        return redirect(request.referrer or url_for('dashboard'))
+
+    # 2. Check if new passwords match
+    if new_pw != confirm_pw:
+        flash("Validation Error: New passwords do not match.", "error")
+        return redirect(request.referrer or url_for('dashboard'))
+
+    # 3. Hash and save the new password
+    current_user.password_hash = generate_password_hash(new_pw)
+    db.session.commit()
+
+    flash("Password updated successfully! Please log in with your new credentials.", "success")
+    return redirect(url_for('logout'))  # Force login with new password
+
 @app.route('/logout')
 @login_required
 def logout():
