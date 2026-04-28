@@ -71,6 +71,10 @@ def load_user(user_id): return Staff.query.get(int(user_id))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # SECURITY FIX: If already logged in, skip the login page entirely
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
         user = Staff.query.filter_by(username=request.form.get('username')).first()
         if user and check_password_hash(user.password_hash, request.form.get('password')):
@@ -104,7 +108,7 @@ def master_data():
 
 # 2. Universal Route to process new additions
 @app.route('/settings/master/add', methods=['POST'])
-# @login_required
+@login_required
 def add_master_data():
     data_type = request.form.get('data_type')
     name = request.form.get('name')
@@ -172,7 +176,7 @@ def admissions_hub():
 
 # 2. Add New Counselling Process
 @app.route('/admissions/add_counselling', methods=['POST'])
-# @login_required
+@login_required
 def add_counselling():
     name = request.form.get('name')
     counselling_type = request.form.get('counselling_type')  # 'State' or 'University'
@@ -192,7 +196,7 @@ def add_counselling():
 
 # 3. Add New Form / Deadline
 @app.route('/admissions/add_form', methods=['POST'])
-# @login_required
+@login_required
 def add_form():
     name = request.form.get('name')
     form_type = request.form.get('form_type')  # 'Exam' or 'Counselling'
@@ -408,7 +412,7 @@ def add_student():
 
 # 1. Register Student for a Counselling Process
 @app.route('/student/<int:student_id>/register_counselling', methods=['POST'])
-# @login_required
+@login_required
 def register_student_counselling(student_id):
     counselling_id = request.form.get('counselling_id')
     app_no = request.form.get('application_number')
@@ -824,7 +828,7 @@ def student_pipeline():
 # UNIVERSAL MASTER DATA DELETE
 # ==========================================
 @app.route('/settings/master/delete/<data_type>/<int:item_id>', methods=['POST'])
-# @login_required
+@login_required
 def delete_master_data(data_type, item_id):
     # Map the string from the URL to the actual Python Class
     model_map = {
@@ -857,7 +861,7 @@ def delete_master_data(data_type, item_id):
 # ADMISSIONS DATA DELETE
 # ==========================================
 @app.route('/admissions/delete/counselling/<int:item_id>', methods=['POST'])
-# @login_required
+@login_required
 def delete_counselling_record(item_id):
     item = Counselling.query.get_or_404(item_id)
     try:
@@ -871,7 +875,7 @@ def delete_counselling_record(item_id):
 
 
 @app.route('/admissions/delete/form/<int:item_id>', methods=['POST'])
-# @login_required
+@login_required
 def delete_form_record(item_id):
     item = Form.query.get_or_404(item_id)
     db.session.delete(item)
