@@ -182,7 +182,7 @@
                                                 <thead style="background-color: var(--brand-blue);">
                                                     <tr>
                                                         <th class="ps-4 text-dark w-25">Counselling Name</th>
-                                                        <th class="text-dark">Entity Type</th>
+                                                        <th class="text-dark">Target Entity</th>
                                                         <th class="text-dark">Target Courses</th>
                                                         <th class="text-dark text-center">Actions</th>
                                                     </tr>
@@ -191,7 +191,13 @@
                                                     {% for c in processes %}
                                                     <tr>
                                                         <td class="ps-4 fw-bold" style="color: #333;">{{ c.name }}</td>
-                                                        <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
+                                                        <td>
+                                                            <span class="badge border border-dark text-dark mb-1">{{ c.counselling_type }}</span><br>
+                                                            <small class="fw-bold text-muted">
+                                                                <i class="fas fa-map-marker-alt me-1"></i>
+                                                                {{ c.state.name if c.counselling_type == 'State' and c.state else (c.university.name if c.counselling_type == 'University' and c.university else 'Not Assigned') }}
+                                                            </small>
+                                                        </td>
                                                         <td>
                                                             {% if c.courses %}
                                                                 {% for crs in c.courses %}
@@ -387,17 +393,22 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Entity Type</label>
-                        <select name="counselling_type" id="counTypeSelect_edit_{{ c.id }}" class="form-select" disabled>
-                            <option value="{{ c.counselling_type }}" selected>{{ c.counselling_type }}</option>
+                        <label class="form-label fw-bold">Target {{ c.counselling_type }}</label>
+                        <select name="target_id" class="form-select" required>
+                            {% if c.counselling_type == 'State' %}
+                                {% for s in states %}
+                                <option value="{{ s.id }}" {% if c.state_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                                {% endfor %}
+                            {% elif c.counselling_type == 'University' %}
+                                {% for u in universities %}
+                                <option value="{{ u.id }}" {% if c.university_id == u.id %}selected{% endif %}>{{ u.name }}</option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>To switch from State to University entirely, recreate the process.</small>
                     </div>
 
                     <input type="hidden" name="counselling_type" value="{{ c.counselling_type }}">
-                    <input type="hidden" name="target_id" value="{{ c.state_id if c.counselling_type == 'State' else c.university_id }}">
-                    <div class="alert alert-light border small text-muted mb-0">
-                        <i class="fas fa-info-circle me-1"></i> To change the Type (State/University), please delete and recreate this process to preserve database integrity.
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
