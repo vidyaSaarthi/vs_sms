@@ -938,13 +938,17 @@ def export_verification(id):
 # ==========================================
 # ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
 # ==========================================
+# ==========================================
+# ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
+# ==========================================
 @app.route('/student/<int:student_id>/register_counselling', methods=['POST'])
 @login_required
 def register_student_counselling(student_id):
     try:
-        counselling_id = request.form.get('counselling_id')
+        # 🚨 THE FIX: Convert the string from the HTML form into a Python Integer!
+        counselling_id = int(request.form.get('counselling_id'))
 
-        # 🛑 NEW FIX: Check if the student is already registered for this process!
+        # 🛑 Check if the student is already registered for this process!
         existing_reg = StudentCounsellingRegistration.query.filter_by(
             student_id=student_id,
             counselling_id=counselling_id
