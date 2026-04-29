@@ -46,35 +46,85 @@
         </div>
     </div>
 
-    <div class="row">
-
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-red);">
-                    <i class="fas fa-calendar-alt me-2"></i> Upcoming Form Deadlines
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                <div class="card-header bg-dark text-white py-3 border-0" style="border-radius: 15px 15px 0 0;">
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib me-2 text-warning"></i>Upcoming Exam Deadlines</h6>
                 </div>
                 <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for form in upcoming_forms %}
-                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-0 fw-bold">{{ form.name }}</h6>
-                                <small class="text-muted">Closes: {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'TBD' }}</small>
-                            </div>
-                            <span class="badge" style="background-color: var(--brand-blue); color: var(--brand-red);">{{ form.form_type }}</span>
-                        </li>
-                        {% else %}
-                        <li class="list-group-item px-4 py-4 text-center text-muted">
-                            <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
-                            <p class="mb-0">No urgent deadlines approaching!</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-4">Exam Form</th>
+                                    <th class="text-danger">Deadline</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in upcoming_exam_forms %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ form.name }}</td>
+                                    <td class="text-danger fw-bold">
+                                        <i class="far fa-clock me-1"></i>{{ form.end_date.strftime('%d %b %Y') }}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="2" class="text-center py-4 text-muted">No upcoming exam deadlines.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                <div class="card-header border-0 py-3" style="background-color: var(--brand-blue); border-radius: 15px 15px 0 0;">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap me-2 text-danger"></i>Upcoming Counselling Deadlines</h6>
+                </div>
+                <div class="card-body p-4" style="max-height: 400px; overflow-y: auto;">
+
+                    {% if counselling_grouped %}
+                        {% for exam_name, forms in counselling_grouped.items() %}
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-2">
+                                    <span class="badge bg-danger shadow-sm px-3 py-2" style="font-size: 0.85rem;">{{ exam_name }}</span>
+                                </h6>
+
+                                <div class="border rounded bg-white shadow-sm overflow-hidden">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <tbody>
+                                            {% for form in forms %}
+                                            <tr>
+                                                <td class="ps-3 py-2 fw-bold text-dark border-0">{{ form.name }}</td>
+                                                <td class="text-end pe-3 py-2 border-0">
+                                                    <span class="badge bg-light text-danger border border-danger">
+                                                        {{ form.end_date.strftime('%d %b %Y') }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                            <p>No upcoming counselling deadlines.</p>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white fw-bold py-3" style="color: #333;">
                     <i class="fas fa-history me-2"></i> Recently Added Students
@@ -97,11 +147,11 @@
                     </ul>
                 </div>
                 <div class="card-footer bg-white text-center py-2">
-                    <a href="/students" class="text-decoration-none" style="color: var(--brand-red); font-size: 0.9rem fw-bold;">View Entire Pipeline &rarr;</a>
+                    <a href="/students" class="text-decoration-none" style="color: var(--brand-red); font-weight: bold; font-size: 0.9rem;">View Entire Pipeline &rarr;</a>
                 </div>
             </div>
         </div>
-
     </div>
+
 </div>
 {% endblock %}

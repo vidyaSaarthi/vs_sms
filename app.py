@@ -371,11 +371,38 @@ def dashboard():
     total_forms = Form.query.count()
     active_counselling = Counselling.query.count()
 
-    # 3. Get Upcoming Deadlines (Forms closing in the future)
     today = date.today()
-    upcoming_forms = Form.query.filter(Form.end_date >= today).order_by(Form.end_date.asc()).limit(5).all()
 
-    # 4. Get Recently Added Students (For quick access)
+    # 3. Get Upcoming EXAM Deadlines (Limit to 5 for neatness)
+    upcoming_exam_forms = Form.query.filter(
+        Form.end_date >= today,
+        Form.form_type == 'Exam'
+    ).order_by(Form.end_date.asc()).limit(5).all()
+
+    # 4. Get Upcoming COUNSELLING Deadlines and Group by Exam
+    upcoming_couns_forms = Form.query.filter(
+        Form.end_date >= today,
+        Form.form_type == 'Counselling'
+    ).order_by(Form.end_date.asc()).all()
+
+    counselling_grouped = {}
+    for form in upcoming_couns_forms:
+        exam_name = "Independent / Unlinked Processes"
+
+        # Safely find the linked Exam Name
+        if form.counselling_id:
+            couns = Counselling.query.get(form.counselling_id)
+            if couns and couns.exam_id:
+                exam = Exam.query.get(couns.exam_id)
+                if exam:
+                    exam_name = exam.name
+
+        # Add the form to the correct Exam group
+        if exam_name not in counselling_grouped:
+            counselling_grouped[exam_name] = []
+        counselling_grouped[exam_name].append(form)
+
+    # 5. Get Recently Added Students
     recent_students = Student.query.order_by(Student.created_at.desc()).limit(5).all()
 
     return render_template('dashboard.html',
@@ -383,7 +410,8 @@ def dashboard():
                            pending_students=pending_students,
                            total_forms=total_forms,
                            active_counselling=active_counselling,
-                           upcoming_forms=upcoming_forms,
+                           upcoming_exam_forms=upcoming_exam_forms,  # <-- Passed to HTML
+                           counselling_grouped=counselling_grouped,  # <-- Passed to HTML
                            recent_students=recent_students)
 
 
