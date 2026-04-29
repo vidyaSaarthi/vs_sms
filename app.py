@@ -945,13 +945,22 @@ def delete_student(id):
         flash("SECURITY BLOCK: Invalid Admin PIN.")
         return redirect(url_for('view_student', id=student.id))
 
+
 @app.route('/student/<int:id>')
 @login_required
 def view_student(id):
     student = Student.query.get_or_404(id)
-    active_counsellings = Counselling.query.all()
+
+    # 🚨 THE FIX: Force the database to return Counsellings alphabetically
+    active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
+    # Force the database to return Exams alphabetically
     exams = Exam.query.order_by(Exam.name.asc()).all()
-    return render_template('profile.html', student=student, active_counsellings=active_counsellings, exams=exams)
+
+    return render_template('profile.html',
+                           student=student,
+                           active_counsellings=active_counsellings,
+                           exams=exams)
 
 @app.route('/student/<int:id>/export')
 @login_required
@@ -1162,8 +1171,10 @@ def college_directory():
     if course_filter: query = query.filter(College.course_id == course_filter)
     if type_filter: query = query.filter(College.college_type == type_filter)
 
+    # Sort the actual College list
     colleges = query.order_by(College.name.asc()).all()
 
+    # 🚨 Force Alphabetical Sorting for all Dropdowns on the College page
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
