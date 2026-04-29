@@ -212,6 +212,7 @@ class Counselling(db.Model):
     counselling_type = db.Column(db.String(50), nullable=False)
 
     exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
 
     state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
     university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=True)
@@ -221,10 +222,16 @@ class Counselling(db.Model):
     required_documents = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationships
+    # ==============================
+    # RELATIONSHIPS
+    # ==============================
     rounds = db.relationship('CounsellingRound', backref='counselling', lazy=True, cascade="all, delete-orphan")
     exam = db.relationship('Exam', backref='counsellings', lazy=True)
     courses = db.relationship('Course', secondary=counselling_courses, backref=db.backref('counsellings', lazy=True))
+
+    # 🚨 ADD THESE TWO NEW LINES:
+    state = db.relationship('State', backref='state_counsellings', lazy=True)
+    university = db.relationship('University', backref='uni_counsellings', lazy=True)
 
 
 class Form(db.Model):
