@@ -522,6 +522,7 @@ def dashboard():
                            counselling_grouped=counselling_grouped,
                            recent_students=recent_students)
 
+
 # ==========================================
 # STUDENT PIPELINE
 # ==========================================
@@ -533,6 +534,9 @@ def student_pipeline():
     counsellor_filter = request.args.get('counsellor', '')
     status_filter = request.args.get('status', '')
     counselling_filter = request.args.get('counselling', '')
+
+    # 1. NEW: Grab the exam_id from the URL if a user clicks the button
+    exam_id_filter = request.args.get('exam_id', '')
 
     query = Student.query
 
@@ -548,15 +552,24 @@ def student_pipeline():
     if exam_filter: query = query.filter(Student.exam_type == exam_filter)
     if counsellor_filter: query = query.filter(Student.created_by == counsellor_filter)
     if status_filter: query = query.filter(Student.academic_status == status_filter)
+
     if counselling_filter:
         query = query.join(StudentCounsellingRegistration).filter(
             StudentCounsellingRegistration.counselling_id == int(counselling_filter)
         )
 
+    # 2. NEW: Filter the pipeline to only show students who have this Exam added to their profile
+    if exam_id_filter:
+        query = query.join(StudentExamResult).filter(
+            StudentExamResult.exam_id == int(exam_id_filter)
+        )
+
     counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
     counsellor_list = [c[0] for c in counsellors]
     active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
-    students = query.order_by(Student.created_at.desc()).all()
+
+    # .distinct() added to ensure no duplicate rows appear if a student has multiple entries
+    students = query.order_by(Student.created_at.desc()).distinct().all()
 
     return render_template('students.html',
                            students=students,
@@ -565,6 +578,7 @@ def student_pipeline():
                            counsellor_filter=counsellor_filter,
                            status_filter=status_filter,
                            counselling_filter=counselling_filter,
+                           exam_id_filter=exam_id_filter,  # <-- Passed to template
                            counsellors=counsellor_list,
                            active_counsellings=active_counsellings)
 

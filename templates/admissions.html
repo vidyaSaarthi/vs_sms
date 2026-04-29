@@ -62,6 +62,11 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1">
+
+                                                    {% if form.exam_id %}
+                                                        <a href="{{ url_for('student_pipeline', exam_id=form.exam_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
+                                                    {% endif %}
+
                                                     <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
                                                         <i class="fas fa-id-badge"></i>
                                                     </button>
