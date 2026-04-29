@@ -269,28 +269,43 @@ from datetime import datetime
 
 
 # 1. Main Admissions Hub Route
+# ==========================================
+# ADMISSIONS HUB (MASTER DATA)
+# ==========================================
 @app.route('/admissions')
 @login_required
 def admissions_hub():
-    # Fetch data for the display tables
-    forms = Form.query.order_by(Form.end_date.asc()).all()
-    counsellings = Counselling.query.order_by(Counselling.created_at.desc()).all()
+    today = date.today().strftime('%Y-%m-%d')
 
-    # Fetch Master Data to populate the "Add New" dropdowns
+    # 1. Split Forms by Type
+    all_forms = Form.query.order_by(Form.end_date.asc()).all()
+    exam_forms = [f for f in all_forms if f.form_type == 'Exam']
+    counselling_forms = [f for f in all_forms if f.form_type == 'Counselling']
+
+    # 2. Group Master Counselling Processes by Exam
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+    counselling_grouped = {}
+    for c in all_counsellings:
+        exam_name = c.exam.name if c.exam else "Independent / Unlinked Processes"
+        if exam_name not in counselling_grouped:
+            counselling_grouped[exam_name] = []
+        counselling_grouped[exam_name].append(c)
+
+    # 3. Master Dropdown Data
     exams = Exam.query.order_by(Exam.name.asc()).all()
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
 
-    # Calculate today's date as a string to pass to the frontend
-    today_str = date.today().strftime('%Y-%m-%d')
-
     return render_template('admissions.html',
-                           forms=forms,
-                           counsellings=counsellings,
+                           forms=all_forms,  # Kept for modal loops
+                           exam_forms=exam_forms,
+                           counselling_forms=counselling_forms,
+                           counsellings=all_counsellings,  # Kept for modal loops
+                           counselling_grouped=counselling_grouped,
                            exams=exams,
                            states=states,
                            universities=universities,
-                           today=today_str)  # <-- The missing piece!
+                           today=today)
 
 # 2. Add New Counselling Process
 @app.route('/admissions/add_counselling', methods=['POST'])

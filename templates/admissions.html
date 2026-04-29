@@ -24,21 +24,21 @@
     <div class="tab-content" id="admissionsTabsContent">
         
         <div class="tab-pane fade show active" id="forms" role="tabpanel">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color: #333;">Upcoming Deadlines</h5>
-                    <button class="btn btn-sm text-white fw-bold" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addFormModal">
-                        <i class="fas fa-plus me-1"></i> Add New Form
-                    </button>
-                </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="text-muted mb-0">Track all active application and deadline windows.</p>
+                <button class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addFormModal">
+                    <i class="fas fa-plus me-1"></i> Add New Form
+                </button>
+            </div>
+
+            <h6 class="fw-bold mb-2" style="color: #333;"><i class="fas fa-pen-nib text-warning me-2"></i>Entrance Exam Forms</h6>
+            <div class="card shadow-sm border-0 mb-5">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead style="background-color: var(--brand-blue);">
                                 <tr>
                                     <th class="ps-4 text-dark">Form Name</th>
-                                    <th class="text-dark">Type</th>
-                                    <th class="text-dark">Linked To</th>
                                     <th class="text-dark">Start Date</th>
                                     <th class="text-dark text-danger">Deadline</th>
                                     <th class="text-dark">Fees (Gen/OBC/SC)</th>
@@ -46,52 +46,75 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for form in forms %}
+                                {% for form in exam_forms %}
                                 <tr>
                                     <td class="ps-4 fw-bold">{{ form.name }}</td>
-                                    <td><span class="badge bg-secondary">{{ form.form_type }}</span></td>
-                                    <td>
-                                        {% if form.form_type == 'Exam' and form.exam_id %}
-                                            <i class="fas fa-pen-alt text-muted me-1"></i> Exam DB
-                                        {% elif form.form_type == 'Counselling' and form.counselling_id %}
-                                            <i class="fas fa-university text-muted me-1"></i> Counselling DB
-                                        {% else %}
-                                            -
-                                        {% endif %}
-                                    </td>
                                     <td>{{ form.start_date.strftime('%d %b %Y') if form.start_date else '-' }}</td>
                                     <td class="{% if form.end_date and form.end_date.strftime('%Y-%m-%d') < today %}text-danger fw-bold{% endif %}">
                                         {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}
                                     </td>
                                     <td>
-                                        <small class="text-muted">
-                                            ₹{{ form.fee_general or '0' }} / ₹{{ form.fee_obc or '0' }} / ₹{{ form.fee_sc_st or '0' }}
-                                        </small>
+                                        <small class="text-muted">₹{{ form.fee_general or '0' }} / ₹{{ form.fee_obc or '0' }} / ₹{{ form.fee_sc_st or '0' }}</small>
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
-                                            {% if form.form_type == 'Exam' %}
                                             <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
                                                 <i class="fas fa-id-badge"></i>
                                             </button>
-                                            {% endif %}
-
-                                            {% if form.document_link %}
-                                                <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>
-                                            {% endif %}
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
+                                            {% if form.document_link %}<a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>{% endif %}
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit"><i class="fas fa-edit"></i></button>
                                             <form action="/admissions/delete/form/{{ form.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this form tracking deadline?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="7" class="text-center py-4 text-muted">No active forms being tracked.</td></tr>
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No active exam forms being tracked.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold mb-2" style="color: #333;"><i class="fas fa-sitemap text-danger me-2"></i>Counselling Forms</h6>
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 text-dark">Form Name</th>
+                                    <th class="text-dark">Start Date</th>
+                                    <th class="text-dark text-danger">Deadline</th>
+                                    <th class="text-dark">Fees (Gen/OBC/SC)</th>
+                                    <th class="text-dark text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in counselling_forms %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ form.name }}</td>
+                                    <td>{{ form.start_date.strftime('%d %b %Y') if form.start_date else '-' }}</td>
+                                    <td class="{% if form.end_date and form.end_date.strftime('%Y-%m-%d') < today %}text-danger fw-bold{% endif %}">
+                                        {{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">₹{{ form.fee_general or '0' }} / ₹{{ form.fee_obc or '0' }} / ₹{{ form.fee_sc_st or '0' }}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            {% if form.document_link %}<a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>{% endif %}
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit"><i class="fas fa-edit"></i></button>
+                                            <form action="/admissions/delete/form/{{ form.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this form tracking deadline?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No active counselling forms being tracked.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -101,59 +124,60 @@
         </div>
 
         <div class="tab-pane fade" id="counselling" role="tabpanel">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color: #333;">Active Counselling Systems</h5>
-                    <button class="btn btn-sm text-dark fw-bold" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addCounsellingModal">
-                        <i class="fas fa-plus me-1"></i> Add Process
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead style="background-color: var(--brand-blue);">
-                                <tr>
-                                    <th class="ps-4 text-dark">Counselling Name</th>
-                                    <th class="text-dark">Type</th>
-                                    <th class="text-dark">Date Created</th>
-                                    <th class="text-dark text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for c in counsellings %}
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-bold" style="color: var(--brand-red);">{{ c.name }}</div>
-                                        {% if c.exam %}
-                                            <span class="badge bg-danger mt-1" style="font-size: 0.7rem;"><i class="fas fa-pen-nib me-1"></i>{{ c.exam.name }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
-                                    <td>{{ c.created_at.strftime('%d %b %Y') if c.created_at else '-' }}</td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}">
-                                                <i class="fas fa-layer-group me-1"></i> Rounds
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCounsellingModal{{ c.id }}" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No counselling processes added.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="text-muted mb-0">Configure the master processes and rounds for student assignments.</p>
+                <button class="btn btn-sm text-dark fw-bold shadow-sm" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addCounsellingModal">
+                    <i class="fas fa-plus me-1"></i> Add Process
+                </button>
             </div>
+
+            {% if counselling_grouped %}
+                {% for exam_name, processes in counselling_grouped.items() %}
+                    <div class="mb-5">
+                        <h6 class="fw-bold mb-3">
+                            <span class="badge bg-danger shadow-sm px-3 py-2 fs-6"><i class="fas fa-layer-group me-2"></i>{{ exam_name }}</span>
+                        </h6>
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead style="background-color: var(--brand-blue);">
+                                            <tr>
+                                                <th class="ps-4 text-dark w-50">Counselling Name</th>
+                                                <th class="text-dark">Entity Type</th>
+                                                <th class="text-dark text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for c in processes %}
+                                            <tr>
+                                                <td class="ps-4 fw-bold" style="color: #333;">{{ c.name }}</td>
+                                                <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
+                                                <td class="text-center">
+                                                    <div class="d-flex justify-content-center gap-2">
+                                                        <a href="{{ url_for('student_pipeline', counselling=c.id) }}" class="btn btn-sm btn-outline-info fw-bold" title="View Registered Students"><i class="fas fa-users"></i></a>
+                                                        <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}"><i class="fas fa-list-ol me-1"></i> Rounds</button>
+                                                        <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCounsellingModal{{ c.id }}" title="Edit"><i class="fas fa-edit"></i></button>
+                                                        <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted bg-white rounded shadow-sm border">
+                    <i class="fas fa-sitemap fa-3x mb-3 text-light"></i>
+                    <p>No master counselling processes configured yet.</p>
+                </div>
+            {% endif %}
         </div>
 
     </div>
