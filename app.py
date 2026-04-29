@@ -132,9 +132,11 @@ def edit_master_data(data_type, item_id):
 
         # NEW LOGIC: Update mapped courses if we are editing an Exam
         if data_type == 'exam':
-            course_ids = request.form.getlist('course_ids')
-            item.courses = [] # Clear the old mapping
-            if course_ids:
+            raw_course_ids = request.form.getlist('course_ids')
+            item.courses = []  # Clear the old mapping
+            if raw_course_ids:
+                # Convert the list of strings to a list of integers
+                course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
                 mapped_courses = Course.query.filter(Course.id.in_(course_ids)).all()
                 item.courses.extend(mapped_courses)
 
@@ -196,13 +198,17 @@ def delete_master_data(data_type, item_id):
 
     return redirect(url_for('master_data'))
 
+
 @app.route('/settings/add_exam', methods=['POST'])
 @login_required
 def add_exam():
     try:
         new_exam = Exam(name=request.form.get('name'))
-        course_ids = request.form.getlist('course_ids')
-        if course_ids:
+
+        # Capture and convert to integers
+        raw_course_ids = request.form.getlist('course_ids')
+        if raw_course_ids:
+            course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
             courses = Course.query.filter(Course.id.in_(course_ids)).all()
             new_exam.courses.extend(courses)
 
