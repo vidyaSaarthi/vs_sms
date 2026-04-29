@@ -268,7 +268,6 @@ from flask import request, redirect, url_for, flash
 from datetime import datetime
 
 
-# 1. Main Admissions Hub Route
 # ==========================================
 # ADMISSIONS HUB (MASTER DATA)
 # ==========================================
@@ -280,7 +279,22 @@ def admissions_hub():
     # 1. Split Forms by Type
     all_forms = Form.query.order_by(Form.end_date.asc()).all()
     exam_forms = [f for f in all_forms if f.form_type == 'Exam']
-    counselling_forms = [f for f in all_forms if f.form_type == 'Counselling']
+    counselling_forms_list = [f for f in all_forms if f.form_type == 'Counselling']
+
+    # 1b. Group Counselling Forms by Exam
+    counselling_forms_grouped = {}
+    for form in counselling_forms_list:
+        exam_name = "Independent / Unlinked Processes"
+        if form.counselling_id:
+            couns = Counselling.query.get(form.counselling_id)
+            if couns and couns.exam_id:
+                exam = Exam.query.get(couns.exam_id)
+                if exam:
+                    exam_name = exam.name
+
+        if exam_name not in counselling_forms_grouped:
+            counselling_forms_grouped[exam_name] = []
+        counselling_forms_grouped[exam_name].append(form)
 
     # 2. Group Master Counselling Processes by Exam
     all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
@@ -299,7 +313,7 @@ def admissions_hub():
     return render_template('admissions.html',
                            forms=all_forms,  # Kept for modal loops
                            exam_forms=exam_forms,
-                           counselling_forms=counselling_forms,
+                           counselling_forms_grouped=counselling_forms_grouped,  # <-- Passed grouped forms
                            counsellings=all_counsellings,  # Kept for modal loops
                            counselling_grouped=counselling_grouped,
                            exams=exams,
