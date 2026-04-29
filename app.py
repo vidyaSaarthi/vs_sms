@@ -113,6 +113,9 @@ def master_data():
     courses = Course.query.order_by(Course.name.asc()).all()
     return render_template('master_data.html', exams=exams, states=states, universities=universities, courses=courses)
 
+# ==========================================
+# EDIT MASTER DATA (Exams, States, Unis, Courses)
+# ==========================================
 @app.route('/settings/master/edit/<data_type>/<int:item_id>', methods=['POST'])
 @login_required
 def edit_master_data(data_type, item_id):
@@ -126,6 +129,15 @@ def edit_master_data(data_type, item_id):
 
     if new_name and new_name.strip():
         item.name = new_name.strip()
+
+        # NEW LOGIC: Update mapped courses if we are editing an Exam
+        if data_type == 'exam':
+            course_ids = request.form.getlist('course_ids')
+            item.courses = [] # Clear the old mapping
+            if course_ids:
+                mapped_courses = Course.query.filter(Course.id.in_(course_ids)).all()
+                item.courses.extend(mapped_courses)
+
         db.session.commit()
         flash(f"Updated successfully to '{item.name}'!", "success")
     return redirect(url_for('master_data'))

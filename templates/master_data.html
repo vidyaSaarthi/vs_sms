@@ -65,9 +65,12 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        <form action="/settings/delete_exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam? Warning: This will affect related counselling processes.');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exam"><i class="fas fa-trash"></i></button>
-                                        </form>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editExamModal{{ exam.id }}" title="Edit Exam"><i class="fas fa-edit"></i></button>
+                                            <form action="/settings/master/delete/exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam? Warning: This will affect related counselling processes.');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exam"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -102,9 +105,12 @@
                                 <tr>
                                     <td class="ps-4 fw-bold">{{ course.name }}</td>
                                     <td class="text-center">
-                                        <form action="/settings/delete_course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Course"><i class="fas fa-trash"></i></button>
-                                        </form>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ course.id }}" title="Edit Course"><i class="fas fa-edit"></i></button>
+                                            <form action="/settings/master/delete/course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Course"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -139,9 +145,12 @@
                                 <tr>
                                     <td class="ps-4 fw-bold">{{ state.name }}</td>
                                     <td class="text-center">
-                                        <form action="/settings/delete_state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
-                                        </form>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editStateModal{{ state.id }}" title="Edit State"><i class="fas fa-edit"></i></button>
+                                            <form action="/settings/master/delete/state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -176,9 +185,12 @@
                                 <tr>
                                     <td class="ps-4 fw-bold">{{ uni.name }}</td>
                                     <td class="text-center">
-                                        <form action="/settings/delete_university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
-                                        </form>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editUniversityModal{{ uni.id }}" title="Edit University"><i class="fas fa-edit"></i></button>
+                                            <form action="/settings/master/delete/university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% else %}
@@ -228,7 +240,8 @@
 <div class="modal fade" id="addCourseModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/settings/add_course" method="POST">
+            <form action="/settings/master/add" method="POST">
+                <input type="hidden" name="data_type" value="course">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title fw-bold">Add Target Course</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -250,7 +263,8 @@
 <div class="modal fade" id="addStateModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/settings/add_state" method="POST">
+            <form action="/settings/master/add" method="POST">
+                <input type="hidden" name="data_type" value="state">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title fw-bold">Add State</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -272,7 +286,8 @@
 <div class="modal fade" id="addUniversityModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="/settings/add_university" method="POST">
+            <form action="/settings/master/add" method="POST">
+                <input type="hidden" name="data_type" value="university">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title fw-bold">Add University</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -290,6 +305,112 @@
         </div>
     </div>
 </div>
+
+
+{% for exam in exams %}
+<div class="modal fade" id="editExamModal{{ exam.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/master/edit/exam/{{ exam.id }}" method="POST">
+                <div class="modal-header text-dark bg-warning">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Exam</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Exam Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ exam.name }}" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-success">Update Target Courses</label>
+                        <select name="course_ids" class="form-select" multiple style="height: 120px;">
+                            {% for course in courses %}
+                            <option value="{{ course.id }}" {% if course in exam.courses %}selected{% endif %}>{{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple courses.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for course in courses %}
+<div class="modal fade" id="editCourseModal{{ course.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/master/edit/course/{{ course.id }}" method="POST">
+                <div class="modal-header text-dark bg-warning">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Course Title</label>
+                        <input type="text" name="name" class="form-control" value="{{ course.name }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for state in states %}
+<div class="modal fade" id="editStateModal{{ state.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/master/edit/state/{{ state.id }}" method="POST">
+                <div class="modal-header text-dark bg-warning">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit State</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">State Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ state.name }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for uni in universities %}
+<div class="modal fade" id="editUniversityModal{{ uni.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/master/edit/university/{{ uni.id }}" method="POST">
+                <div class="modal-header text-dark bg-warning">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit University</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">University Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ uni.name }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
