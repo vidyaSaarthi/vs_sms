@@ -236,6 +236,7 @@ class Form(db.Model):
     admit_card_date = db.Column(db.Date, nullable=True)
     admit_card_link = db.Column(db.String(500), nullable=True)
     document_link = db.Column(db.String(500), nullable=True)
+    prospectus_link = db.Column(db.String(500), nullable=True)  # <-- NEW FIELD
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 

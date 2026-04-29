@@ -44,7 +44,7 @@
                                             <th class="text-dark">Start Date</th>
                                             <th class="text-dark text-danger">Deadline</th>
                                             <th class="text-dark">Fees (Gen/OBC/SC)</th>
-                                            <th class="text-dark text-center">Actions</th>
+                                            <th class="text-dark text-center">Links & Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -61,14 +61,19 @@
                                                 </small>
                                             </td>
                                             <td class="text-center">
-                                                <div class="d-flex justify-content-center gap-2">
+                                                <div class="d-flex justify-content-center gap-1">
                                                     <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
                                                         <i class="fas fa-id-badge"></i>
                                                     </button>
-                                                    {% if form.document_link %}
-                                                        <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>
+
+                                                    {% if form.prospectus_link %}
+                                                        <a href="{{ form.prospectus_link }}" target="_blank" class="btn btn-sm btn-outline-success" title="View Prospectus"><i class="fas fa-file-pdf"></i></a>
                                                     {% endif %}
-                                                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit">
+                                                    {% if form.document_link %}
+                                                        <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                                    {% endif %}
+
+                                                    <button type="button" class="btn btn-sm btn-outline-warning ms-1" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <form action="/admissions/delete/form/{{ form.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this form tracking deadline?');">
@@ -106,7 +111,7 @@
                                                     <th class="text-dark">Start Date</th>
                                                     <th class="text-dark text-danger">Deadline</th>
                                                     <th class="text-dark">Fees (Gen/OBC/SC)</th>
-                                                    <th class="text-dark text-center">Actions</th>
+                                                    <th class="text-dark text-center">Links & Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -121,9 +126,15 @@
                                                         <small class="text-muted">₹{{ form.fee_general or '0' }} / ₹{{ form.fee_obc or '0' }} / ₹{{ form.fee_sc_st or '0' }}</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="d-flex justify-content-center gap-2">
-                                                            {% if form.document_link %}<a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-link"></i></a>{% endif %}
-                                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit"><i class="fas fa-edit"></i></button>
+                                                        <div class="d-flex justify-content-center gap-1">
+                                                            {% if form.prospectus_link %}
+                                                                <a href="{{ form.prospectus_link }}" target="_blank" class="btn btn-sm btn-outline-success" title="View Prospectus"><i class="fas fa-file-pdf"></i></a>
+                                                            {% endif %}
+                                                            {% if form.document_link %}
+                                                                <a href="{{ form.document_link }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Official Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                                            {% endif %}
+
+                                                            <button type="button" class="btn btn-sm btn-outline-warning ms-1" data-bs-toggle="modal" data-bs-target="#editFormModal{{ form.id }}" title="Edit"><i class="fas fa-edit"></i></button>
                                                             <form action="/admissions/delete/form/{{ form.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this form tracking deadline?');">
                                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
                                                             </form>
@@ -479,9 +490,13 @@
                             <input type="number" step="0.01" name="fee_female" class="form-control">
                         </div>
 
-                        <div class="col-md-12 mt-3">
-                            <label class="form-label fw-bold">Official Link (Optional)</label>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label fw-bold">Form Link (Optional)</label>
                             <input type="url" name="document_link" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label fw-bold text-success">Prospectus Link (Optional)</label>
+                            <input type="url" name="prospectus_link" class="form-control" placeholder="https://...">
                         </div>
                     </div>
                 </div>
@@ -551,9 +566,13 @@
                             <input type="number" step="0.01" name="fee_female" class="form-control" value="{{ form.fee_female or '' }}">
                         </div>
 
-                        <div class="col-md-12 mt-3">
-                            <label class="form-label fw-bold">Official Registration Link</label>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label fw-bold">Form Link (Optional)</label>
                             <input type="url" name="document_link" class="form-control" value="{{ form.document_link or '' }}">
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label fw-bold text-success">Prospectus Link (Optional)</label>
+                            <input type="url" name="prospectus_link" class="form-control" value="{{ form.prospectus_link or '' }}">
                         </div>
                     </div>
                 </div>

@@ -214,6 +214,7 @@ def edit_form(item_id):
         form.fee_female = safe_float(request.form.get('fee_female'))
 
         form.document_link = request.form.get('document_link')
+        form.prospectus_link = request.form.get('prospectus_link')  # <-- ADD THIS LINE
 
         db.session.commit()
         flash("Form details updated!", "success")
@@ -380,7 +381,8 @@ def add_form():
         fee_obc=safe_float(request.form.get('fee_obc')),
         fee_sc_st=safe_float(request.form.get('fee_sc_st')),
         fee_female=safe_float(request.form.get('fee_female')),
-        document_link=request.form.get('document_link')
+        document_link=request.form.get('document_link'),
+        prospectus_link = request.form.get('prospectus_link')  # <-- ADD THIS LINE
     )
     db.session.add(new_form)
     db.session.commit()
