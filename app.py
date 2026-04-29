@@ -32,12 +32,30 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # 🚀 AUTOMATIC CLOUD DATABASE BUILDER
+# 🚀 AUTOMATIC CLOUD DATABASE BUILDER & TEAM INJECTION
 with app.app_context():
     db.create_all()
+
+    # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
         db.session.add(Staff(username='admin', password_hash=generate_password_hash('admin123'), role='admin'))
         db.session.commit()
         print("✅ Master Admin account automatically injected!")
+
+    # 2. Inject The VidyaSaarthi Counseling Team
+    team_members = ['Shubham', 'Shruti', 'Vivek', 'Krishna', 'Yashpreet']
+
+    for member in team_members:
+        if not Staff.query.filter_by(username=member).first():
+            # Give everyone a default starting password
+            db.session.add(Staff(
+                username=member,
+                password_hash=generate_password_hash('vs383940'),
+                role='counselor'
+            ))
+            print(f"✅ Counselor account for {member} created!")
+
+    db.session.commit()
 
 def convert_to_embed_link(url):
     if not url: return None
