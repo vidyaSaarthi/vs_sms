@@ -8,54 +8,56 @@
         <p class="text-muted">Here is what is happening across VidyaSaarthi today.</p>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid var(--brand-blue);">
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #3b82f6 !important;">
                 <div class="card-body">
-                    <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--brand-blue);">Total Pipeline</div>
-                    <div class="h2 mb-0 fw-bold text-dark">{{ total_students }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Students</span></div>
+                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Pipeline</h6>
+                    <h2 class="fw-bold mb-0" style="color: #1e293b;">{{ total_students }}</h2>
+                    <small class="text-muted">Students tracked</small>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid #ffc107;">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--brand-yellow) !important;">
                 <div class="card-body">
-                    <div class="text-xs fw-bold text-warning text-uppercase mb-1">Pending Approvals</div>
-                    <div class="h2 mb-0 fw-bold text-dark">{{ pending_students }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Requires Action</span></div>
+                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Pending Approvals</h6>
+                    <h2 class="fw-bold mb-0 text-warning">{{ pending_students }}</h2>
+                    <small class="text-muted">Requires action</small>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid var(--brand-red);">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--brand-red) !important;">
                 <div class="card-body">
-                    <div class="text-xs fw-bold text-uppercase mb-1" style="color: var(--brand-red);">Tracked Forms</div>
-                    <div class="h2 mb-0 fw-bold text-dark">{{ total_forms }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Exams/Counselling</span></div>
+                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Tracked Forms</h6>
+                    <h2 class="fw-bold mb-0 text-danger">{{ total_forms }}</h2>
+                    <small class="text-muted">Exams & Counselling</small>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 5px solid var(--brand-yellow);">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #10b981 !important;">
                 <div class="card-body">
-                    <div class="text-xs fw-bold text-uppercase mb-1" style="color: #b3a000;">Active Counselling</div>
-                    <div class="h2 mb-0 fw-bold text-dark">{{ active_counselling }} <span style="font-size: 1rem; font-weight: normal;" class="text-muted">Processes</span></div>
+                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Active Counselling</h6>
+                    <h2 class="fw-bold mb-0 text-success">{{ active_counselling }}</h2>
+                    <small class="text-muted">Master processes</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
-                <div class="card-header bg-dark text-white py-3 border-0" style="border-radius: 15px 15px 0 0;">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib me-2 text-warning"></i>Upcoming Exam Forms Deadlines</h6>
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-dark text-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Upcoming Exam Deadlines</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light text-muted small text-uppercase">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light">
                                 <tr>
                                     <th class="ps-4">Exam Form</th>
                                     <th class="text-danger">Deadline</th>
@@ -64,13 +66,21 @@
                             <tbody>
                                 {% for form in upcoming_exam_forms %}
                                 <tr>
-                                    <td class="ps-4 fw-bold">{{ form.name }}</td>
-                                    <td class="text-danger fw-bold">
-                                        <i class="far fa-clock me-1"></i>{{ form.end_date.strftime('%d %b %Y') }}
+                                    <td class="ps-4 fw-bold">
+                                        {{ form.name }}
+                                        {% if form.document_link %}
+                                            <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted" title="Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                        {% endif %}
                                     </td>
+                                    <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="2" class="text-center py-4 text-muted">No upcoming exam deadlines.</td></tr>
+                                <tr>
+                                    <td colspan="2" class="text-center py-5 text-muted">
+                                        <i class="fas fa-calendar-check fs-4 mb-2 text-success d-block"></i>
+                                        No upcoming exam deadlines.
+                                    </td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -79,79 +89,229 @@
             </div>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
-                <div class="card-header border-0 py-3" style="background-color: var(--brand-blue); border-radius: 15px 15px 0 0;">
-                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap me-2 text-danger"></i>Upcoming Counselling Forms Deadlines</h6>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3" style="background-color: var(--brand-blue);">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Deadlines</h6>
                 </div>
-                <div class="card-body p-4" style="max-height: 400px; overflow-y: auto;">
-
-                    {% if counselling_grouped %}
-                        {% for exam_name, forms in counselling_grouped.items() %}
-                            <div class="mb-4">
-                                <h6 class="fw-bold mb-2">
-                                    <span class="badge bg-danger shadow-sm px-3 py-2" style="font-size: 0.85rem;">{{ exam_name }}</span>
-                                </h6>
-
-                                <div class="border rounded bg-white shadow-sm overflow-hidden">
-                                    <table class="table table-sm table-hover align-middle mb-0">
-                                        <tbody>
-                                            {% for form in forms %}
-                                            <tr>
-                                                <td class="ps-3 py-2 fw-bold text-dark border-0">{{ form.name }}</td>
-                                                <td class="text-end pe-3 py-2 border-0">
-                                                    <span class="badge bg-light text-danger border border-danger">
-                                                        {{ form.end_date.strftime('%d %b %Y') }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-5 text-muted">
-                            <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
-                            <p>No upcoming counselling deadlines.</p>
-                        </div>
-                    {% endif %}
-
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Process & Form</th>
+                                    <th class="text-danger">Deadline</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if counselling_grouped %}
+                                    {% for exam_name, forms in counselling_grouped.items() %}
+                                        <tr>
+                                            <td colspan="2" class="bg-light ps-4">
+                                                <span class="badge bg-secondary">{{ exam_name }}</span>
+                                            </td>
+                                        </tr>
+                                        {% for form in forms %}
+                                        <tr>
+                                            <td class="ps-4 fw-bold ps-5" style="border-left: 3px solid var(--brand-blue);">
+                                                {{ form.name }}
+                                                {% if form.document_link %}
+                                                    <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted" title="Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center py-5 text-muted">
+                                            <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i>
+                                            No upcoming counselling deadlines.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3" style="color: #333;">
-                    <i class="fas fa-history me-2"></i> Recently Added Students
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for student in recent_students %}
-                        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-0 fw-bold">{{ student.full_name }}</h6>
-                                <small class="text-muted">{{ student.exam_type }} | {{ student.mobile_number }}</small>
-                            </div>
-                            <a href="/student/{{ student.id }}" class="btn btn-sm btn-outline-dark">View</a>
-                        </li>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold" style="color: #333;"><i class="fas fa-tasks text-primary me-2"></i>Assigned Activities & Workflows</h5>
+            <button class="btn btn-sm btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                <i class="fas fa-plus me-1"></i> Assign Task
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Task Details</th>
+                            <th>Dates</th>
+                            <th>Assigned To</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in pending_tasks %}
+                        <tr>
+                            <td class="ps-4">
+                                <strong class="text-dark">{{ task.title }}</strong><br>
+                                {% if task.exam %}<span class="badge bg-danger mt-1">Exam: {{ task.exam.name }}</span>{% endif %}
+                                {% if task.counselling %}<span class="badge bg-warning text-dark mt-1">Couns: {{ task.counselling.name }}</span>{% endif %}
+                                {% if task.form %}<span class="badge bg-info text-dark mt-1">Form: {{ task.form.name }}</span>{% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted d-block">Start: {{ task.start_date.strftime('%d %b %Y') if task.start_date else '-' }}</small>
+                                <small class="text-danger fw-bold d-block">Due: {{ task.end_date.strftime('%d %b %Y') if task.end_date else '-' }}</small>
+                            </td>
+                            <td>
+                                <span class="badge border border-dark text-dark"><i class="fas fa-user me-1"></i>{{ task.assigned_to }}</span>
+                                {% if current_user.role == 'admin' %}
+                                    <small class="d-block text-muted" style="font-size: 0.7rem;">Assigned by: {{ task.assigned_by }}</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <form action="/tasks/update/{{ task.id }}" method="POST" class="m-0" onsubmit="return confirm('Mark this task as completed?');">
+                                        <input type="hidden" name="status" value="Completed">
+                                        <button type="submit" class="btn btn-sm btn-success fw-bold" title="Mark Complete"><i class="fas fa-check"></i></button>
+                                    </form>
+                                    <form action="/tasks/update/{{ task.id }}" method="POST" class="m-0" onsubmit="return confirm('Reject this task?');">
+                                        <input type="hidden" name="status" value="Rejected">
+                                        <button type="submit" class="btn btn-sm btn-danger fw-bold" title="Reject Task"><i class="fas fa-times"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                         {% else %}
-                        <li class="list-group-item px-4 py-4 text-center text-muted">
-                            <p class="mb-0">No students added yet.</p>
-                        </li>
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fas fa-clipboard-check fs-4 mb-2 text-secondary d-block"></i>
+                                No pending activities assigned to you.
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </ul>
-                </div>
-                <div class="card-footer bg-white text-center py-2">
-                    <a href="/students" class="text-decoration-none" style="color: var(--brand-red); font-weight: bold; font-size: 0.9rem;">View Entire Pipeline &rarr;</a>
-                </div>
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="mb-0 fw-bold"><i class="fas fa-history text-secondary me-2"></i>Recently Added Students</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Name</th>
+                            <th>Exam Target</th>
+                            <th>Contact</th>
+                            <th class="text-end pe-4">Added On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in recent_students %}
+                        <tr>
+                            <td class="ps-4 fw-bold">
+                                <a href="{{ url_for('view_student', id=student.id) }}" class="text-decoration-none text-dark">{{ student.full_name }}</a>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ student.exam_type }}</span></td>
+                            <td><small class="text-muted"><i class="fas fa-phone-alt me-1"></i>{{ student.mobile_number }}</small></td>
+                            <td class="text-end pe-4 text-muted small">{{ student.created_at.strftime('%d %b %Y') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted">No students added yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white text-center py-3 border-top">
+            <a href="{{ url_for('student_pipeline') }}" class="text-decoration-none fw-bold" style="color: var(--brand-red);">View Entire Pipeline &rarr;</a>
         </div>
     </div>
 
 </div>
+
+<div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/tasks/add" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Assign New Activity</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Task Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Verify domicile certificates" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-primary">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">End Date</label>
+                            <input type="date" name="end_date" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Assign To</label>
+                        <select name="assigned_to" class="form-select" required>
+                            <option value="">Select Counselor...</option>
+                            {% for staff in staff_members %}
+                            <option value="{{ staff.username }}">{{ staff.username }} ({{ staff.role }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description / Notes <span class="fw-normal text-muted">(Optional)</span></label>
+                        <textarea name="description" class="form-control" rows="2" placeholder="Add any details or instructions..."></textarea>
+                    </div>
+
+                    <h6 class="fw-bold mt-4 mb-3 border-bottom pb-2 text-muted">Link to Master Data (Optional)</h6>
+
+                    <div class="mb-2">
+                        <select name="counselling_id" class="form-select form-select-sm">
+                            <option value="">Link to Counselling Process...</option>
+                            {% for exam_name, forms in counselling_grouped.items() %}
+                                <optgroup label="{{ exam_name }}">
+                                {% for c in forms %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <select name="form_id" class="form-select form-select-sm">
+                            <option value="">Link to Specific Form/Deadline...</option>
+                            {% for f in upcoming_exam_forms %}
+                                <option value="{{ f.id }}">{{ f.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Assign Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
