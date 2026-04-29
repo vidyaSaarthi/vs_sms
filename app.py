@@ -221,18 +221,19 @@ def add_exam():
     return redirect(url_for('master_data'))
 
 # ==========================================
-# ADMISSIONS HUB
+# ADMISSIONS HUB (MASTER DATA)
 # ==========================================
 @app.route('/admissions')
 @login_required
 def admissions_hub():
     today = date.today().strftime('%Y-%m-%d')
 
-    all_forms = Form.query.order_by(Form.end_date.asc()).all()
+    # 1. Sort ALL forms alphabetically by Form Name
+    all_forms = Form.query.order_by(Form.name.asc()).all()
     exam_forms = [f for f in all_forms if f.form_type == 'Exam']
     counselling_forms_list = [f for f in all_forms if f.form_type == 'Counselling']
 
-    counselling_forms_grouped = {}
+    counselling_forms_grouped_raw = {}
     for form in counselling_forms_list:
         exam_name = "Independent / Unlinked Processes"
         if form.counselling_id:
@@ -241,27 +242,42 @@ def admissions_hub():
                 exam = Exam.query.get(couns.exam_id)
                 if exam: exam_name = exam.name
 
-        if exam_name not in counselling_forms_grouped:
-            counselling_forms_grouped[exam_name] = []
-        counselling_forms_grouped[exam_name].append(form)
+        if exam_name not in counselling_forms_grouped_raw:
+            counselling_forms_grouped_raw[exam_name] = []
+        counselling_forms_grouped_raw[exam_name].append(form)
 
+    # Sort groups alphabetically (Keep 'Independent' at the bottom)
+    counselling_forms_grouped = {
+        k: counselling_forms_grouped_raw[k]
+        for k in sorted(counselling_forms_grouped_raw.keys(), key=lambda x: (x == "Independent / Unlinked Processes", x))
+    }
+
+    # 2. Master Counselling Processes (Already sorted alphabetically by query)
     all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
-    counselling_grouped = {}
+    counselling_grouped_raw = {}
     for c in all_counsellings:
         exam_name = c.exam.name if c.exam else "Independent / Unlinked Processes"
-        if exam_name not in counselling_grouped:
-            counselling_grouped[exam_name] = []
-        counselling_grouped[exam_name].append(c)
+        if exam_name not in counselling_grouped_raw:
+            counselling_grouped_raw[exam_name] = []
+        counselling_grouped_raw[exam_name].append(c)
 
+    # Sort groups alphabetically (Keep 'Independent' at the bottom)
+    counselling_grouped = {
+        k: counselling_grouped_raw[k]
+        for k in sorted(counselling_grouped_raw.keys(), key=lambda x: (x == "Independent / Unlinked Processes", x))
+    }
+
+    # 3. Master Dropdown Data (Sorted Alphabetically)
     exams = Exam.query.order_by(Exam.name.asc()).all()
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
 
-    # JS Mapping dict
+    # JS Mapping dict (Sort the courses inside the JSON map too!)
     exam_course_mapping = {}
     for exam in exams:
-        exam_course_mapping[exam.id] = [{'id': c.id, 'name': c.name} for c in exam.courses]
+        sorted_courses = sorted(exam.courses, key=lambda c: c.name)
+        exam_course_mapping[exam.id] = [{'id': c.id, 'name': c.name} for c in sorted_courses]
 
     return render_template('admissions.html',
                            forms=all_forms,
@@ -534,8 +550,6 @@ def student_pipeline():
     counsellor_filter = request.args.get('counsellor', '')
     status_filter = request.args.get('status', '')
     counselling_filter = request.args.get('counselling', '')
-
-    # 1. NEW: Grab the exam_id from the URL if a user clicks the button
     exam_id_filter = request.args.get('exam_id', '')
 
     query = Student.query
@@ -557,19 +571,20 @@ def student_pipeline():
         query = query.join(StudentCounsellingRegistration).filter(
             StudentCounsellingRegistration.counselling_id == int(counselling_filter)
         )
-
-    # 2. NEW: Filter the pipeline to only show students who have this Exam added to their profile
     if exam_id_filter:
         query = query.join(StudentExamResult).filter(
             StudentExamResult.exam_id == int(exam_id_filter)
         )
 
+    # Sort the Counselor Dropdown Alphabetically
     counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
-    counsellor_list = [c[0] for c in counsellors]
+    counsellor_list = sorted([c[0] for c in counsellors if c[0]])
+
+    # Sort the Counselling Dropdown Alphabetically
     active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
-    # .distinct() added to ensure no duplicate rows appear if a student has multiple entries
-    students = query.order_by(Student.created_at.desc()).distinct().all()
+    # Sort the Students Alphabetically by Name
+    students = query.order_by(Student.full_name.asc()).distinct().all()
 
     return render_template('students.html',
                            students=students,
@@ -578,7 +593,7 @@ def student_pipeline():
                            counsellor_filter=counsellor_filter,
                            status_filter=status_filter,
                            counselling_filter=counselling_filter,
-                           exam_id_filter=exam_id_filter,  # <-- Passed to template
+                           exam_id_filter=exam_id_filter,
                            counsellors=counsellor_list,
                            active_counsellings=active_counsellings)
 
