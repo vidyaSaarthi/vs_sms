@@ -495,6 +495,9 @@ def delete_counselling_round(round_id):
 # ==========================================
 # DASHBOARD
 # ==========================================
+# ==========================================
+# DASHBOARD
+# ==========================================
 @app.route('/')
 @app.route('/dashboard')
 @login_required
@@ -529,21 +532,15 @@ def dashboard():
 
     recent_students = Student.query.order_by(Student.created_at.desc()).limit(5).all()
 
-    # NEW LOGIC: Fetch Tasks & Staff for the Assignment System
-    staff_members = Staff.query.all()
-
-    # Admins see all pending tasks; normal counselors see only their assigned tasks
+    # TASK SYSTEM ADDITIONS
+    staff_members = Staff.query.order_by(Staff.username.asc()).all()
     if current_user.role == 'admin':
         pending_tasks = Task.query.filter_by(status='Pending').order_by(Task.end_date.asc()).all()
     else:
-        pending_tasks = Task.query.filter_by(assigned_to=current_user.username, status='Pending').order_by(
-            Task.end_date.asc()).all()
+        pending_tasks = Task.query.filter_by(assigned_to=current_user.username, status='Pending').order_by(Task.end_date.asc()).all()
 
-    # Pass everything to the template
-    return render_template('dashboard.html',
-                           # ... keep your existing variables here ...
-                           staff_members=staff_members,
-                           pending_tasks=pending_tasks)
+    # Fetch ALL active counsellings for the Task Modal dropdown
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
     return render_template('dashboard.html',
                            total_students=total_students,
@@ -552,7 +549,10 @@ def dashboard():
                            active_counselling=active_counselling,
                            upcoming_exam_forms=upcoming_exam_forms,
                            counselling_grouped=counselling_grouped,
-                           recent_students=recent_students)
+                           recent_students=recent_students,
+                           staff_members=staff_members,
+                           pending_tasks=pending_tasks,
+                           all_counsellings=all_counsellings)
 
 
 # ==========================================

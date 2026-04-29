@@ -287,12 +287,8 @@
                     <div class="mb-2">
                         <select name="counselling_id" class="form-select form-select-sm">
                             <option value="">Link to Counselling Process...</option>
-                            {% for exam_name, forms in counselling_grouped.items() %}
-                                <optgroup label="{{ exam_name }}">
-                                {% for c in forms %}
-                                    <option value="{{ c.id }}">{{ c.name }}</option>
-                                {% endfor %}
-                                </optgroup>
+                            {% for c in all_counsellings %}
+                                <option value="{{ c.id }}">{{ c.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
