@@ -27,7 +27,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold" style="color: #333;">Upcoming Deadlines</h5>
-                    <button class="btn btn-sm text-white fw-bold" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addFormModal">
+                    <button class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addFormModal">
                         <i class="fas fa-plus me-1"></i> Add New Form
                     </button>
                 </div>
@@ -181,9 +181,9 @@
                                             <table class="table table-hover align-middle mb-0">
                                                 <thead style="background-color: var(--brand-blue);">
                                                     <tr>
-                                                        <th class="ps-4 text-dark w-50">Counselling Name</th>
+                                                        <th class="ps-4 text-dark w-25">Counselling Name</th>
                                                         <th class="text-dark">Entity Type</th>
-                                                        <th class="text-dark">Course</th>
+                                                        <th class="text-dark">Target Courses</th>
                                                         <th class="text-dark text-center">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -193,7 +193,13 @@
                                                         <td class="ps-4 fw-bold" style="color: #333;">{{ c.name }}</td>
                                                         <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
                                                         <td>
-                                                            <span class="badge bg-light text-primary border border-primary">{{ c.course.name if c.course else 'Not Tagged' }}</span>
+                                                            {% if c.courses %}
+                                                                {% for crs in c.courses %}
+                                                                    <span class="badge bg-light text-primary border border-primary me-1 mb-1">{{ crs.name }}</span>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <span class="badge bg-light text-muted border">Not Tagged</span>
+                                                            {% endif %}
                                                         </td>
                                                         <td class="text-center">
                                                             <div class="d-flex justify-content-center gap-2">
@@ -334,6 +340,7 @@
                         <i class="fas fa-plus-circle me-2"></i>Create Round
                     </button>
                 </form>
+
             </div>
         </div>
     </div>
@@ -364,18 +371,25 @@
                     </div>
 
                     <div class="mb-3 border-bottom pb-3">
-                        <label class="form-label fw-bold text-success">Target Degree Course</label>
-                        <select name="course_id" id="courseSelect_edit_{{ c.id }}" class="form-select" required>
-                            <option value="">Select Target Course...</option>
+                        <label class="form-label fw-bold text-success">Target Degree Courses</label>
+                        <select name="course_ids" id="courseSelect_edit_{{ c.id }}" class="form-select" multiple style="height: 100px;">
                             {% if c.exam_id %}
                                 {% for crs in c.exam.courses %}
-                                    <option value="{{ crs.id }}" {% if c.course_id == crs.id %}selected{% endif %}>{{ crs.name }}</option>
+                                    <option value="{{ crs.id }}" {% if crs in c.courses %}selected{% endif %}>{{ crs.name }}</option>
                                 {% endfor %}
                             {% else %}
                                 {% for crs in courses %}
-                                    <option value="{{ crs.id }}" {% if c.course_id == crs.id %}selected{% endif %}>{{ crs.name }}</option>
+                                    <option value="{{ crs.id }}" {% if crs in c.courses %}selected{% endif %}>{{ crs.name }}</option>
                                 {% endfor %}
                             {% endif %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Entity Type</label>
+                        <select name="counselling_type" id="counTypeSelect_edit_{{ c.id }}" class="form-select" disabled>
+                            <option value="{{ c.counselling_type }}" selected>{{ c.counselling_type }}</option>
                         </select>
                     </div>
 
@@ -419,13 +433,13 @@
                     </div>
 
                     <div class="mb-3 border-bottom pb-3">
-                        <label class="form-label fw-bold text-success">Target Degree Course</label>
-                        <select name="course_id" id="courseSelect_add" class="form-select" required>
-                            <option value="">Select an Exam first...</option>
+                        <label class="form-label fw-bold text-success">Target Degree Courses</label>
+                        <select name="course_ids" id="courseSelect_add" class="form-select" multiple style="height: 100px;">
                             {% for crs in courses %}
                             <option value="{{ crs.id }}">{{ crs.name }}</option>
                             {% endfor %}
                         </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple.</small>
                     </div>
 
                     <div class="mb-3">
@@ -620,14 +634,15 @@
     const examsData = [ {% for e in exams %}{ id: {{ e.id }}, name: "{{ e.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
     const counsData = [ {% for c in counsellings %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
 
-    // NEW: Smart Course Mapping Dictionary from Python
+    // Smart Course Mapping Dictionary from Python
     const examCourseMap = {{ exam_course_mapping | tojson | safe }};
 
     function updateCourseDropdown(examSelectId, courseSelectId) {
         const examId = document.getElementById(examSelectId).value;
         const courseSelect = document.getElementById(courseSelectId);
 
-        courseSelect.innerHTML = '<option value="">Select Target Course...</option>';
+        // Clear out existing options completely
+        courseSelect.innerHTML = '';
 
         if (examId && examCourseMap[examId] && examCourseMap[examId].length > 0) {
             // Populate ONLY courses mapped to this specific exam
@@ -701,8 +716,12 @@
         }
     }
 
+    // ==========================================
+    // TAB MEMORY: Remember active tab on reload
+    // ==========================================
     document.addEventListener("DOMContentLoaded", function() {
         let activeTabId = localStorage.getItem('admissionsActiveTab');
+
         if (activeTabId) {
             let tabElement = document.querySelector(activeTabId);
             if (tabElement) {
@@ -710,6 +729,7 @@
                 tab.show();
             }
         }
+
         let tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
         tabButtons.forEach(function(btn) {
             btn.addEventListener('shown.bs.tab', function(event) {

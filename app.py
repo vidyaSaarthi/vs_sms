@@ -276,6 +276,7 @@ def admissions_hub():
                            exam_course_mapping=exam_course_mapping,
                            today=today)
 
+
 @app.route('/admissions/add_counselling', methods=['POST'])
 @login_required
 def add_counselling():
@@ -283,16 +284,22 @@ def add_counselling():
     counselling_type = request.form.get('counselling_type')
     target_id = request.form.get('target_id')
     exam_id_val = request.form.get('exam_id')
-    course_id_val = request.form.get('course_id') # FIX: Capture Course ID
 
     new_counselling = Counselling(
         name=name,
         counselling_type=counselling_type,
         state_id=target_id if counselling_type == 'State' else None,
         university_id=target_id if counselling_type == 'University' else None,
-        exam_id=int(exam_id_val) if exam_id_val else None,
-        course_id=int(course_id_val) if course_id_val else None # FIX: Save to DB
+        exam_id=int(exam_id_val) if exam_id_val else None
     )
+
+    # NEW LOGIC: Capture and map multiple courses
+    raw_course_ids = request.form.getlist('course_ids')
+    if raw_course_ids:
+        course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
+        courses = Course.query.filter(Course.id.in_(course_ids)).all()
+        new_counselling.courses.extend(courses)
+
     db.session.add(new_counselling)
     db.session.commit()
     flash(f"Counselling process '{name}' created successfully!", "success")
@@ -311,8 +318,13 @@ def edit_counselling(item_id):
     exam_id_val = request.form.get('exam_id')
     c.exam_id = int(exam_id_val) if exam_id_val else None
 
-    course_id_val = request.form.get('course_id') # FIX: Capture Course ID
-    c.course_id = int(course_id_val) if course_id_val else None # FIX: Save to DB
+    # NEW LOGIC: Update mapped multiple courses
+    raw_course_ids = request.form.getlist('course_ids')
+    c.courses = [] # Clear existing
+    if raw_course_ids:
+        course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
+        mapped_courses = Course.query.filter(Course.id.in_(course_ids)).all()
+        c.courses.extend(mapped_courses)
 
     db.session.commit()
     flash("Counselling process updated successfully!", "success")
