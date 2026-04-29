@@ -935,11 +935,26 @@ def export_verification(id):
 # ==========================================
 # ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
 # ==========================================
+# ==========================================
+# ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
+# ==========================================
 @app.route('/student/<int:student_id>/register_counselling', methods=['POST'])
 @login_required
 def register_student_counselling(student_id):
     try:
         counselling_id = request.form.get('counselling_id')
+
+        # 🛑 NEW FIX: Check if the student is already registered for this process!
+        existing_reg = StudentCounsellingRegistration.query.filter_by(
+            student_id=student_id,
+            counselling_id=counselling_id
+        ).first()
+
+        if existing_reg:
+            flash("This student is already registered for this counselling process!", "error")
+            return redirect(url_for('view_student', id=student_id))
+
+        # Continue with normal registration if no duplicate is found
         app_no = request.form.get('application_number')
         reg_status = request.form.get('registration_status', 'Planned')
 
