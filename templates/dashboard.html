@@ -203,43 +203,6 @@
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 border-bottom">
-            <h6 class="mb-0 fw-bold"><i class="fas fa-history text-secondary me-2"></i>Recently Added Students</h6>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Name</th>
-                            <th>Exam Target</th>
-                            <th>Contact</th>
-                            <th class="text-end pe-4">Added On</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in recent_students %}
-                        <tr>
-                            <td class="ps-4 fw-bold">
-                                <a href="{{ url_for('view_student', id=student.id) }}" class="text-decoration-none text-dark">{{ student.full_name }}</a>
-                            </td>
-                            <td><span class="badge bg-secondary">{{ student.exam_type }}</span></td>
-                            <td><small class="text-muted"><i class="fas fa-phone-alt me-1"></i>{{ student.mobile_number }}</small></td>
-                            <td class="text-end pe-4 text-muted small">{{ student.created_at.strftime('%d %b %Y') }}</td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="4" class="text-center py-4 text-muted">No students added yet.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer bg-white text-center py-3 border-top">
-            <a href="{{ url_for('student_pipeline') }}" class="text-decoration-none fw-bold" style="color: var(--brand-red);">View Entire Pipeline &rarr;</a>
-        </div>
-    </div>
-
 </div>
 
 <div class="modal fade" id="addTaskModal" tabindex="-1">
