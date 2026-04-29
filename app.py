@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
 
 # Consolidated Imports
-from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult
+from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task
 
 app = Flask(__name__)
 
@@ -528,6 +528,22 @@ def dashboard():
         counselling_grouped[exam_name].append(form)
 
     recent_students = Student.query.order_by(Student.created_at.desc()).limit(5).all()
+
+    # NEW LOGIC: Fetch Tasks & Staff for the Assignment System
+    staff_members = Staff.query.all()
+
+    # Admins see all pending tasks; normal counselors see only their assigned tasks
+    if current_user.role == 'admin':
+        pending_tasks = Task.query.filter_by(status='Pending').order_by(Task.end_date.asc()).all()
+    else:
+        pending_tasks = Task.query.filter_by(assigned_to=current_user.username, status='Pending').order_by(
+            Task.end_date.asc()).all()
+
+    # Pass everything to the template
+    return render_template('dashboard.html',
+                           # ... keep your existing variables here ...
+                           staff_members=staff_members,
+                           pending_tasks=pending_tasks)
 
     return render_template('dashboard.html',
                            total_students=total_students,
@@ -1211,6 +1227,52 @@ def add_college():
         flash(f"Error saving college: {str(e)}", "error")
 
     return redirect(url_for('college_directory'))
+
+
+# ==========================================
+# WORKFLOW: ADD & UPDATE TASKS
+# ==========================================
+@app.route('/tasks/add', methods=['POST'])
+@login_required
+def add_task():
+    try:
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
+
+        new_task = Task(
+            title=request.form.get('title'),
+            description=request.form.get('description'),
+            start_date=datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None,
+            end_date=datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None,
+            assigned_to=request.form.get('assigned_to'),
+            assigned_by=current_user.username,
+            exam_id=request.form.get('exam_id') or None,
+            counselling_id=request.form.get('counselling_id') or None,
+            form_id=request.form.get('form_id') or None
+        )
+        db.session.add(new_task)
+        db.session.commit()
+        flash(f"Task assigned to {new_task.assigned_to} successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error creating task: {str(e)}", "error")
+
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/tasks/update/<int:task_id>', methods=['POST'])
+@login_required
+def update_task_status(task_id):
+    task = Task.query.get_or_404(task_id)
+    new_status = request.form.get('status')
+
+    if new_status in ['Completed', 'Rejected']:
+        task.status = new_status
+        db.session.commit()
+        flash(f"Task marked as {new_status}!", "success")
+
+    return redirect(url_for('dashboard'))
+
 
 @app.cli.command("init-db")
 def init_db():
