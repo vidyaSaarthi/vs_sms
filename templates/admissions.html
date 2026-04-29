@@ -183,6 +183,7 @@
                                                     <tr>
                                                         <th class="ps-4 text-dark w-50">Counselling Name</th>
                                                         <th class="text-dark">Entity Type</th>
+                                                        <th class="text-dark">Course</th>
                                                         <th class="text-dark text-center">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -191,6 +192,9 @@
                                                     <tr>
                                                         <td class="ps-4 fw-bold" style="color: #333;">{{ c.name }}</td>
                                                         <td><span class="badge border border-dark text-dark">{{ c.counselling_type }}</span></td>
+                                                        <td>
+                                                            <span class="badge bg-light text-primary border border-primary">{{ c.course.name if c.course else 'Not Tagged' }}</span>
+                                                        </td>
                                                         <td class="text-center">
                                                             <div class="d-flex justify-content-center gap-2">
                                                                 <a href="{{ url_for('student_pipeline', counselling=c.id) }}" class="btn btn-sm btn-outline-info fw-bold" title="View Registered Students"><i class="fas fa-users"></i></a>
@@ -330,7 +334,6 @@
                         <i class="fas fa-plus-circle me-2"></i>Create Round
                     </button>
                 </form>
-
             </div>
         </div>
     </div>
@@ -352,11 +355,27 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
-                        <select name="exam_id" class="form-select">
+                        <select name="exam_id" id="examSelect_edit_{{ c.id }}" class="form-select" onchange="updateCourseDropdown('examSelect_edit_{{ c.id }}', 'courseSelect_edit_{{ c.id }}')">
                             <option value="">None / Not Applicable</option>
                             {% for exam in exams %}
                             <option value="{{ exam.id }}" {% if c.exam_id == exam.id %}selected{% endif %}>{{ exam.name }}</option>
                             {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label fw-bold text-success">Target Degree Course</label>
+                        <select name="course_id" id="courseSelect_edit_{{ c.id }}" class="form-select" required>
+                            <option value="">Select Target Course...</option>
+                            {% if c.exam_id %}
+                                {% for crs in c.exam.courses %}
+                                    <option value="{{ crs.id }}" {% if c.course_id == crs.id %}selected{% endif %}>{{ crs.name }}</option>
+                                {% endfor %}
+                            {% else %}
+                                {% for crs in courses %}
+                                    <option value="{{ crs.id }}" {% if c.course_id == crs.id %}selected{% endif %}>{{ crs.name }}</option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
 
@@ -389,12 +408,22 @@
                         <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
                     </div>
 
-                    <div class="mb-3 border-bottom pb-3">
+                    <div class="mb-3">
                         <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
-                        <select name="exam_id" class="form-select">
+                        <select name="exam_id" id="examSelect_add" class="form-select">
                             <option value="">None / Not Applicable</option>
                             {% for exam in exams %}
                             <option value="{{ exam.id }}">{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label fw-bold text-success">Target Degree Course</label>
+                        <select name="course_id" id="courseSelect_add" class="form-select" required>
+                            <option value="">Select an Exam first...</option>
+                            {% for crs in courses %}
+                            <option value="{{ crs.id }}">{{ crs.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -591,6 +620,43 @@
     const examsData = [ {% for e in exams %}{ id: {{ e.id }}, name: "{{ e.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
     const counsData = [ {% for c in counsellings %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
 
+    // NEW: Smart Course Mapping Dictionary from Python
+    const examCourseMap = {{ exam_course_mapping | tojson | safe }};
+
+    function updateCourseDropdown(examSelectId, courseSelectId) {
+        const examId = document.getElementById(examSelectId).value;
+        const courseSelect = document.getElementById(courseSelectId);
+
+        courseSelect.innerHTML = '<option value="">Select Target Course...</option>';
+
+        if (examId && examCourseMap[examId] && examCourseMap[examId].length > 0) {
+            // Populate ONLY courses mapped to this specific exam
+            examCourseMap[examId].forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.text = course.name;
+                courseSelect.appendChild(option);
+            });
+        } else {
+            // Fallback: If no exam is selected, show ALL courses
+            const allCourses = [ {% for c in courses %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+            allCourses.forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.text = course.name;
+                courseSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Attach listener to Add Modal Exam Dropdown
+    const addExamSelect = document.querySelector('#examSelect_add');
+    if (addExamSelect) {
+        addExamSelect.addEventListener('change', function() {
+            updateCourseDropdown(this.id, 'courseSelect_add');
+        });
+    }
+
     function toggleCounsellingTarget() {
         const type = document.getElementById('counTypeSelect').value;
         const div = document.getElementById('counTargetDiv');
@@ -635,28 +701,18 @@
         }
     }
 
-    // ==========================================
-    // TAB MEMORY: Remember active tab on reload
-    // ==========================================
     document.addEventListener("DOMContentLoaded", function() {
-        // 1. Check if the browser remembers a previously clicked tab
         let activeTabId = localStorage.getItem('admissionsActiveTab');
-
         if (activeTabId) {
-            // Find that specific tab button
             let tabElement = document.querySelector(activeTabId);
             if (tabElement) {
-                // Use Bootstrap's built-in tab engine to switch to it
                 let tab = new bootstrap.Tab(tabElement);
                 tab.show();
             }
         }
-
-        // 2. Whenever a counselor clicks a tab, save its ID to browser memory
         let tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
         tabButtons.forEach(function(btn) {
             btn.addEventListener('shown.bs.tab', function(event) {
-                // Save the ID (e.g., '#counselling-tab')
                 localStorage.setItem('admissionsActiveTab', '#' + event.target.id);
             });
         });

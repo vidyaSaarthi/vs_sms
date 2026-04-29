@@ -9,6 +9,7 @@ db = SQLAlchemy()
 # 1. CORE ENTITIES
 # ==========================================
 
+
 class Staff(db.Model, UserMixin):
     __tablename__ = 'staff'
     id = db.Column(db.Integer, primary_key=True)
@@ -109,7 +110,7 @@ class Student(db.Model):
     class_12_marks_data = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    created_by = db.Column(db.String(50))  # FIXED: Comma removed!
+    created_by = db.Column(db.String(50))
     academic_status = db.Column(db.String(50), default='Fresher')
 
     # Relationships
@@ -123,16 +124,16 @@ class StudentExamResult(db.Model):
     __tablename__ = 'student_exam_result'
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
-    exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=False)  # Links to your Master Data
+    exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=False)
 
-    application_number = db.Column(db.String(100), nullable=True)  # E.g., JEE App No
+    application_number = db.Column(db.String(100), nullable=True)
     score = db.Column(db.Float, nullable=True)
     percentile = db.Column(db.Float, nullable=True)
     all_india_rank = db.Column(db.Integer, nullable=True)
-    state_rank = db.Column(db.Integer, nullable=True)  # Highly useful for HSTES/State Counselling
+    state_rank = db.Column(db.Integer, nullable=True)
 
-    # Allows us to easily grab the exam name in HTML (e.g., result.exam_ref.name)
     exam_ref = db.relationship('Exam', backref='student_results')
+
 
 class Document(db.Model):
     __tablename__ = 'documents'
@@ -144,7 +145,7 @@ class Document(db.Model):
 
 
 # ==========================================
-# 2. MASTER DATA (States, Universities, Exams)
+# 2. MASTER DATA (States, Universities, Exams, Courses)
 # ==========================================
 
 class State(db.Model):
@@ -179,11 +180,21 @@ class UniversityCategory(db.Model):
     category_description = db.Column(db.Text, nullable=True)
 
 
+# The Many-to-Many Bridge Table
+exam_courses = db.Table('exam_courses',
+                        db.Column('exam_id', db.Integer, db.ForeignKey('exams.id'), primary_key=True),
+                        db.Column('course_id', db.Integer, db.ForeignKey('courses.id'), primary_key=True)
+                        )
+
+
 class Exam(db.Model):
     __tablename__ = 'exams'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     exam_date = db.Column(db.Date, nullable=True)
+
+    # Relationship to Courses
+    courses = db.relationship('Course', secondary=exam_courses, backref=db.backref('exams', lazy=True))
 
 
 # ==========================================
@@ -194,12 +205,11 @@ class Counselling(db.Model):
     __tablename__ = 'counselling'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
-    counselling_type = db.Column(db.String(50), nullable=False)  # 'State' or 'University'
+    counselling_type = db.Column(db.String(50), nullable=False)
 
-    # 🚨 CRITICAL FIX: Make sure this line is here, and it says 'exams.id' (PLURAL)
     exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
 
-    # Exclusive Foreign Keys based on type
     state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
     university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=True)
 
@@ -210,17 +220,16 @@ class Counselling(db.Model):
 
     # Relationships
     rounds = db.relationship('CounsellingRound', backref='counselling', lazy=True, cascade="all, delete-orphan")
-
-    # 🚨 CRITICAL FIX: Make sure this relationship is here to match the column above
     exam = db.relationship('Exam', backref='counsellings', lazy=True)
+    course = db.relationship('Course')  # 🚨 FIXED: Changed from 'Courses' to 'Course'
+
 
 class Form(db.Model):
     __tablename__ = 'forms'
     id = db.Column(db.Integer, primary_key=True)
-    form_type = db.Column(db.String(50), nullable=False)  # 'Exam' or 'Counselling'
+    form_type = db.Column(db.String(50), nullable=False)
     name = db.Column(db.String(200), nullable=False)
 
-    # Exclusive Foreign Keys based on type
     exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=True)
     counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=True)
 
@@ -232,11 +241,10 @@ class Form(db.Model):
     fee_sc_st = db.Column(db.Numeric(10, 2), nullable=True)
     fee_female = db.Column(db.Numeric(10, 2), nullable=True)
 
-
     admit_card_date = db.Column(db.Date, nullable=True)
     admit_card_link = db.Column(db.String(500), nullable=True)
     document_link = db.Column(db.String(500), nullable=True)
-    prospectus_link = db.Column(db.String(500), nullable=True)  # <-- NEW FIELD
+    prospectus_link = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -248,13 +256,12 @@ class CounsellingRound(db.Model):
     __tablename__ = 'counselling_rounds'
     id = db.Column(db.Integer, primary_key=True)
     counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=False)
-    round_number = db.Column(db.String(50), nullable=False)  # e.g., "Round 1", "Mop-Up"
+    round_number = db.Column(db.String(50), nullable=False)
     rules = db.Column(db.Text, nullable=True)
     seat_matrix_link = db.Column(db.String(500), nullable=True)
     cutoffs_link = db.Column(db.String(500), nullable=True)
     result_link = db.Column(db.String(500), nullable=True)
 
-    # Relationships
     schedules = db.relationship('RoundSchedule', backref='round', lazy=True, cascade="all, delete-orphan")
 
 
@@ -262,7 +269,7 @@ class RoundSchedule(db.Model):
     __tablename__ = 'round_schedules'
     id = db.Column(db.Integer, primary_key=True)
     round_id = db.Column(db.Integer, db.ForeignKey('counselling_rounds.id'), nullable=False)
-    activity_name = db.Column(db.String(150), nullable=False)  # e.g., "Choice Filling"
+    activity_name = db.Column(db.String(150), nullable=False)
     start_date = db.Column(db.DateTime, nullable=True)
     end_date = db.Column(db.DateTime, nullable=True)
 
@@ -276,7 +283,6 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
 
-    # Links back to colleges
     colleges = db.relationship('College', backref='course_ref', lazy=True)
 
     def __repr__(self):
@@ -301,7 +307,6 @@ class College(db.Model):
     joining_documents = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationships - renamed backrefs to be specific and avoid conflicts
     state = db.relationship('State', backref='state_colleges', lazy=True)
     university = db.relationship('University', backref='uni_colleges', lazy=True)
 
@@ -320,12 +325,12 @@ class StudentCounsellingRegistration(db.Model):
     counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=False)
 
     application_number = db.Column(db.String(100), nullable=True)
-    registration_status = db.Column(db.String(50), default='Planned')  # <-- NEW FIELD
+    registration_status = db.Column(db.String(50), default='Planned')
 
     login_username = db.Column(db.String(150), nullable=True)
     login_password = db.Column(db.String(150), nullable=True)
     registered_email = db.Column(db.String(150), nullable=True)
-    registered_mobile = db.Column(db.String(20), nullable=True)  # <-- NEW FIELD
+    registered_mobile = db.Column(db.String(20), nullable=True)
     form_confirmation_link = db.Column(db.String(500), nullable=True)
 
     registration_date = db.Column(db.Date, nullable=True)
@@ -356,4 +361,4 @@ class StudentRoundResult(db.Model):
     round = db.relationship('CounsellingRound', backref='student_results', lazy=True)
 
     def __repr__(self):
-        return f'<Result {self.allotted_institute}>'  # Corrected this!
+        return f'<Result {self.allotted_institute}>'

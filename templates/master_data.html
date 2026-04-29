@@ -4,148 +4,189 @@
 <div class="container-fluid">
     
     <div class="mb-4">
-        <h2 class="fw-bold" style="color: var(--brand-red);"><i class="fas fa-cogs me-2"></i>Master Data Configuration</h2>
-        <p class="text-muted">Manage the foundational data that populates dropdowns across the ERP.</p>
+        <h2 class="fw-bold" style="color: var(--brand-red);"><i class="fas fa-cogs me-2"></i>Master Database</h2>
+        <p class="text-muted">Manage core entity lists (Courses, Exams, States, Universities) used throughout the ERP.</p>
     </div>
 
-    <div class="row">
-        
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-red);">
-                    <i class="fas fa-edit me-2"></i> Entrance Exams
-                </div>
-                
-                <div class="card-body bg-light border-bottom p-3">
-                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
-                        <input type="hidden" name="data_type" value="exam">
-                        <input type="text" class="form-control" name="name" placeholder="e.g. NEET 2026" required>
-                        <button type="submit" class="btn text-white" style="background-color: var(--brand-red);"><i class="fas fa-plus"></i></button>
-                    </form>
-                </div>
+    <ul class="nav nav-tabs mb-4" id="masterTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold text-dark" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">
+                <i class="fas fa-pen-nib me-1"></i> Entrance Exams
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses" type="button" role="tab">
+                <i class="fas fa-graduation-cap me-1"></i> Degree Courses
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="states-tab" data-bs-toggle="tab" data-bs-target="#states" type="button" role="tab">
+                <i class="fas fa-map-marker-alt me-1"></i> States
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="universities-tab" data-bs-toggle="tab" data-bs-target="#universities" type="button" role="tab">
+                <i class="fas fa-university me-1"></i> Universities
+            </button>
+        </li>
+    </ul>
 
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
-                    <ul class="list-group list-group-flush">
-                        {% for exam in exams %}
-                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            <span>{{ exam.name }}</span>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_exam_{{ exam.id }}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <form action="/settings/master/delete/exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam from the master list?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                                </form>
-                            </div>
-                        </li>
-                        {% else %}
-                        <li class="list-group-item text-muted text-center py-3">No exams added yet.</li>
-                        {% endfor %}
-                    </ul>
+    <div class="tab-content" id="masterTabsContent">
+
+        <div class="tab-pane fade show active" id="exams" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">Recognized Entrance Exams</h5>
+                    <button class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addExamModal">
+                        <i class="fas fa-plus me-1"></i> Add Exam
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 text-dark w-25">Exam Name</th>
+                                    <th class="text-dark">Mapped Target Courses</th>
+                                    <th class="text-dark text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exam in exams %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ exam.name }}</td>
+                                    <td>
+                                        {% if exam.courses %}
+                                            {% for c in exam.courses %}
+                                                <span class="badge border border-primary text-primary me-1 mb-1">{{ c.name }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted small fst-italic">No courses mapped</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <form action="/settings/delete_exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam? Warning: This will affect related counselling processes.');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exam"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">No exams have been added to the master list.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-blue);">
-                    <i class="fas fa-map-marker-alt me-2" style="color: #4a6b8c;"></i> States (State Counselling)
+        <div class="tab-pane fade" id="courses" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">Degree Courses</h5>
+                    <button class="btn btn-sm text-dark fw-bold shadow-sm" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                        <i class="fas fa-plus me-1"></i> Add Course
+                    </button>
                 </div>
-
-                <div class="card-body bg-light border-bottom p-3">
-                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
-                        <input type="hidden" name="data_type" value="state">
-                        <input type="text" class="form-control" name="name" placeholder="e.g. Haryana" required>
-                        <button type="submit" class="btn text-dark fw-bold" style="background-color: var(--brand-blue);"><i class="fas fa-plus"></i></button>
-                    </form>
-                </div>
-
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
-                    <ul class="list-group list-group-flush">
-                        {% for state in states %}
-                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            <span>{{ state.name }}</span>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_state_{{ state.id }}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <form action="/settings/master/delete/state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state from the master list?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                                </form>
-                            </div>
-                        </li>
-                        {% else %}
-                        <li class="list-group-item text-muted text-center py-3">No states added yet.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3" style="color: #b3a000;">
-                    <i class="fas fa-university me-2"></i> Independent Universities
-                </div>
-
-                <div class="card-body bg-light border-bottom p-3">
-                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
-                        <input type="hidden" name="data_type" value="university">
-                        <input type="text" class="form-control" name="name" placeholder="e.g. VIT Vellore" required>
-                        <button type="submit" class="btn text-dark fw-bold" style="background-color: var(--brand-yellow);"><i class="fas fa-plus"></i></button>
-                    </form>
-                </div>
-
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
-                    <ul class="list-group list-group-flush">
-                        {% for uni in universities %}
-                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            <span>{{ uni.name }}</span>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_university_{{ uni.id }}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <form action="/settings/master/delete/university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university from the master list?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                                </form>
-                            </div>
-                        </li>
-                        {% else %}
-                        <li class="list-group-item text-muted text-center py-3">No universities added yet.</li>
-                        {% endfor %}
-                    </ul>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 text-dark">Course Title (e.g. B.Tech, MBBS)</th>
+                                    <th class="text-dark text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ course.name }}</td>
+                                    <td class="text-center">
+                                        <form action="/settings/delete_course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Course"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="2" class="text-center py-4 text-muted">No courses added.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white fw-bold py-3" style="color: var(--brand-red);">
-                    <i class="fas fa-graduation-cap me-2"></i> Degree Courses
+        <div class="tab-pane fade" id="states" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">States & Regions</h5>
+                    <button class="btn btn-sm text-white fw-bold shadow-sm bg-dark" data-bs-toggle="modal" data-bs-target="#addStateModal">
+                        <i class="fas fa-plus me-1"></i> Add State
+                    </button>
                 </div>
-                <div class="card-body bg-light border-bottom p-3">
-                    <form action="/settings/master/add" method="POST" class="d-flex gap-2">
-                        <input type="hidden" name="data_type" value="course">
-                        <input type="text" class="form-control" name="name" placeholder="e.g. B.Tech" required>
-                        <button type="submit" class="btn text-white" style="background-color: var(--brand-red);"><i class="fas fa-plus"></i></button>
-                    </form>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 text-dark">State Name</th>
+                                    <th class="text-dark text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for state in states %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ state.name }}</td>
+                                    <td class="text-center">
+                                        <form action="/settings/delete_state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="2" class="text-center py-4 text-muted">No states added.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
-                    <ul class="list-group list-group-flush">
-                        {% for course in courses %}
-                        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
-                            <span>{{ course.name }}</span>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editMasterModal_course_{{ course.id }}" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <form action="/settings/master/delete/course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course from the master list?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                                </form>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="universities" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">Independent Universities</h5>
+                    <button class="btn btn-sm text-dark fw-bold shadow-sm border" style="background-color: #e2e8f0;" data-bs-toggle="modal" data-bs-target="#addUniversityModal">
+                        <i class="fas fa-plus me-1"></i> Add University
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 text-dark">University Name</th>
+                                    <th class="text-dark text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for uni in universities %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ uni.name }}</td>
+                                    <td class="text-center">
+                                        <form action="/settings/delete_university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="2" class="text-center py-4 text-muted">No universities added.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,35 +194,120 @@
     </div>
 </div>
 
-{% macro render_edit_modal(items, data_type_label, data_type_slug) %}
-    {% for item in items %}
-    <div class="modal fade" id="editMasterModal_{{ data_type_slug }}_{{ item.id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="/settings/master/edit/{{ data_type_slug }}/{{ item.id }}" method="POST">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title fw-bold text-dark"><i class="fas fa-edit me-2"></i>Edit {{ data_type_label }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="addExamModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/add_exam" method="POST">
+                <div class="modal-header text-white" style="background-color: var(--brand-red);">
+                    <h5 class="modal-title fw-bold">Add Entrance Exam</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Exam Name (e.g. JEE Main)</label>
+                        <input type="text" name="name" class="form-control" required>
                     </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Name</label>
-                            <input type="text" name="name" class="form-control" value="{{ item.name }}" required>
-                        </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-success">Map to Target Courses</label>
+                        <select name="course_ids" class="form-select" multiple style="height: 120px;">
+                            {% for course in courses %}
+                            <option value="{{ course.id }}">{{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple courses.</small>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Update</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Exam</button>
+                </div>
+            </form>
         </div>
     </div>
-    {% endfor %}
-{% endmacro %}
+</div>
 
-{{ render_edit_modal(exams, 'Exam', 'exam') }}
-{{ render_edit_modal(states, 'State', 'state') }}
-{{ render_edit_modal(universities, 'University', 'university') }}
-{{ render_edit_modal(courses, 'Course', 'course') }}
+<div class="modal fade" id="addCourseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/add_course" method="POST">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold">Add Target Course</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Course Title (e.g. B.Tech, MBBS)</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success fw-bold w-100">Save Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addStateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/add_state" method="POST">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold">Add State</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">State Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Save State</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addUniversityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/settings/add_university" method="POST">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold">Add University</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">University Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-secondary fw-bold w-100">Save University</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let activeTabId = localStorage.getItem('masterTabsActive');
+        if (activeTabId) {
+            let tabElement = document.querySelector(activeTabId);
+            if (tabElement) {
+                let tab = new bootstrap.Tab(tabElement);
+                tab.show();
+            }
+        }
+        let tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabButtons.forEach(function(btn) {
+            btn.addEventListener('shown.bs.tab', function(event) {
+                localStorage.setItem('masterTabsActive', '#' + event.target.id);
+            });
+        });
+    });
+</script>
 
 {% endblock %}
