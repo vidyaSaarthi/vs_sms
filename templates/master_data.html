@@ -32,6 +32,13 @@
                 <i class="fas fa-graduation-cap me-2"></i>Courses
             </button>
         </li>
+
+        <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="master-couns-tab" data-bs-toggle="tab" data-bs-target="#tab-master-couns" type="button" role="tab" style="border-top: 3px solid var(--brand-yellow); color: #333;">
+            <i class="fas fa-sitemap me-2"></i>Master Counseling Processes
+        </button>
+</li>
+
     </ul>
 
     <!-- 🚨 UI FIX: TAB CONTENT PANES -->
@@ -258,6 +265,86 @@
             </div>
         </div>
 
+        <!-- TAB 5: MASTER COUNSELLING PROCESSES CONTENT -->
+        <div class="tab-pane fade" id="tab-master-couns" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #333;">Active Counselling Systems</h5>
+                    <button class="btn btn-sm text-dark fw-bold" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addCounsellingModal">
+                        <i class="fas fa-plus me-1"></i> Add Process
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    {% if counselling_grouped %}
+                        {% for exam_name, processes in counselling_grouped.items() %}
+                            <div class="mb-5">
+                                <h6 class="fw-bold mb-3">
+                                    <span class="badge bg-danger shadow-sm px-3 py-2 fs-6"><i class="fas fa-layer-group me-2"></i>{{ exam_name }}</span>
+                                </h6>
+                                <div class="card shadow-sm border-0">
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead style="background-color: var(--brand-blue);">
+                                                    <tr>
+                                                        <th class="ps-4 text-dark w-25">Counselling Name</th>
+                                                        <th class="text-dark">Target Entity</th>
+                                                        <th class="text-dark">Target Courses</th>
+                                                        <th class="text-dark text-center">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for c in processes %}
+                                                    <tr>
+                                                        <td class="ps-4 fw-bold" style="color: #333;">{{ c.name }}</td>
+                                                        <td>
+                                                            <span class="badge border border-dark text-dark mb-1">{{ c.counselling_type }}</span><br>
+                                                            <small class="fw-bold text-muted">
+                                                                <i class="fas fa-map-marker-alt me-1"></i>
+                                                                {{ c.state.name if c.counselling_type == 'State' and c.state else (c.university.name if c.counselling_type == 'University' and c.university else 'Not Assigned') }}
+                                                            </small>
+                                                        </td>
+                                                        <td>
+                                                            {% if c.courses %}
+                                                                {% for crs in c.courses %}
+                                                                    <span class="badge bg-light text-primary border border-primary me-1 mb-1">{{ crs.name }}</span>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <span class="badge bg-light text-muted border">Not Tagged</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="d-flex justify-content-center gap-2">
+                                                                <a href="{{ url_for('student_pipeline', counselling=c.id) }}" class="btn btn-sm btn-outline-info fw-bold" title="View Registered Students"><i class="fas fa-users"></i></a>
+                                                                <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}"><i class="fas fa-list-ol me-1"></i> Rounds</button>
+                                                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCounsellingModal{{ c.id }}" title="Edit"><i class="fas fa-edit"></i></button>
+                                                                <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                                                </form>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted bg-light rounded shadow-sm border">
+                            <i class="fas fa-sitemap fa-3x mb-3 text-secondary"></i>
+                            <p>No master counselling processes configured yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+
+
     </div> <!-- End Tab Content -->
 
 </div> <!-- End Container -->
@@ -351,5 +438,270 @@
         </div>
     </div>
 </div>
+
+
+<!-- MASTER COUNSELLING MODALS -->
+{% for c in counsellings %}
+<div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content text-start" style="border-radius: 15px;">
+            <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-sitemap me-2 text-warning"></i>Manage Rounds: {{ c.name }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+
+                <h6 class="fw-bold text-primary mb-3">Active Rounds</h6>
+                {% if c.rounds %}
+                <div class="table-responsive mb-4">
+                    <table class="table table-sm table-hover border">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 text-muted">Round Name</th>
+                                <th class="text-muted">Important Links</th>
+                                <th class="text-end pe-3 text-muted">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in c.rounds %}
+                            <tr>
+                                <td class="ps-3 fw-bold align-middle">{{ r.round_number }}</td>
+                                <td class="align-middle">
+                                    {% if r.seat_matrix_link %}
+                                        <a href="{{ r.seat_matrix_link }}" target="_blank" class="badge bg-secondary text-decoration-none me-1"><i class="fas fa-table me-1"></i>Seat Matrix</a>
+                                    {% endif %}
+                                    {% if r.result_link %}
+                                        <a href="{{ r.result_link }}" target="_blank" class="badge bg-success text-decoration-none"><i class="fas fa-trophy me-1"></i>Result</a>
+                                    {% endif %}
+                                    {% if not r.seat_matrix_link and not r.result_link %}
+                                        <span class="text-muted small">No links added</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3 align-middle">
+                                    <form action="/admissions/delete_round/{{ r.id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ r.round_number }}?');">
+                                        <button type="submit" class="btn btn-sm text-danger border-0 p-1" title="Delete Round"><i class="fas fa-trash-alt"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light border text-center mb-4 text-muted small">
+                    <i class="fas fa-info-circle me-1"></i> No rounds have been configured for this process yet.
+                </div>
+                {% endif %}
+
+                <h6 class="fw-bold text-danger mb-3 border-top pt-4">Add a New Round</h6>
+                <form action="{{ url_for('add_counselling_round', counselling_id=c.id) }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold small text-muted">Round Name / Phase</label>
+                            <input type="text" name="round_number" class="form-control bg-light" placeholder="e.g. Round 1, Mock Allotment, Mop-Up" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Seat Matrix URL <span class="fw-normal">(Optional)</span></label>
+                            <input type="url" name="seat_matrix_link" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Cutoffs URL <span class="fw-normal">(Optional)</span></label>
+                            <input type="url" name="cutoffs_link" class="form-control" placeholder="https://...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Official Result URL <span class="fw-normal">(Optional)</span></label>
+                            <input type="url" name="result_link" class="form-control" placeholder="https://...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn text-white fw-bold w-100 mt-2" style="background-color: var(--brand-red);">
+                        <i class="fas fa-plus-circle me-2"></i>Create Round
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editCounsellingModal{{ c.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admissions/edit_counselling/{{ c.id }}" method="POST">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fas fa-edit me-2"></i>Edit Process</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Process Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ c.name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
+                        <select name="exam_id" id="examSelect_edit_{{ c.id }}" class="form-select" onchange="updateCourseDropdown('examSelect_edit_{{ c.id }}', 'courseSelect_edit_{{ c.id }}')">
+                            <option value="">None / Not Applicable</option>
+                            {% for exam in exams %}
+                            <option value="{{ exam.id }}" {% if c.exam_id == exam.id %}selected{% endif %}>{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label fw-bold text-success">Target Degree Courses</label>
+                        <select name="course_ids" id="courseSelect_edit_{{ c.id }}" class="form-select" multiple style="height: 100px;">
+                            {% if c.exam_id %}
+                                {% for crs in c.exam.courses %}
+                                    <option value="{{ crs.id }}" {% if crs in c.courses %}selected{% endif %}>{{ crs.name }}</option>
+                                {% endfor %}
+                            {% else %}
+                                {% for crs in courses %}
+                                    <option value="{{ crs.id }}" {% if crs in c.courses %}selected{% endif %}>{{ crs.name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Target {{ c.counselling_type }}</label>
+                        <select name="target_id" class="form-select" required>
+                            {% if c.counselling_type == 'State' %}
+                                {% for s in states %}
+                                <option value="{{ s.id }}" {% if c.state_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                                {% endfor %}
+                            {% elif c.counselling_type == 'University' %}
+                                {% for u in universities %}
+                                <option value="{{ u.id }}" {% if c.university_id == u.id %}selected{% endif %}>{{ u.name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>To switch from State to University entirely, recreate the process.</small>
+                    </div>
+
+                    <input type="hidden" name="counselling_type" value="{{ c.counselling_type }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<div class="modal fade" id="addCounsellingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/admissions/add_counselling" method="POST">
+                <div class="modal-header" style="background-color: var(--brand-blue);">
+                    <h5 class="modal-title fw-bold text-dark">New Counselling Process</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Process Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
+                        <select name="exam_id" id="examSelect_add" class="form-select">
+                            <option value="">None / Not Applicable</option>
+                            {% for exam in exams %}
+                            <option value="{{ exam.id }}">{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label fw-bold text-success">Target Degree Courses</label>
+                        <select name="course_ids" id="courseSelect_add" class="form-select" multiple style="height: 100px;">
+                            {% for crs in courses %}
+                            <option value="{{ crs.id }}">{{ crs.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Type</label>
+                        <select name="counselling_type" id="counTypeSelect" class="form-select" required onchange="toggleCounsellingTarget()">
+                            <option value="">Select Type...</option>
+                            <option value="State">State Counselling</option>
+                            <option value="University">Independent University</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="counTargetDiv" style="display: none;">
+                        <label class="form-label fw-bold" id="counTargetLabel">Select Entity</label>
+                        <select name="target_id" id="counTargetSelect" class="form-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Process</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JS required for Master Counselling dropdown logic
+    const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const unisData = [ {% for u in universities %}{ id: {{ u.id }}, name: "{{ u.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const examCourseMap = {{ exam_course_mapping | tojson | safe }};
+
+    function updateCourseDropdown(examSelectId, courseSelectId) {
+        const examId = document.getElementById(examSelectId).value;
+        const courseSelect = document.getElementById(courseSelectId);
+
+        courseSelect.innerHTML = '';
+
+        if (examId && examCourseMap[examId] && examCourseMap[examId].length > 0) {
+            examCourseMap[examId].forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.text = course.name;
+                courseSelect.appendChild(option);
+            });
+        } else {
+            const allCourses = [ {% for c in courses %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+            allCourses.forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.text = course.name;
+                courseSelect.appendChild(option);
+            });
+        }
+    }
+
+    const addExamSelect = document.querySelector('#examSelect_add');
+    if (addExamSelect) {
+        addExamSelect.addEventListener('change', function() {
+            updateCourseDropdown(this.id, 'courseSelect_add');
+        });
+    }
+
+    function toggleCounsellingTarget() {
+        const type = document.getElementById('counTypeSelect').value;
+        const div = document.getElementById('counTargetDiv');
+        const select = document.getElementById('counTargetSelect');
+        const label = document.getElementById('counTargetLabel');
+
+        select.innerHTML = '<option value="">Select...</option>';
+        if (type === 'State') {
+            label.innerText = 'Which State?';
+            statesData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else if (type === 'University') {
+            label.innerText = 'Which University?';
+            unisData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+</script>
 
 {% endblock %}
