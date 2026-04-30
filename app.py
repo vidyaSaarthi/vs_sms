@@ -576,15 +576,18 @@ def dashboard():
 # ==========================================
 # STUDENT PIPELINE
 # ==========================================
+
 @app.route('/students')
 @login_required
 def student_pipeline():
     search_query = request.args.get('search', '')
-    exam_filter = request.args.get('exam', '')
     counsellor_filter = request.args.get('counsellor', '')
     status_filter = request.args.get('status', '')
     counselling_filter = request.args.get('counselling', '')
     exam_id_filter = request.args.get('exam_id', '')
+
+    # 🚨 NEW: Grab the active tab from the URL (Defaults to 'all')
+    active_tab = request.args.get('tab', 'all')
 
     query = Student.query
 
@@ -597,7 +600,13 @@ def student_pipeline():
             )
         )
 
-    if exam_filter: query = query.filter(Student.exam_type == exam_filter)
+    # 🚨 NEW: Filter the database based on the selected Tab!
+    if active_tab == 'jee':
+        query = query.filter(Student.exam_type == 'JEE')
+    elif active_tab == 'neet':
+        query = query.filter(Student.exam_type == 'NEET')
+
+    # Apply other remaining filters
     if counsellor_filter: query = query.filter(Student.created_by == counsellor_filter)
     if status_filter: query = query.filter(Student.academic_status == status_filter)
 
@@ -610,20 +619,16 @@ def student_pipeline():
             StudentExamResult.exam_id == int(exam_id_filter)
         )
 
-    # Sort the Counselor Dropdown Alphabetically
     counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
     counsellor_list = sorted([c[0] for c in counsellors if c[0]])
-
-    # Sort the Counselling Dropdown Alphabetically
     active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
-    # Sort the Students Alphabetically by Name
     students = query.order_by(Student.full_name.asc()).distinct().all()
 
     return render_template('students.html',
                            students=students,
                            search_query=search_query,
-                           exam_filter=exam_filter,
+                           active_tab=active_tab,  # <-- Passed to template to highlight active tab
                            counsellor_filter=counsellor_filter,
                            status_filter=status_filter,
                            counselling_filter=counselling_filter,
