@@ -529,7 +529,6 @@ def delete_counselling_round(round_id):
 def dashboard():
     today = date.today()
 
-    # 🚨 NEW: Fetch Master Exams and sort by Date (TBD at the bottom)
     master_exams = Exam.query.all()
     master_exams_sorted = sorted(master_exams, key=lambda x: x.exam_date or date.max)
 
@@ -555,22 +554,11 @@ def dashboard():
             counselling_grouped[exam_name] = []
         counselling_grouped[exam_name].append(form)
 
-    # TASK SYSTEM ADDITIONS
-    staff_members = Staff.query.order_by(Staff.username.asc()).all()
-    if current_user.role == 'admin':
-        pending_tasks = Task.query.filter_by(status='Pending').order_by(Task.end_date.asc()).all()
-    else:
-        pending_tasks = Task.query.filter_by(assigned_to=current_user.username, status='Pending').order_by(Task.end_date.asc()).all()
-
-    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
-
+    # 🚨 Notice: Tasks logic has been entirely removed from here to make the dashboard load faster!
     return render_template('dashboard.html',
-                           master_exams=master_exams_sorted, # Pass to HTML!
+                           master_exams=master_exams_sorted,
                            upcoming_exam_forms=upcoming_exam_forms,
-                           counselling_grouped=counselling_grouped,
-                           staff_members=staff_members,
-                           pending_tasks=pending_tasks,
-                           all_counsellings=all_counsellings)
+                           counselling_grouped=counselling_grouped)
 
 
 # ==========================================
@@ -652,9 +640,6 @@ def add_student():
         if not request.form.get('created_by'):
             flash("Validation Error: Please select a Counselor Name (Created By).", "error")
             return redirect(url_for('add_student'))
-
-        # 1. Capture inputs, strip accidental spaces, convert blanks to None
-        aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
 
         # 1. Capture inputs, strip accidental spaces, convert blanks to None
         aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
@@ -1300,9 +1285,31 @@ def add_college():
     return redirect(url_for('college_directory'))
 
 
-# ==========================================
-# WORKFLOW: ADD & UPDATE TASKS
-# ==========================================
+@app.route('/tasks')
+@login_required
+def tasks_page():
+    today = date.today()
+    staff_members = Staff.query.order_by(Staff.username.asc()).all()
+
+    if current_user.role == 'admin':
+        pending_tasks = Task.query.filter_by(status='Pending').order_by(Task.end_date.asc()).all()
+    else:
+        pending_tasks = Task.query.filter_by(assigned_to=current_user.username, status='Pending').order_by(
+            Task.end_date.asc()).all()
+
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
+    # Required for the dropdown when linking a task to a form
+    upcoming_exam_forms = Form.query.filter(Form.end_date >= today, Form.form_type == 'Exam').order_by(
+        Form.end_date.asc()).all()
+
+    return render_template('tasks.html',
+                           pending_tasks=pending_tasks,
+                           staff_members=staff_members,
+                           all_counsellings=all_counsellings,
+                           upcoming_exam_forms=upcoming_exam_forms)
+
+
 @app.route('/tasks/add', methods=['POST'])
 @login_required
 def add_task():
@@ -1327,23 +1334,17 @@ def add_task():
     except Exception as e:
         db.session.rollback()
         flash(f"Error creating task: {str(e)}", "error")
+    return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
 
-    return redirect(url_for('dashboard'))
 
-
-# ==========================================
-# WORKFLOW: EDIT EXISTING TASK
-# ==========================================
 @app.route('/tasks/edit/<int:task_id>', methods=['POST'])
 @login_required
 def edit_task(task_id):
     try:
         task = Task.query.get_or_404(task_id)
-
-        # Security: Only admins or the person who assigned the task can edit it
         if current_user.role != 'admin' and current_user.username != task.assigned_by:
             flash("You do not have permission to edit this task.", "error")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('tasks_page'))
 
         start_date_str = request.form.get('start_date')
         end_date_str = request.form.get('end_date')
@@ -1354,7 +1355,6 @@ def edit_task(task_id):
         task.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
         task.assigned_to = request.form.get('assigned_to')
 
-        # Handle the optional linked master data
         task.exam_id = request.form.get('exam_id') or None
         task.counselling_id = request.form.get('counselling_id') or None
         task.form_id = request.form.get('form_id') or None
@@ -1364,21 +1364,17 @@ def edit_task(task_id):
     except Exception as e:
         db.session.rollback()
         flash(f"Error updating task: {str(e)}", "error")
-
-    return redirect(url_for('dashboard'))
-
+    return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
 @app.route('/tasks/update/<int:task_id>', methods=['POST'])
 @login_required
 def update_task_status(task_id):
     task = Task.query.get_or_404(task_id)
     new_status = request.form.get('status')
-
     if new_status in ['Completed', 'Rejected']:
         task.status = new_status
         db.session.commit()
         flash(f"Task marked as {new_status}!", "success")
-
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
 
 
 @app.cli.command("init-db")

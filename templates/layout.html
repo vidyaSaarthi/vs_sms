@@ -191,6 +191,14 @@
                             <i class="fas fa-chart-pie"></i> Dashboard
                         </a>
                     </li>
+
+                    <!-- ADD THIS LINK TO YOUR SIDEBAR -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'tasks_page' %}active fw-bold text-danger{% else %}text-dark{% endif %}" href="{{ url_for('tasks_page') }}">
+                            <i class="fas fa-clipboard-list me-2" style="width: 20px;"></i> Task Management
+                        </a>
+                    </li>
+
                     <li class="nav-item mt-3 mb-1">
                         <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Admissions</span>
                     </li>

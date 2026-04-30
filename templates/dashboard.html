@@ -3,61 +3,85 @@
 {% block content %}
 <div class="container-fluid pt-3">
 
-    <!-- MASTER ENTRANCE EXAM DATES ROW -->
-    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-            <h5 class="mb-0 fw-bold" style="color: var(--brand-red);"><i class="fas fa-calendar-alt text-primary me-2"></i>Master Entrance Exam Dates</h5>
-            <a href="{{ url_for('master_data') }}" class="btn btn-sm btn-outline-secondary">Manage Exams</a>
-        </div>
-        <div class="card-body p-0">
-            <!-- 🚨 UI FIX: Scrollable Container -->
-            <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0">
-                    <!-- 🚨 UI FIX: Sticky Header -->
-                    <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-                        <tr>
-                            <th class="ps-4 bg-light">Entrance Exam</th>
-                            <th class="text-danger bg-light">Exam Date</th> <!-- 🚨 Renamed -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for exam in master_exams %}
-                        <tr>
-                            <td class="ps-4 fw-bold" style="font-size: 1.05rem;">
-                                {{ exam.name }}
-                            </td>
-                            <td class="fw-bold {% if exam.exam_date %}text-dark{% else %}text-muted{% endif %}">
-                                {% if exam.exam_date %}
-                                    <i class="far fa-calendar-check text-success me-2"></i> {{ exam.exam_date.strftime('%d %b %Y') }}
-                                {% else %}
-                                    <i class="far fa-clock me-2"></i> To be announced
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="2" class="text-center py-4 text-muted">
-                                <i class="fas fa-exclamation-circle mb-2 d-block fs-4"></i> No entrance exams configured yet.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #333;"><i class="fas fa-home text-primary me-2"></i>Command Center</h2>
+            <p class="text-muted mb-0">Your overview of master exam dates and upcoming deadlines.</p>
         </div>
     </div>
 
-    <!-- DEADLINES ROW -->
-    <div class="row g-4 mb-4">
+    <!-- 🚨 NEW: DASHBOARD TABS -->
+    <ul class="nav nav-tabs mb-4 border-bottom-0" id="dashboardTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exams-tab" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" role="tab" style="border-top: 3px solid var(--brand-red); color: #333;">
+                <i class="far fa-calendar-alt me-2"></i>Master Exam Dates
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exam-forms-tab" data-bs-toggle="tab" data-bs-target="#tab-exam-forms" type="button" role="tab" style="border-top: 3px solid var(--brand-yellow); color: #333;">
+                <i class="fas fa-pen-nib me-2"></i>Exam Form Deadlines
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="couns-forms-tab" data-bs-toggle="tab" data-bs-target="#tab-couns-forms" type="button" role="tab" style="border-top: 3px solid var(--brand-blue); color: #333;">
+                <i class="fas fa-sitemap me-2"></i>Counselling Form Deadlines
+            </button>
+        </li>
+    </ul>
 
-        <!-- EXAM FORMS DEADLINES -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
-                <div class="card-header bg-dark text-white py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Upcoming Exam Forms Deadlines</h6>
+    <!-- 🚨 TAB CONTENT -->
+    <div class="tab-content" id="dashboardTabsContent">
+
+        <!-- TAB 1: MASTER EXAM DATES -->
+        <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="mb-0 fw-bold" style="color: var(--brand-red);"><i class="fas fa-calendar-alt text-primary me-2"></i>Master Entrance Exam Dates</h5>
+                    <a href="{{ url_for('master_data') }}" class="btn btn-sm btn-outline-secondary">Manage Exams</a>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                                <tr>
+                                    <th class="ps-4 bg-light">Entrance Exam</th>
+                                    <th class="text-danger bg-light">Exam Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exam in master_exams %}
+                                <tr>
+                                    <td class="ps-4 fw-bold" style="font-size: 1.05rem;">{{ exam.name }}</td>
+                                    <td class="fw-bold {% if exam.exam_date %}text-dark{% else %}text-muted{% endif %}">
+                                        {% if exam.exam_date %}
+                                            <i class="far fa-calendar-check text-success me-2"></i> {{ exam.exam_date.strftime('%d %b %Y') }}
+                                        {% else %}
+                                            <i class="far fa-clock me-2"></i> To be announced
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center py-4 text-muted">
+                                        <i class="fas fa-exclamation-circle mb-2 d-block fs-4"></i> No entrance exams configured yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: EXAM FORMS DEADLINES -->
+        <div class="tab-pane fade" id="tab-exam-forms" role="tabpanel">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Upcoming Exam Forms Deadlines</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                         <table class="table table-hover mb-0 align-middle">
                             <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                                 <tr>
@@ -79,8 +103,7 @@
                                 {% else %}
                                 <tr>
                                     <td colspan="2" class="text-center py-5 text-muted">
-                                        <i class="fas fa-calendar-check fs-4 mb-2 text-success d-block"></i>
-                                        No upcoming exam form deadlines.
+                                        <i class="fas fa-calendar-check fs-4 mb-2 text-success d-block"></i> No upcoming exam form deadlines.
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -91,14 +114,14 @@
             </div>
         </div>
 
-        <!-- COUNSELLING FORMS DEADLINES -->
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+        <!-- TAB 3: COUNSELLING FORMS DEADLINES -->
+        <div class="tab-pane fade" id="tab-couns-forms" role="tabpanel">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
                 <div class="card-header py-3" style="background-color: var(--brand-blue);">
-                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h6>
+                    <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h5>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                         <table class="table table-hover mb-0 align-middle">
                             <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                                 <tr>
@@ -129,8 +152,7 @@
                                 {% else %}
                                     <tr>
                                         <td colspan="2" class="text-center py-5 text-muted">
-                                            <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i>
-                                            No upcoming counselling form deadlines.
+                                            <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i> No upcoming counselling form deadlines.
                                         </td>
                                     </tr>
                                 {% endif %}
@@ -140,217 +162,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ASSIGNED TASKS ROW -->
-    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-            <h5 class="mb-0 fw-bold" style="color: #333;"><i class="fas fa-tasks text-primary me-2"></i>Assigned Activities & Workflows</h5>
-            <button class="btn btn-sm btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-                <i class="fas fa-plus me-1"></i> Assign Task
-            </button>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-                        <tr>
-                            <th class="ps-4 bg-light">Task Details</th>
-                            <th class="bg-light">Dates</th>
-                            <th class="bg-light">Assigned To</th>
-                            <th class="text-center bg-light">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in pending_tasks %}
-                        <tr>
-                            <td class="ps-4">
-                                <strong class="text-dark">{{ task.title }}</strong><br>
-                                {% if task.exam %}<span class="badge bg-danger mt-1">Exam: {{ task.exam.name }}</span>{% endif %}
-                                {% if task.counselling %}<span class="badge bg-warning text-dark mt-1">Couns: {{ task.counselling.name }}</span>{% endif %}
-                                {% if task.form %}<span class="badge bg-info text-dark mt-1">Form: {{ task.form.name }}</span>{% endif %}
-                            </td>
-                            <td>
-                                <small class="text-muted d-block">Start: {{ task.start_date.strftime('%d %b %Y') if task.start_date else '-' }}</small>
-                                <small class="text-danger fw-bold d-block">Due: {{ task.end_date.strftime('%d %b %Y') if task.end_date else '-' }}</small>
-                            </td>
-                            <td>
-                                <span class="badge border border-dark text-dark"><i class="fas fa-user me-1"></i>{{ task.assigned_to }}</span>
-                                {% if current_user.role == 'admin' %}
-                                    <small class="d-block text-muted" style="font-size: 0.7rem;">Assigned by: {{ task.assigned_by }}</small>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <button type="button" class="btn btn-sm btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#editTaskModal{{ task.id }}" title="Edit Task"><i class="fas fa-edit"></i></button>
-                                    <form action="/tasks/update/{{ task.id }}" method="POST" class="m-0" onsubmit="return confirm('Mark this task as completed?');">
-                                        <input type="hidden" name="status" value="Completed">
-                                        <button type="submit" class="btn btn-sm btn-success fw-bold" title="Mark Complete"><i class="fas fa-check"></i></button>
-                                    </form>
-                                    <form action="/tasks/update/{{ task.id }}" method="POST" class="m-0" onsubmit="return confirm('Reject this task?');">
-                                        <input type="hidden" name="status" value="Rejected">
-                                        <button type="submit" class="btn btn-sm btn-danger fw-bold" title="Reject Task"><i class="fas fa-times"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
-                                <i class="fas fa-clipboard-check fs-4 mb-2 text-secondary d-block"></i>
-                                No pending activities assigned to you.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- ... KEEP YOUR EXISTING TASK MODALS AT THE VERY BOTTOM ... -->
-<!-- ADD TASK MODAL -->
-<div class="modal fade" id="addTaskModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-            <form action="/tasks/add" method="POST">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Assign New Activity</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Task Title</label>
-                        <input type="text" name="title" class="form-control" placeholder="e.g. Verify domicile certificates" required>
-                    </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-primary">Start Date</label>
-                            <input type="date" name="start_date" class="form-control" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-danger">End Date</label>
-                            <input type="date" name="end_date" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Assign To</label>
-                        <select name="assigned_to" class="form-select" required>
-                            <option value="">Select Counselor...</option>
-                            {% for staff in staff_members %}
-                            <option value="{{ staff.username }}">{{ staff.username }} ({{ staff.role }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Description / Notes <span class="fw-normal text-muted">(Optional)</span></label>
-                        <textarea name="description" class="form-control" rows="2" placeholder="Add any details or instructions..."></textarea>
-                    </div>
-
-                    <h6 class="fw-bold mt-4 mb-3 border-bottom pb-2 text-muted">Link to Master Data (Optional)</h6>
-
-                    <div class="mb-2">
-                        <select name="counselling_id" class="form-select form-select-sm">
-                            <option value="">Link to Counselling Process...</option>
-                            {% for c in all_counsellings %}
-                                <option value="{{ c.id }}">{{ c.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <select name="form_id" class="form-select form-select-sm">
-                            <option value="">Link to Specific Form/Deadline...</option>
-                            {% for f in upcoming_exam_forms %}
-                                <option value="{{ f.id }}">{{ f.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-primary fw-bold w-100">Assign Task</button>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
-
-<!-- EDIT TASK MODALS -->
-{% for task in pending_tasks %}
-<div class="modal fade" id="editTaskModal{{ task.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-            <form action="/tasks/edit/{{ task.id }}" method="POST">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Activity</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 text-start">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Task Title</label>
-                        <input type="text" name="title" class="form-control" value="{{ task.title }}" required>
-                    </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-primary">Start Date</label>
-                            <input type="date" name="start_date" class="form-control" value="{{ task.start_date.strftime('%Y-%m-%d') if task.start_date else '' }}" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-danger">End Date</label>
-                            <input type="date" name="end_date" class="form-control" value="{{ task.end_date.strftime('%Y-%m-%d') if task.end_date else '' }}" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Assign To</label>
-                        <select name="assigned_to" class="form-select" required>
-                            {% for staff in staff_members %}
-                            <option value="{{ staff.username }}" {% if task.assigned_to == staff.username %}selected{% endif %}>
-                                {{ staff.username }} ({{ staff.role }})
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Description / Notes</label>
-                        <textarea name="description" class="form-control" rows="2">{{ task.description or '' }}</textarea>
-                    </div>
-
-                    <h6 class="fw-bold mt-4 mb-3 border-bottom pb-2 text-muted">Link to Master Data (Optional)</h6>
-
-                    <div class="mb-2">
-                        <select name="counselling_id" class="form-select form-select-sm">
-                            <option value="">Link to Counselling Process...</option>
-                            <option value="">-- Clear Selection --</option>
-                            {% for c in all_counsellings %}
-                                <option value="{{ c.id }}" {% if task.counselling_id == c.id %}selected{% endif %}>{{ c.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <select name="form_id" class="form-select form-select-sm">
-                            <option value="">Link to Specific Form/Deadline...</option>
-                            <option value="">-- Clear Selection --</option>
-                            {% for f in upcoming_exam_forms %}
-                                <option value="{{ f.id }}" {% if task.form_id == f.id %}selected{% endif %}>{{ f.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Save Updates</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endfor %}
 {% endblock %}
