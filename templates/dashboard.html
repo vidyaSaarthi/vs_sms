@@ -8,6 +8,7 @@
         <p class="text-muted">Here is what is happening across VidyaSaarthi today.</p>
     </div>
 
+    <!-- KPI CARDS -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #3b82f6 !important;">
@@ -47,8 +48,10 @@
         </div>
     </div>
 
+    <!-- DEADLINES ROW -->
     <div class="row g-4 mb-4">
 
+        <!-- EXAM DEADLINES -->
         <div class="col-md-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-dark text-white py-3">
@@ -89,6 +92,7 @@
             </div>
         </div>
 
+        <!-- COUNSELLING DEADLINES -->
         <div class="col-md-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header py-3" style="background-color: var(--brand-blue);">
@@ -139,6 +143,7 @@
         </div>
     </div>
 
+    <!-- ASSIGNED TASKS & ACTIVITIES ROW -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
             <h5 class="mb-0 fw-bold" style="color: #333;"><i class="fas fa-tasks text-primary me-2"></i>Assigned Activities & Workflows</h5>
@@ -178,6 +183,8 @@
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#editTaskModal{{ task.id }}" title="Edit Task"><i class="fas fa-edit"></i></button>
+
                                     <form action="/tasks/update/{{ task.id }}" method="POST" class="m-0" onsubmit="return confirm('Mark this task as completed?');">
                                         <input type="hidden" name="status" value="Completed">
                                         <button type="submit" class="btn btn-sm btn-success fw-bold" title="Mark Complete"><i class="fas fa-check"></i></button>
@@ -205,6 +212,9 @@
 
 </div>
 
+<!-- ==========================================
+     ADD TASK MODAL
+     ========================================== -->
 <div class="modal fade" id="addTaskModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -272,5 +282,81 @@
         </div>
     </div>
 </div>
+
+<!-- ==========================================
+     EDIT TASK MODALS
+     ========================================== -->
+{% for task in pending_tasks %}
+<div class="modal fade" id="editTaskModal{{ task.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/tasks/edit/{{ task.id }}" method="POST">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Activity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Task Title</label>
+                        <input type="text" name="title" class="form-control" value="{{ task.title }}" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-primary">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ task.start_date.strftime('%Y-%m-%d') if task.start_date else '' }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ task.end_date.strftime('%Y-%m-%d') if task.end_date else '' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Assign To</label>
+                        <select name="assigned_to" class="form-select" required>
+                            {% for staff in staff_members %}
+                            <option value="{{ staff.username }}" {% if task.assigned_to == staff.username %}selected{% endif %}>
+                                {{ staff.username }} ({{ staff.role }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description / Notes</label>
+                        <textarea name="description" class="form-control" rows="2">{{ task.description or '' }}</textarea>
+                    </div>
+
+                    <h6 class="fw-bold mt-4 mb-3 border-bottom pb-2 text-muted">Link to Master Data (Optional)</h6>
+
+                    <div class="mb-2">
+                        <select name="counselling_id" class="form-select form-select-sm">
+                            <option value="">Link to Counselling Process...</option>
+                            <option value="">-- Clear Selection --</option>
+                            {% for c in all_counsellings %}
+                                <option value="{{ c.id }}" {% if task.counselling_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <select name="form_id" class="form-select form-select-sm">
+                            <option value="">Link to Specific Form/Deadline...</option>
+                            <option value="">-- Clear Selection --</option>
+                            {% for f in upcoming_exam_forms %}
+                                <option value="{{ f.id }}" {% if task.form_id == f.id %}selected{% endif %}>{{ f.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 {% endblock %}

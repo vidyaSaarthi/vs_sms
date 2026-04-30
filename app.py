@@ -1278,6 +1278,42 @@ def add_task():
     return redirect(url_for('dashboard'))
 
 
+# ==========================================
+# WORKFLOW: EDIT EXISTING TASK
+# ==========================================
+@app.route('/tasks/edit/<int:task_id>', methods=['POST'])
+@login_required
+def edit_task(task_id):
+    try:
+        task = Task.query.get_or_404(task_id)
+
+        # Security: Only admins or the person who assigned the task can edit it
+        if current_user.role != 'admin' and current_user.username != task.assigned_by:
+            flash("You do not have permission to edit this task.", "error")
+            return redirect(url_for('dashboard'))
+
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
+
+        task.title = request.form.get('title')
+        task.description = request.form.get('description')
+        task.start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
+        task.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+        task.assigned_to = request.form.get('assigned_to')
+
+        # Handle the optional linked master data
+        task.exam_id = request.form.get('exam_id') or None
+        task.counselling_id = request.form.get('counselling_id') or None
+        task.form_id = request.form.get('form_id') or None
+
+        db.session.commit()
+        flash(f"Task '{task.title}' updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating task: {str(e)}", "error")
+
+    return redirect(url_for('dashboard'))
+
 @app.route('/tasks/update/<int:task_id>', methods=['POST'])
 @login_required
 def update_task_status(task_id):
