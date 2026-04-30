@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <!-- 🚨 NEW: DASHBOARD TABS -->
+    <!-- DASHBOARD TABS -->
     <ul class="nav nav-tabs mb-4 border-bottom-0" id="dashboardTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exams-tab" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" role="tab" style="border-top: 3px solid var(--brand-red); color: #333;">
@@ -29,10 +29,12 @@
         </li>
     </ul>
 
-    <!-- 🚨 TAB CONTENT -->
+    <!-- TAB CONTENT -->
     <div class="tab-content" id="dashboardTabsContent">
 
-        <!-- TAB 1: MASTER EXAM DATES -->
+        <!-- ==========================================
+             TAB 1: MASTER EXAM DATES
+             ========================================== -->
         <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
             <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
@@ -74,7 +76,9 @@
             </div>
         </div>
 
-        <!-- TAB 2: EXAM FORMS DEADLINES -->
+        <!-- ==========================================
+             TAB 2: EXAM FORMS DEADLINES
+             ========================================== -->
         <div class="tab-pane fade" id="tab-exam-forms" role="tabpanel">
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
                 <div class="card-header bg-dark text-white py-3">
@@ -86,7 +90,7 @@
                             <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                                 <tr>
                                     <th class="ps-4 bg-light">Exam Form</th>
-                                    <th class="text-danger bg-light">Deadline</th>
+                                    <th class="text-danger bg-light" style="width: 200px;">Deadline</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -114,50 +118,84 @@
             </div>
         </div>
 
-        <!-- TAB 3: COUNSELLING FORMS DEADLINES -->
+        <!-- ==========================================
+             TAB 3: COUNSELLING FORMS DEADLINES
+             ========================================== -->
         <div class="tab-pane fade" id="tab-couns-forms" role="tabpanel">
+
+            <!-- Custom Styles specifically for the sub-tabs -->
+            <style>
+                .couns-pill.active {
+                    background-color: var(--brand-white) !important;
+                    color: var(--brand-red) !important;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+                }
+                .couns-pill {
+                    background-color: rgba(255, 255, 255, 0.5);
+                    color: var(--vs-text-main);
+                    border-radius: 8px;
+                    font-weight: 700;
+                    transition: all 0.2s ease;
+                    border: 1px solid rgba(255, 255, 255, 0.4);
+                }
+                .couns-pill:hover:not(.active) {
+                    background-color: rgba(255, 255, 255, 0.8);
+                }
+            </style>
+
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
-                <div class="card-header py-3" style="background-color: var(--brand-blue);">
-                    <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h5>
+                <div class="card-header py-3 border-bottom-0" style="background-color: var(--brand-blue);">
+                    <h5 class="mb-3 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h5>
+
+                    {% if counselling_grouped %}
+                    <!-- DYNAMIC EXAM SUB-TABS (JEE, NEET, etc.) -->
+                    <ul class="nav nav-pills gap-2" id="counsSubTabs" role="tablist">
+                        {% for exam_name, forms in counselling_grouped.items() %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link couns-pill {% if loop.first %}active{% endif %} px-4 py-2" id="pill-{{ loop.index }}-tab" data-bs-toggle="pill" data-bs-target="#pill-{{ loop.index }}" type="button" role="tab">
+                                {{ exam_name }} <span class="badge bg-danger ms-2 rounded-pill">{{ forms|length }}</span>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table table-hover mb-0 align-middle">
-                            <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-                                <tr>
-                                    <th class="ps-4 bg-light">Process & Form</th>
-                                    <th class="text-danger bg-light">Deadline</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if counselling_grouped %}
-                                    {% for exam_name, forms in counselling_grouped.items() %}
-                                        <tr>
-                                            <td colspan="2" class="bg-light ps-4">
-                                                <span class="badge bg-secondary">{{ exam_name }}</span>
-                                            </td>
-                                        </tr>
-                                        {% for form in forms %}
-                                        <tr>
-                                            <td class="ps-4 fw-bold ps-5" style="border-left: 3px solid var(--brand-blue);">
-                                                {{ form.name }}
-                                                {% if form.document_link %}
-                                                    <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted" title="Form Link"><i class="fas fa-external-link-alt"></i></a>
-                                                {% endif %}
-                                            </td>
-                                            <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="2" class="text-center py-5 text-muted">
-                                            <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i> No upcoming counselling form deadlines.
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
+
+                <div class="card-body p-0 bg-white">
+                    <div class="tab-content" id="counsSubTabsContent">
+                        {% if counselling_grouped %}
+                            {% for exam_name, forms in counselling_grouped.items() %}
+                            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="pill-{{ loop.index }}" role="tabpanel">
+                                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                    <table class="table table-hover mb-0 align-middle">
+                                        <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                                            <tr>
+                                                <th class="ps-4 bg-light">Process & Form</th>
+                                                <th class="text-danger bg-light" style="width: 200px;">Deadline</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for form in forms %}
+                                            <tr>
+                                                <td class="ps-4 fw-bold" style="border-left: 3px solid var(--brand-blue);">
+                                                    {{ form.name }}
+                                                    {% if form.document_link %}
+                                                        <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted" title="Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i> No upcoming counselling form deadlines.
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
