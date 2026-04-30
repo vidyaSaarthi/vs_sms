@@ -1,548 +1,112 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-        <div>
-            <h2 class="fw-bold" style="color: var(--brand-red);">{{ student.full_name }}</h2>
-            <p class="text-muted mb-0">
-                <i class="fas fa-id-card me-2"></i>{{ student.aadhaar_no }} |
-                <i class="fas fa-phone me-2 ms-3"></i>{{ student.mobile_number }} |
-                <span class="badge bg-dark ms-3">{{ student.exam_type or 'Stream Not Set' }}</span>
-            </p>
-        </div>
+<div class="container-fluid pt-3">
+
+    <!-- TOP ACTION BAR -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-dark"><i class="fas fa-user-graduate text-primary me-2"></i>{{ student.full_name }}</h2>
+
         <div class="d-flex gap-2">
-            <a href="{{ url_for('export_verification', id=student.id) }}" target="_blank" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm">
+            <a href="{{ url_for('export_verification', id=student.id) }}" target="_blank" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm py-2">
                 <i class="fas fa-file-alt me-1"></i> Verification Profile
             </a>
 
-            <!-- 🚨 NEW: Smart Lock Button -->
+            <!-- SMART LOCK BUTTON -->
             {% if not student.is_approved %}
                 <form action="{{ url_for('approve_student', id=student.id) }}" method="POST" class="m-0" onsubmit="return confirm('Lock this profile? Once locked, an Admin PIN will be required to edit the data.');">
-                    <button type="submit" class="btn btn-sm btn-success fw-bold shadow-sm">
+                    <button type="submit" class="btn btn-sm btn-success fw-bold shadow-sm py-2">
                         <i class="fas fa-lock me-1"></i> Lock Profile
                     </button>
                 </form>
             {% else %}
-                <span class="btn btn-sm btn-outline-success fw-bold shadow-sm pe-none" style="background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;">
+                <span class="btn btn-sm btn-outline-success fw-bold shadow-sm pe-none py-2" style="background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;">
                     <i class="fas fa-shield-alt me-1"></i> Parent Approved
                 </span>
             {% endif %}
 
-            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-sm fw-bold shadow-sm" style="background-color: var(--brand-yellow); color: #333;">
+            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-sm fw-bold shadow-sm py-2" style="background-color: var(--brand-yellow); color: #333;">
                 <i class="fas fa-edit me-1"></i> Edit Student Data
             </a>
 
-            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteStudentModal">
+            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm py-2" data-bs-toggle="modal" data-bs-target="#deleteStudentModal">
                 <i class="fas fa-trash-alt me-1"></i> Delete
             </button>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-5 mb-4">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
-                <div class="card-header border-0 py-3 d-flex justify-content-between align-items-center" style="background-color: var(--brand-blue); border-radius: 15px 15px 0 0;">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-pen-nib me-2 text-danger"></i>Entrance Exams</h5>
-                    <button class="btn btn-sm btn-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addExamModal">
-                        <i class="fas fa-plus"></i> Add
-                    </button>
+    <!-- 🚨 DATA HEALTH WIDGET 🚨 -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; border-left: 5px solid var(--bs-{{ student.completion_color }}) !important;">
+        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center w-75">
+                <div class="me-4 text-center">
+                    <h3 class="mb-0 fw-bold text-{{ student.completion_color }}">{{ student.profile_completion }}%</h3>
+                    <small class="text-muted fw-bold text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">Data Health</small>
                 </div>
-                <div class="card-body bg-light">
-                    {% for result in student.exam_results %}
-                    <div class="bg-white p-3 rounded shadow-sm border mb-3 position-relative">
-                        <h6 class="fw-bold text-danger mb-2">{{ result.exam_ref.name }}</h6>
-                        <p class="small text-muted mb-2">App No: <strong>{{ result.application_number or 'N/A' }}</strong></p>
-
-                        <div class="row g-2 text-center mt-2">
-                            <div class="col-4">
-                                <div class="p-2 rounded bg-light border">
-                                    <small class="d-block text-muted" style="font-size: 0.7rem;">SCORE</small>
-                                    <strong class="text-dark">{{ result.score or '-' }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="p-2 rounded bg-light border">
-                                    <small class="d-block text-muted" style="font-size: 0.7rem;">%ILE</small>
-                                    <strong class="text-dark">{{ result.percentile or '-' }}</strong>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="p-2 rounded" style="background-color: var(--brand-yellow); border: 1px solid #d4c47b;">
-                                    <small class="d-block text-dark" style="font-size: 0.7rem;">AIR</small>
-                                    <strong class="text-dark">{{ result.all_india_rank or '-' }}</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="position-absolute top-0 end-0 mt-2 me-2 d-flex gap-1 bg-white rounded shadow-sm border p-1">
-                            <button type="button" class="btn btn-sm text-warning border-0 p-1" data-bs-toggle="modal" data-bs-target="#editExamModal{{ result.id }}" title="Edit Exam"><i class="fas fa-edit"></i></button>
-                            <form action="/student/delete_exam_result/{{ result.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam result?');">
-                                <button type="submit" class="btn btn-sm text-danger border-0 p-1" title="Delete Exam"><i class="fas fa-times"></i></button>
-                            </form>
-                        </div>
+                <div class="flex-grow-1 pe-4">
+                    <div class="progress shadow-sm" style="height: 8px; border-radius: 10px; background-color: #e2e8f0;">
+                        <div class="progress-bar bg-{{ student.completion_color }}" role="progressbar" style="width: {{ student.profile_completion }}%; border-radius: 10px;"></div>
                     </div>
-                    {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-clipboard-list fa-3x mb-3 text-light"></i>
-                        <p>No exam results tracked yet.</p>
-                    </div>
-                    {% endfor %}
+                    <p class="mb-0 mt-2 small text-muted">
+                        {% if student.profile_completion < 50 %}
+                            <strong class="text-danger">Critical Warning:</strong> This profile is missing vital information. Admission workflows may fail.
+                        {% elif student.profile_completion < 85 %}
+                            <strong class="text-warning text-dark">Incomplete:</strong> Several core data fields are still empty. Please complete the profile.
+                        {% else %}
+                            <strong class="text-success">Healthy Profile:</strong> All critical data fields have been captured successfully.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-7 mb-4">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
-                <div class="card-header border-0 py-3 d-flex justify-content-between align-items-center bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-sitemap me-2 text-warning"></i>Counselling Journey</h5>
-                    <button class="btn btn-sm fw-bold shadow-sm" style="background-color: var(--brand-yellow); color: #333;" data-bs-toggle="modal" data-bs-target="#registerCounsellingModal">
-                        <i class="fas fa-plus"></i> Register
-                    </button>
+            {% if student.profile_completion < 100 %}
+            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-sm btn-outline-{{ student.completion_color }} fw-bold px-3 shadow-sm py-2">
+                <i class="fas fa-magic me-1"></i> Complete Data
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- BASIC OVERVIEW GRID -->
+    <div class="row g-4 mb-4">
+        <!-- Personal Info -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-id-card text-primary me-2"></i>Personal Identity</h6>
                 </div>
                 <div class="card-body">
-                    {% for reg in student.counselling_registrations %}
-                    <div class="mb-4 border border-secondary rounded p-3">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Aadhaar No:</span> <strong>{{ student.aadhaar_no or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Mobile Number:</span> <strong>{{ student.mobile_number or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Email Address:</span> <strong>{{ student.email_address or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Date of Birth:</span> <strong>{{ student.dob.strftime('%d %b %Y') if student.dob else 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Category:</span> <strong>{{ student.category or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Home State:</span> <strong>{{ student.state_ut or 'Pending' }}</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                            <h6 class="fw-bold text-dark mb-0">{{ reg.counselling.name }}</h6>
-                            <div class="d-flex align-items-center gap-3">
-                                <div>
-                                    {% if reg.registration_status == 'Planned' %}
-                                        <span class="badge bg-warning text-dark shadow-sm"><i class="fas fa-clock me-1"></i>Planned</span>
-                                    {% else %}
-                                        <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle me-1"></i>Registered</span>
-                                        {% if reg.application_number %}
-                                            <span class="badge bg-secondary ms-1 border shadow-sm">App: {{ reg.application_number }}</span>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                                <button type="button" class="btn btn-sm text-warning border-0 p-0" data-bs-toggle="modal" data-bs-target="#editCounsellingRegModal{{ reg.id }}" title="Edit Registration">
-                                    <i class="fas fa-edit fs-5"></i>
-                                </button>
-                                <form action="/student/delete_counselling_reg/{{ reg.id }}" method="POST" class="m-0" onsubmit="return confirm('Remove this student from {{ reg.counselling.name }}? This will also delete any saved round allotments for this process.');">
-                                    <button type="submit" class="btn btn-sm text-danger border-0 p-0 ms-2" title="Remove Participation"><i class="fas fa-trash-alt fs-5"></i></button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            {% set has_results = false %}
-                            {% for res in student.round_results %}
-                                {% if res.round.counselling_id == reg.counselling_id %}
-                                    {% set has_results = true %}
-                                    <div class="p-3 mb-2 rounded shadow-sm" style="background-color: #f8fbff; border: 1px solid #ccdfed;">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge bg-dark">{{ res.round.round_number }}</span>
-                                            {% if res.seat_acceptance_fee_paid %}
-                                                <span class="badge bg-success small"><i class="fas fa-rupee-sign me-1"></i>SAF Paid</span>
-                                            {% endif %}
-                                        </div>
-
-                                        {% if res.allotted_institute %}
-                                            <p class="mb-1 fw-bold text-danger">{{ res.allotted_institute }}</p>
-                                            <p class="mb-2 small text-muted fw-bold">{{ res.allotted_branch }} ({{ res.allotted_category }})</p>
-                                            <div class="d-flex gap-2">
-                                                <span class="badge border border-dark text-dark">Action: {{ res.post_allotment_action }}</span>
-                                                <span class="badge border border-secondary text-secondary">Status: {{ res.reporting_status }}</span>
-                                            </div>
-                                        {% else %}
-                                            <p class="mb-0 small text-muted fst-italic">No seat allotted in this round.</p>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if not has_results %}
-                                <div class="alert alert-info py-2 small mb-0">
-                                    <i class="fas fa-info-circle me-2"></i> Tracking initiated. Awaiting round allotments.
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- ... existing blue tracking alert ... -->
-
-                        <!-- NEW: Collapsible Registration Details -->
-                        <div class="mb-3">
-                            <button class="btn btn-sm text-secondary border w-100 bg-white shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#regDetails{{ reg.id }}" aria-expanded="false" style="border-radius: 8px;">
-                                <i class="fas fa-lock me-2 text-warning"></i>View Portal Credentials & Details <i class="fas fa-chevron-down ms-1" style="font-size: 0.8em;"></i>
-                            </button>
-
-                            <div class="collapse mt-2" id="regDetails{{ reg.id }}">
-                                <div class="card card-body bg-light border-0 p-3 shadow-inner" style="border-radius: 8px;">
-                                    <div class="row g-3" style="font-size: 0.9rem;">
-
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Application No.</small>
-                                            <span class="text-dark fw-bold">{{ reg.application_number or 'N/A' }}</span>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Portal Username</small>
-                                            <span class="text-dark">{{ reg.login_username or 'N/A' }}</span>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Portal Password</small>
-                                            <span class="text-dark font-monospace bg-white px-2 py-1 border rounded">{{ reg.login_password or 'N/A' }}</span>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Registered Mobile</small>
-                                            <span class="text-dark">{{ reg.registered_mobile or 'N/A' }}</span>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Registered Email</small>
-                                            <span class="text-dark">{{ reg.registered_email or 'N/A' }}</span>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Confirmation Page</small>
-                                            {% if reg.form_confirmation_link %}
-                                                <a href="{{ reg.form_confirmation_link }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold">
-                                                    <i class="fas fa-external-link-alt me-1"></i> Open Drive
-                                                </a>
-                                            {% else %}
-                                                <span class="text-muted">Not Uploaded</span>
-                                            {% endif %}
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <button class="btn btn-sm btn-outline-dark w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#addRoundResultModal{{ reg.id }}">
-                            <i class="fas fa-plus-circle me-1"></i> Add Round Result
-                        </button>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-route fa-3x mb-3" style="color: #e0e0e0;"></i>
-                        <p>Student is not registered for any counselling processes.</p>
-                    </div>
-                    {% endfor %}
+        <!-- Parent Info -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-users text-success me-2"></i>Family Details</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Father's Name:</span> <strong>{{ student.father_name or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Mother's Name:</span> <strong>{{ student.mother_name or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Family Income:</span> <strong>{{ student.family_income or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between border-bottom-0"><span class="text-muted">Counselor:</span> <span class="badge border border-dark text-dark">{{ student.created_by }}</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
-
-<div class="modal fade" id="addExamModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius: 15px;">
-            <form action="{{ url_for('add_exam_result', student_id=student.id) }}" method="POST">
-                <div class="modal-header text-white" style="background-color: var(--brand-red); border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold">Log Exam Result</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Select Exam</label>
-                        <select name="exam_id" class="form-select" required>
-                            <option value="">Select from Master List...</option>
-                            {% for exam in exams %}
-                            <option value="{{ exam.id }}">{{ exam.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small">Application/Roll Number</label>
-                        <input type="text" name="application_number" class="form-control" placeholder="e.g. 240411XXXX">
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-muted">Raw Score</label>
-                            <input type="number" step="0.01" name="score" class="form-control" placeholder="e.g. 640">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-muted">Percentile</label>
-                            <input type="number" step="0.0000001" name="percentile" class="form-control" placeholder="e.g. 98.452">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-primary">All India Rank (AIR)</label>
-                            <input type="number" name="all_india_rank" class="form-control" placeholder="e.g. 15400">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-success">State Category Rank</label>
-                            <input type="number" name="state_rank" class="form-control" placeholder="e.g. 450">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                    <button type="submit" class="btn text-white fw-bold w-100" style="background-color: var(--brand-red);">Save Result</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="registerCounsellingModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius: 15px;">
-            <form action="{{ url_for('register_student_counselling', student_id=student.id) }}" method="POST">
-                <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold">Plan or Register Counselling</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Counselling Process</label>
-                            <select name="counselling_id" class="form-select bg-light" required>
-                                <option value="">Select Process...</option>
-                                {% for c in active_counsellings %}
-                                <option value="{{ c.id }}">{{ c.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small text-primary">Current Status</label>
-                            <select name="registration_status" id="regStatusSelect" class="form-select" required onchange="toggleAppDetailsField()">
-                                <option value="Planned">Planned (Will Register Later)</option>
-                                <option value="Completed">Completed (Form is Filled)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="completedDetailsDiv" style="display: none;" class="mt-4 pt-3 border-top">
-                        <h6 class="text-success fw-bold mb-3"><i class="fas fa-check-circle me-2"></i>Registration Details</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Official Application No.</label>
-                                <input type="text" name="application_number" id="appNumberInput" class="form-control" placeholder="Enter Registration ID">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Portal Username</label>
-                                <input type="text" name="login_username" class="form-control" placeholder="Username/ID">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Portal Password</label>
-                                <input type="text" name="login_password" class="form-control" placeholder="Password">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Registered Email <span class="fw-normal text-muted">(Optional)</span></label>
-                                <input type="email" name="registered_email" class="form-control" placeholder="Email used for this form">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Registered Mobile <span class="fw-normal text-muted">(Optional)</span></label>
-                                <input type="text" name="registered_mobile" class="form-control" placeholder="Mobile used for this form">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Confirmation Page Link <span class="fw-normal text-muted">(Drive URL)</span></label>
-                                <input type="url" name="form_confirmation_link" class="form-control" placeholder="https://drive.google.com/...">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Process to Journey</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{% for reg in student.counselling_registrations %}
-<div class="modal fade" id="addRoundResultModal{{ reg.id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius: 15px;">
-            <form action="{{ url_for('add_round_result', student_id=student.id) }}" method="POST">
-                <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold">Record Allotment: {{ reg.counselling.name }}</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row g-3 border-bottom pb-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Select Round</label>
-                            <select name="round_id" class="form-select" required>
-                                <option value="">Select Round...</option>
-                                {% for r in reg.counselling.rounds %}
-                                <option value="{{ r.id }}">{{ r.round_number }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            <div class="form-check form-switch fs-5">
-                                <input class="form-check-input" type="checkbox" name="choices_submitted" value="yes" id="choicesCheck{{ reg.id }}">
-                                <label class="form-check-label ms-2 small fw-bold mt-1" for="choicesCheck{{ reg.id }}">Choices Submitted?</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h6 class="text-danger fw-bold mb-3">Allotment Details</h6>
-                    <div class="row g-3 mb-3 border-bottom pb-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold small">Allotted Institute (Leave blank if not allotted)</label>
-                            <input type="text" name="allotted_institute" class="form-control" placeholder="e.g. PGIMS Rohtak">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Allotted Branch/Course</label>
-                            <input type="text" name="allotted_branch" class="form-control" placeholder="e.g. MBBS">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Allotted Category</label>
-                            <input type="text" name="allotted_category" class="form-control" placeholder="e.g. BC-A / General">
-                        </div>
-                    </div>
-
-                    <h6 class="text-primary fw-bold mb-3">Post-Allotment Actions</h6>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small">Action Taken</label>
-                            <select name="post_allotment_action" class="form-select">
-                                <option value="None">No Action Yet</option>
-                                <option value="Freeze">Freeze (Accepted)</option>
-                                <option value="Float">Float (Upgrade)</option>
-                                <option value="Slide">Slide</option>
-                                <option value="Surrender">Surrender/Withdraw</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small">Reporting Status</label>
-                            <select name="reporting_status" class="form-select">
-                                <option value="Not Reported">Not Reported</option>
-                                <option value="Reported Online">Reported Online</option>
-                                <option value="Reported Physically">Reported Physically</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <div class="form-check form-switch fs-5">
-                                <input class="form-check-input" type="checkbox" name="seat_acceptance_fee_paid" value="yes" id="safCheck{{ reg.id }}">
-                                <label class="form-check-label ms-2 small fw-bold mt-1 text-success" for="safCheck{{ reg.id }}">SAF Paid?</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Allotment Record</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-{% for result in student.exam_results %}
-<div class="modal fade" id="editExamModal{{ result.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius: 15px;">
-            <form action="{{ url_for('edit_exam_result', result_id=result.id) }}" method="POST">
-                <div class="modal-header bg-warning text-dark" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Exam Result</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Select Exam</label>
-                        <select name="exam_id" class="form-select" required>
-                            {% for exam in exams %}
-                            <option value="{{ exam.id }}" {% if result.exam_id == exam.id %}selected{% endif %}>{{ exam.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small">Application/Roll Number</label>
-                        <input type="text" name="application_number" class="form-control" value="{{ result.application_number or '' }}">
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-muted">Raw Score</label>
-                            <input type="number" step="0.01" name="score" class="form-control" value="{{ result.score or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-muted">Percentile</label>
-                            <input type="number" step="0.0000001" name="percentile" class="form-control" value="{{ result.percentile or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-primary">All India Rank (AIR)</label>
-                            <input type="number" name="all_india_rank" class="form-control" value="{{ result.all_india_rank or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-success">State Category Rank</label>
-                            <input type="number" name="state_rank" class="form-control" value="{{ result.state_rank or '' }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-{% for reg in student.counselling_registrations %}
-<div class="modal fade" id="editCounsellingRegModal{{ reg.id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="border-radius: 15px;">
-            <form action="{{ url_for('edit_counselling_reg', reg_id=reg.id) }}" method="POST">
-                <div class="modal-header bg-warning text-dark" style="border-radius: 15px 15px 0 0;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Registration: {{ reg.counselling.name }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small">Counselling Process</label>
-                            <select name="counselling_id" class="form-select bg-light" required>
-                                {% for c in active_counsellings %}
-                                <option value="{{ c.id }}" {% if reg.counselling_id == c.id %}selected{% endif %}>{{ c.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small text-primary">Current Status</label>
-                            <select name="registration_status" id="regStatusSelect_edit_{{ reg.id }}" class="form-select" required onchange="toggleEditAppDetailsField({{ reg.id }})">
-                                <option value="Planned" {% if reg.registration_status == 'Planned' %}selected{% endif %}>Planned (Will Register Later)</option>
-                                <option value="Completed" {% if reg.registration_status == 'Completed' %}selected{% endif %}>Completed (Form is Filled)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="completedDetailsDiv_edit_{{ reg.id }}" style="display: {% if reg.registration_status == 'Completed' %}block{% else %}none{% endif %};" class="mt-4 pt-3 border-top">
-                        <h6 class="text-success fw-bold mb-3"><i class="fas fa-check-circle me-2"></i>Registration Details</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Official Application No.</label>
-                                <input type="text" name="application_number" id="appNumberInput_edit_{{ reg.id }}" class="form-control" value="{{ reg.application_number or '' }}" {% if reg.registration_status == 'Completed' %}required{% endif %}>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Portal Username</label>
-                                <input type="text" name="login_username" class="form-control" value="{{ reg.login_username or '' }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Portal Password</label>
-                                <input type="text" name="login_password" class="form-control" value="{{ reg.login_password or '' }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Registered Email</label>
-                                <input type="email" name="registered_email" class="form-control" value="{{ reg.registered_email or '' }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Registered Mobile</label>
-                                <input type="text" name="registered_mobile" class="form-control" value="{{ reg.registered_mobile or '' }}">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Confirmation Page Link (Drive URL)</label>
-                                <input type="url" name="form_confirmation_link" class="form-control" value="{{ reg.form_confirmation_link or '' }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endfor %}
 
 <!-- ==========================================
      DELETE STUDENT SECURITY MODAL
@@ -575,35 +139,4 @@
         </div>
     </div>
 </div>
-
-<script>
-function toggleAppDetailsField() {
-    const status = document.getElementById('regStatusSelect').value;
-    const detailsDiv = document.getElementById('completedDetailsDiv');
-    const appInput = document.getElementById('appNumberInput');
-
-    if(status === 'Completed') {
-        detailsDiv.style.display = 'block';
-        appInput.setAttribute('required', 'required');
-    } else {
-        detailsDiv.style.display = 'none';
-        appInput.removeAttribute('required');
-    }
-}
-
-function toggleEditAppDetailsField(regId) {
-    const status = document.getElementById('regStatusSelect_edit_' + regId).value;
-    const detailsDiv = document.getElementById('completedDetailsDiv_edit_' + regId);
-    const appInput = document.getElementById('appNumberInput_edit_' + regId);
-
-    if(status === 'Completed') {
-        detailsDiv.style.display = 'block';
-        appInput.setAttribute('required', 'required');
-    } else {
-        detailsDiv.style.display = 'none';
-        appInput.removeAttribute('required');
-    }
-}
-</script>
-
 {% endblock %}

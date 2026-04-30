@@ -35,11 +35,11 @@ class Student(db.Model):
     religion = db.Column(db.String(50), nullable=True)
     identification_mark = db.Column(db.String(200), nullable=True)
     category = db.Column(db.String(100), nullable=False)
-    aadhaar_no = db.Column(db.String(20), unique=True, nullable=False)
+    aadhaar_no = db.Column(db.String(20), unique=True, nullable=True)
     nationality = db.Column(db.String(50), default='Indian')
     nativity = db.Column(db.String(100), nullable=True)
 
-    mobile_number = db.Column(db.String(15), unique=True, nullable=False)
+    mobile_number = db.Column(db.String(15), unique=True, nullable=True)
     alt_mobile_number = db.Column(db.String(15), nullable=True)
     emergency_mobile = db.Column(db.String(15), nullable=True)
     email_address = db.Column(db.String(120), nullable=True)
@@ -118,6 +118,35 @@ class Student(db.Model):
     counselling_registrations = db.relationship('StudentCounsellingRegistration', backref='student', lazy=True)
     round_results = db.relationship('StudentRoundResult', backref='student', lazy=True)
     exam_results = db.relationship('StudentExamResult', backref='student', lazy=True, cascade="all, delete-orphan")
+
+    # ... your existing Student columns are above this ...
+
+    @property
+    def profile_completion(self):
+        # The 18 critical fields that make up a "Healthy" profile
+        fields_to_check = [
+            self.full_name, self.mobile_number, self.email_address,
+            self.dob, self.gender, self.category, self.aadhaar_no,
+            self.state_ut, self.district, self.pin_code,
+            self.father_name, self.mother_name, self.family_income,
+            self.class_10_year, self.class_10_board,
+            self.class_12_year, self.class_12_board,
+            self.exam_type
+        ]
+        # Count how many fields actually have text/data in them
+        filled = sum(1 for f in fields_to_check if f and str(f).strip())
+        return int((filled / len(fields_to_check)) * 100)
+
+    @property
+    def completion_color(self):
+        # Automatically determine the UI color based on the score
+        score = self.profile_completion
+        if score < 50:
+            return "danger"  # Red (Critical missing info)
+        elif score < 85:
+            return "warning"  # Yellow (Needs work)
+        else:
+            return "success"  # Green (Healthy!)
 
 
 class StudentExamResult(db.Model):
