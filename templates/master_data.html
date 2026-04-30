@@ -10,28 +10,53 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <!-- 🚨 UI FIX: TAB NAVIGATION -->
+    <ul class="nav nav-tabs mb-4 border-bottom-0" id="masterDataTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exams-tab" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" role="tab" style="border-top: 3px solid var(--brand-red); color: #333;">
+                <i class="fas fa-pen-nib me-2"></i>Entrance Exams
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="states-tab" data-bs-toggle="tab" data-bs-target="#tab-states" type="button" role="tab" style="border-top: 3px solid var(--brand-blue); color: #333;">
+                <i class="fas fa-map-marker-alt me-2"></i>States / Regions
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="unis-tab" data-bs-toggle="tab" data-bs-target="#tab-unis" type="button" role="tab" style="border-top: 3px solid var(--brand-red); color: #333;">
+                <i class="fas fa-university me-2"></i>Universities
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="courses-tab" data-bs-toggle="tab" data-bs-target="#tab-courses" type="button" role="tab" style="border-top: 3px solid #198754; color: #333;">
+                <i class="fas fa-graduation-cap me-2"></i>Courses
+            </button>
+        </li>
+    </ul>
+
+    <!-- 🚨 UI FIX: TAB CONTENT PANES -->
+    <div class="tab-content" id="masterDataTabsContent">
 
         <!-- ==========================================
-             1. ENTRANCE EXAMS SECTION
+             TAB 1: ENTRANCE EXAMS
              ========================================== -->
-        <div class="col-12">
+        <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
             <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
                 <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Entrance Exams</h5>
+                    <h5 class="mb-0 fw-bold">Entrance Exams List</h5>
                     <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addExamModal">
                         <i class="fas fa-plus me-1"></i> Add Exam
                     </button>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                         <table class="table table-hover mb-0 align-middle">
-                            <thead class="bg-light">
+                            <thead class="bg-light sticky-top" style="z-index: 1;">
                                 <tr>
-                                    <th class="ps-4">Exam Name</th>
-                                    <th>Official Test Date</th>
-                                    <th>Mapped Courses</th>
-                                    <th class="text-end pe-4">Actions</th>
+                                    <th class="ps-4 bg-light">Exam Name</th>
+                                    <th class="bg-light">Exam Date</th> <!-- 🚨 Renamed -->
+                                    <th class="bg-light">Mapped Courses</th>
+                                    <th class="text-end pe-4 bg-light">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -78,7 +103,7 @@
                                                     </div>
 
                                                     <div class="mb-3">
-                                                        <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
+                                                        <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label> <!-- 🚨 Renamed -->
                                                         <input type="date" name="exam_date" class="form-control" value="{{ exam.exam_date.strftime('%Y-%m-%d') if exam.exam_date else '' }}">
                                                     </div>
 
@@ -108,23 +133,23 @@
         </div>
 
         <!-- ==========================================
-             2. STATES SECTION
+             TAB 2: STATES
              ========================================== -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+        <div class="tab-pane fade" id="tab-states" role="tabpanel">
+            <div class="card shadow-sm border-0" style="border-radius: 12px; max-width: 800px; margin: 0 auto; overflow: hidden;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                    <h6 class="mb-0 fw-bold" style="color: var(--brand-blue);"><i class="fas fa-map-marker-alt me-2"></i>States / Regions</h6>
-                    <button class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addStateModal"><i class="fas fa-plus"></i></button>
+                    <h5 class="mb-0 fw-bold" style="color: var(--brand-blue);">States / Regions</h5>
+                    <button class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addStateModal"><i class="fas fa-plus me-1"></i> Add State</button>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
                     <ul class="list-group list-group-flush">
                         {% for state in states %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <span class="fw-bold text-dark">{{ state.name }}</span>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                            <span class="fw-bold text-dark fs-5">{{ state.name }}</span>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editStateModal{{ state.id }}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editStateModal{{ state.id }}"><i class="fas fa-edit fs-5"></i></button>
                                 <form action="{{ url_for('delete_master_data', data_type='state', item_id=state.id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this State?');">
-                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
+                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt fs-5"></i></button>
                                 </form>
                             </div>
                         </li>
@@ -150,23 +175,23 @@
         </div>
 
         <!-- ==========================================
-             3. UNIVERSITIES SECTION
+             TAB 3: UNIVERSITIES
              ========================================== -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+        <div class="tab-pane fade" id="tab-unis" role="tabpanel">
+            <div class="card shadow-sm border-0" style="border-radius: 12px; max-width: 800px; margin: 0 auto; overflow: hidden;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                    <h6 class="mb-0 fw-bold" style="color: var(--brand-red);"><i class="fas fa-university me-2"></i>Universities</h6>
-                    <button class="btn btn-sm btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#addUniModal"><i class="fas fa-plus"></i></button>
+                    <h5 class="mb-0 fw-bold" style="color: var(--brand-red);">Universities</h5>
+                    <button class="btn btn-sm btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#addUniModal"><i class="fas fa-plus me-1"></i> Add University</button>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
                     <ul class="list-group list-group-flush">
                         {% for uni in universities %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <span class="fw-bold text-dark">{{ uni.name }}</span>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                            <span class="fw-bold text-dark fs-5">{{ uni.name }}</span>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editUniModal{{ uni.id }}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editUniModal{{ uni.id }}"><i class="fas fa-edit fs-5"></i></button>
                                 <form action="{{ url_for('delete_master_data', data_type='university', item_id=uni.id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this University?');">
-                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
+                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt fs-5"></i></button>
                                 </form>
                             </div>
                         </li>
@@ -192,23 +217,23 @@
         </div>
 
         <!-- ==========================================
-             4. COURSES SECTION
+             TAB 4: COURSES
              ========================================== -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+        <div class="tab-pane fade" id="tab-courses" role="tabpanel">
+            <div class="card shadow-sm border-0" style="border-radius: 12px; max-width: 800px; margin: 0 auto; overflow: hidden;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
-                    <h6 class="mb-0 fw-bold text-success"><i class="fas fa-graduation-cap me-2"></i>Courses</h6>
-                    <button class="btn btn-sm btn-outline-success fw-bold" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="fas fa-plus"></i></button>
+                    <h5 class="mb-0 fw-bold text-success">Courses</h5>
+                    <button class="btn btn-sm btn-outline-success fw-bold" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="fas fa-plus me-1"></i> Add Course</button>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
                     <ul class="list-group list-group-flush">
                         {% for course in courses %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <span class="fw-bold text-dark">{{ course.name }}</span>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                            <span class="fw-bold text-dark fs-5">{{ course.name }}</span>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ course.id }}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ course.id }}"><i class="fas fa-edit fs-5"></i></button>
                                 <form action="{{ url_for('delete_master_data', data_type='course', item_id=course.id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this Course?');">
-                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
+                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt fs-5"></i></button>
                                 </form>
                             </div>
                         </li>
@@ -233,9 +258,9 @@
             </div>
         </div>
 
-    </div>
+    </div> <!-- End Tab Content -->
 
-</div>
+</div> <!-- End Container -->
 
 <!-- ==========================================
      GLOBAL ADD MODALS
@@ -257,7 +282,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
+                        <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label> <!-- 🚨 Renamed -->
                         <input type="date" name="exam_date" class="form-control">
                     </div>
 

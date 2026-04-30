@@ -3,19 +3,21 @@
 {% block content %}
 <div class="container-fluid pt-3">
 
-    <!-- MASTER ENTRANCE EXAM DATES ROW (NEW TOP SECTION) -->
+    <!-- MASTER ENTRANCE EXAM DATES ROW -->
     <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
             <h5 class="mb-0 fw-bold" style="color: var(--brand-red);"><i class="fas fa-calendar-alt text-primary me-2"></i>Master Entrance Exam Dates</h5>
             <a href="{{ url_for('master_data') }}" class="btn btn-sm btn-outline-secondary">Manage Exams</a>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <!-- 🚨 UI FIX: Scrollable Container -->
+            <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
+                    <!-- 🚨 UI FIX: Sticky Header -->
+                    <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                         <tr>
-                            <th class="ps-4">Entrance Exam</th>
-                            <th class="text-danger">Official Test Date</th>
+                            <th class="ps-4 bg-light">Entrance Exam</th>
+                            <th class="text-danger bg-light">Exam Date</th> <!-- 🚨 Renamed -->
                         </tr>
                     </thead>
                     <tbody>
@@ -55,12 +57,12 @@
                     <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Upcoming Exam Forms Deadlines</h6>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
                         <table class="table table-hover mb-0 align-middle">
-                            <thead class="bg-light">
+                            <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                                 <tr>
-                                    <th class="ps-4">Exam Form</th>
-                                    <th class="text-danger">Deadline</th>
+                                    <th class="ps-4 bg-light">Exam Form</th>
+                                    <th class="text-danger bg-light">Deadline</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -96,12 +98,12 @@
                     <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h6>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
                         <table class="table table-hover mb-0 align-middle">
-                            <thead class="bg-light">
+                            <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                                 <tr>
-                                    <th class="ps-4">Process & Form</th>
-                                    <th class="text-danger">Deadline</th>
+                                    <th class="ps-4 bg-light">Process & Form</th>
+                                    <th class="text-danger bg-light">Deadline</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -140,7 +142,7 @@
         </div>
     </div>
 
-    <!-- ASSIGNED TASKS & ACTIVITIES ROW -->
+    <!-- ASSIGNED TASKS ROW -->
     <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
             <h5 class="mb-0 fw-bold" style="color: #333;"><i class="fas fa-tasks text-primary me-2"></i>Assigned Activities & Workflows</h5>
@@ -149,14 +151,14 @@
             </button>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
                         <tr>
-                            <th class="ps-4">Task Details</th>
-                            <th>Dates</th>
-                            <th>Assigned To</th>
-                            <th class="text-center">Action</th>
+                            <th class="ps-4 bg-light">Task Details</th>
+                            <th class="bg-light">Dates</th>
+                            <th class="bg-light">Assigned To</th>
+                            <th class="text-center bg-light">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -181,7 +183,6 @@
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     <button type="button" class="btn btn-sm btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#editTaskModal{{ task.id }}" title="Edit Task"><i class="fas fa-edit"></i></button>
-
                                     <form action="/tasks/update/{{ task.id }}" method="POST" class="m-0" onsubmit="return confirm('Mark this task as completed?');">
                                         <input type="hidden" name="status" value="Completed">
                                         <button type="submit" class="btn btn-sm btn-success fw-bold" title="Mark Complete"><i class="fas fa-check"></i></button>
@@ -209,9 +210,8 @@
 
 </div>
 
-<!-- ==========================================
-     ADD TASK MODAL
-     ========================================== -->
+<!-- ... KEEP YOUR EXISTING TASK MODALS AT THE VERY BOTTOM ... -->
+<!-- ADD TASK MODAL -->
 <div class="modal fade" id="addTaskModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
@@ -280,9 +280,7 @@
     </div>
 </div>
 
-<!-- ==========================================
-     EDIT TASK MODALS
-     ========================================== -->
+<!-- EDIT TASK MODALS -->
 {% for task in pending_tasks %}
 <div class="modal fade" id="editTaskModal{{ task.id }}" tabindex="-1">
     <div class="modal-dialog">
@@ -355,5 +353,4 @@
     </div>
 </div>
 {% endfor %}
-
 {% endblock %}
