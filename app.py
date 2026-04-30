@@ -573,8 +573,6 @@ def student_pipeline():
     status_filter = request.args.get('status', '')
     counselling_filter = request.args.get('counselling', '')
     exam_id_filter = request.args.get('exam_id', '')
-
-    # 🚨 NEW: Grab the active tab from the URL (Defaults to 'all')
     active_tab = request.args.get('tab', 'all')
 
     query = Student.query
@@ -587,43 +585,34 @@ def student_pipeline():
                 Student.aadhaar_no.ilike(f'%{search_query}%')
             )
         )
+    if counsellor_filter: query = query.filter(Student.created_by == counsellor_filter)
+    if status_filter: query = query.filter(Student.academic_status == status_filter)
+    if counselling_filter:
+        query = query.join(StudentCounsellingRegistration).filter(StudentCounsellingRegistration.counselling_id == int(counselling_filter))
+    if exam_id_filter:
+        query = query.join(StudentExamResult).filter(StudentExamResult.exam_id == int(exam_id_filter))
 
-    # 🚨 NEW: Filter the database based on the selected Tab!
+    # 🚨 NEW: Calculate counts BEFORE filtering by tab!
+    all_count = query.count()
+    jee_count = query.filter(Student.exam_type == 'JEE').count()
+    neet_count = query.filter(Student.exam_type == 'NEET').count()
+
+    # Now apply the active tab filter for what gets shown on screen
     if active_tab == 'jee':
         query = query.filter(Student.exam_type == 'JEE')
     elif active_tab == 'neet':
         query = query.filter(Student.exam_type == 'NEET')
 
-    # Apply other remaining filters
-    if counsellor_filter: query = query.filter(Student.created_by == counsellor_filter)
-    if status_filter: query = query.filter(Student.academic_status == status_filter)
-
-    if counselling_filter:
-        query = query.join(StudentCounsellingRegistration).filter(
-            StudentCounsellingRegistration.counselling_id == int(counselling_filter)
-        )
-    if exam_id_filter:
-        query = query.join(StudentExamResult).filter(
-            StudentExamResult.exam_id == int(exam_id_filter)
-        )
-
     counsellors = db.session.query(Student.created_by).distinct().filter(Student.created_by != None).all()
     counsellor_list = sorted([c[0] for c in counsellors if c[0]])
     active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
-
     students = query.order_by(Student.full_name.asc()).distinct().all()
 
-    return render_template('students.html',
-                           students=students,
-                           search_query=search_query,
-                           active_tab=active_tab,  # <-- Passed to template to highlight active tab
-                           counsellor_filter=counsellor_filter,
-                           status_filter=status_filter,
-                           counselling_filter=counselling_filter,
-                           exam_id_filter=exam_id_filter,
-                           counsellors=counsellor_list,
-                           active_counsellings=active_counsellings)
-
+    return render_template('students.html', students=students, search_query=search_query, active_tab=active_tab,
+                           counsellor_filter=counsellor_filter, status_filter=status_filter,
+                           counselling_filter=counselling_filter, exam_id_filter=exam_id_filter,
+                           counsellors=counsellor_list, active_counsellings=active_counsellings,
+                           all_count=all_count, jee_count=jee_count, neet_count=neet_count) # Pass counts to UI
 def extract_dynamic_marks(prefix, group):
     names = request.form.getlist(f'{prefix}_{group}_name[]')
     maxs = request.form.getlist(f'{prefix}_{group}_max[]')
@@ -1143,56 +1132,61 @@ def edit_counselling_reg(reg_id):
 @app.route('/student/<int:student_id>/add_exam_result', methods=['POST'])
 @login_required
 def add_exam_result(student_id):
-    score_val = request.form.get('score')
-    percentile_val = request.form.get('percentile')
-    air_val = request.form.get('all_india_rank')
-    state_rank_val = request.form.get('state_rank')
-
     try:
         result = StudentExamResult(
             student_id=student_id,
             exam_id=request.form.get('exam_id'),
             application_number=request.form.get('application_number'),
-            score=float(score_val) if score_val else None,
-            percentile=float(percentile_val) if percentile_val else None,
-            all_india_rank=int(air_val) if air_val else None,
-            state_rank=int(state_rank_val) if state_rank_val else None
+            login_username=request.form.get('login_username'),
+            login_password=request.form.get('login_password'),
+            registered_email=request.form.get('registered_email'),
+            registered_mobile=request.form.get('registered_mobile'),
+            form_confirmation_link=request.form.get('form_confirmation_link'),
+            score=float(request.form.get('score')) if request.form.get('score') else None,
+            percentile=float(request.form.get('percentile')) if request.form.get('percentile') else None,
+            all_india_rank=int(request.form.get('all_india_rank')) if request.form.get('all_india_rank') else None,
+            state_rank=int(request.form.get('state_rank')) if request.form.get('state_rank') else None
         )
         db.session.add(result)
         db.session.commit()
-        flash("Exam result added successfully!", "success")
+        flash("Exam Form & Result added successfully!", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Error saving exam result: {str(e)}", "error")
-
+        flash(f"Error saving exam data: {str(e)}", "error")
     return redirect(url_for('view_student', id=student_id))
+
 
 @app.route('/student/edit_exam_result/<int:result_id>', methods=['POST'])
 @login_required
 def edit_exam_result(result_id):
     result = StudentExamResult.query.get_or_404(result_id)
     student_id = result.student_id
-
     try:
         result.exam_id = request.form.get('exam_id')
         result.application_number = request.form.get('application_number')
+        result.login_username = request.form.get('login_username')
+        result.login_password = request.form.get('login_password')
+        result.registered_email = request.form.get('registered_email')
+        result.registered_mobile = request.form.get('registered_mobile')
+        result.form_confirmation_link = request.form.get('form_confirmation_link')
 
         score_val = request.form.get('score')
-        percentile_val = request.form.get('percentile')
-        air_val = request.form.get('all_india_rank')
-        state_rank_val = request.form.get('state_rank')
-
         result.score = float(score_val) if score_val and score_val.strip() else None
-        result.percentile = float(percentile_val) if percentile_val and percentile_val.strip() else None
+
+        perc_val = request.form.get('percentile')
+        result.percentile = float(perc_val) if perc_val and perc_val.strip() else None
+
+        air_val = request.form.get('all_india_rank')
         result.all_india_rank = int(air_val) if air_val and air_val.strip() else None
-        result.state_rank = int(state_rank_val) if state_rank_val and state_rank_val.strip() else None
+
+        state_val = request.form.get('state_rank')
+        result.state_rank = int(state_val) if state_val and state_val.strip() else None
 
         db.session.commit()
-        flash("Exam result updated successfully!", "success")
+        flash("Exam details updated successfully!", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Error updating exam result: {str(e)}", "error")
-
+        flash(f"Error updating exam details: {str(e)}", "error")
     return redirect(url_for('view_student', id=student_id))
 
 @app.route('/student/delete_exam_result/<int:result_id>', methods=['POST'])

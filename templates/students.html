@@ -57,24 +57,27 @@
     </div>
 
     <!-- TABS (All / JEE / NEET) -->
+
     <ul class="nav nav-pills mb-4 gap-2" style="font-weight: 700;">
         <li class="nav-item">
             <a class="nav-link {% if active_tab == 'all' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('student_pipeline', tab='all', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}" style="border-radius: 10px;">
                 <i class="fas fa-globe me-1"></i> All Students
+                <span class="badge ms-2 rounded-pill {% if active_tab == 'all' %}bg-white text-dark{% else %}bg-secondary{% endif %}">{{ all_count }}</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {% if active_tab == 'jee' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('student_pipeline', tab='jee', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}" style="border-radius: 10px; {% if active_tab == 'jee' %}background-color: var(--brand-blue); color: var(--vs-text-main);{% endif %}">
                 <i class="fas fa-cogs me-1"></i> JEE Pipeline
+                <span class="badge ms-2 rounded-pill {% if active_tab == 'jee' %}bg-white text-dark{% else %}bg-secondary{% endif %}">{{ jee_count }}</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {% if active_tab == 'neet' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('student_pipeline', tab='neet', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}" style="border-radius: 10px; {% if active_tab == 'neet' %}background-color: var(--brand-red); color: white;{% endif %}">
                 <i class="fas fa-stethoscope me-1"></i> NEET Pipeline
+                <span class="badge ms-2 rounded-pill {% if active_tab == 'neet' %}bg-white text-danger{% else %}bg-secondary{% endif %}">{{ neet_count }}</span>
             </a>
         </li>
     </ul>
-
     <!-- STUDENT TABLE WIDGET -->
     <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px; overflow: hidden;">
         <div class="table-responsive" style="min-height: 400px;">

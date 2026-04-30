@@ -184,19 +184,26 @@ class Student(db.Model):
 
 
 class StudentExamResult(db.Model):
-    __tablename__ = 'student_exam_result'
+    __tablename__ = 'student_exam_results'
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=False)
 
+    # 🚨 Form & Credential Fields
     application_number = db.Column(db.String(100), nullable=True)
+    login_username = db.Column(db.String(100), nullable=True)
+    login_password = db.Column(db.String(100), nullable=True)
+    registered_email = db.Column(db.String(120), nullable=True)
+    registered_mobile = db.Column(db.String(15), nullable=True)
+    form_confirmation_link = db.Column(db.String(250), nullable=True)
+
+    # Academic Fields
     score = db.Column(db.Float, nullable=True)
     percentile = db.Column(db.Float, nullable=True)
     all_india_rank = db.Column(db.Integer, nullable=True)
     state_rank = db.Column(db.Integer, nullable=True)
 
-    exam_ref = db.relationship('Exam', backref='student_results')
-
+    exam = db.relationship('Exam')
 
 class Document(db.Model):
     __tablename__ = 'documents'
