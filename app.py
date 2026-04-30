@@ -648,6 +648,14 @@ def extract_dynamic_marks(prefix, group):
 def add_student():
     if request.method == 'POST':
 
+        # 🚨 NEW: Ensure Counselor is selected before even talking to the database!
+        if not request.form.get('created_by'):
+            flash("Validation Error: Please select a Counselor Name (Created By).", "error")
+            return redirect(url_for('add_student'))
+
+        # 1. Capture inputs, strip accidental spaces, convert blanks to None
+        aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
+
         # 1. Capture inputs, strip accidental spaces, convert blanks to None
         aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
         mobile_number = request.form.get('mobile_number', '').strip() or None
@@ -807,17 +815,20 @@ def add_student():
                                             drive_link=convert_to_embed_link(url.strip())))
 
             db.session.commit()
-            flash(f"Student {new_student.full_name} added successfully!")
+            flash(f"Student {new_student.full_name} added successfully!", "success")
             return redirect(url_for('dashboard'))
 
-        except IntegrityError:
+            # 🚨 FIX: Catch the specific error (as 'e') and print the real reason!
+        except IntegrityError as e:
             db.session.rollback()
-            flash("Error: Duplicate Aadhaar or Mobile Number detected.")
+            print(f"INTEGRITY ERROR DETAILS: {str(e.orig)}")  # Prints to your Railway logs
+            flash(f"Database Error: {str(e.orig)}", "error")  # Shows the real error on screen!
+
         except Exception as e:
             db.session.rollback()
-            flash(f"Error saving student: {str(e)}")
+            flash(f"Error saving student: {str(e)}", "error")
 
-    return render_template('add_student.html')
+        return render_template('add_student.html')
 @app.route('/student/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_student(id):
