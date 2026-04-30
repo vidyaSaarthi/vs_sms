@@ -148,12 +148,15 @@ def edit_master_data(data_type, item_id):
     if new_name and new_name.strip():
         item.name = new_name.strip()
 
-        # NEW LOGIC: Update mapped courses if we are editing an Exam
         if data_type == 'exam':
+            # NEW LOGIC: Update Date
+            exam_date_str = request.form.get('exam_date')
+            item.exam_date = datetime.strptime(exam_date_str, '%Y-%m-%d').date() if exam_date_str else None
+
+            # Keep your existing courses logic
             raw_course_ids = request.form.getlist('course_ids')
-            item.courses = []  # Clear the old mapping
+            item.courses = []
             if raw_course_ids:
-                # Convert the list of strings to a list of integers
                 course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
                 mapped_courses = Course.query.filter(Course.id.in_(course_ids)).all()
                 item.courses.extend(mapped_courses)
@@ -221,9 +224,16 @@ def delete_master_data(data_type, item_id):
 @login_required
 def add_exam():
     try:
-        new_exam = Exam(name=request.form.get('name'))
+        # 🚨 NEW: Capture the date
+        exam_date_str = request.form.get('exam_date')
+        exam_date_val = datetime.strptime(exam_date_str, '%Y-%m-%d').date() if exam_date_str else None
 
-        # Capture and convert to integers
+        new_exam = Exam(
+            name=request.form.get('name'),
+            exam_date=exam_date_val # 🚨 NEW: Save to DB
+        )
+
+        # Capture and convert to integers (Keep your existing courses logic!)
         raw_course_ids = request.form.getlist('course_ids')
         if raw_course_ids:
             course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
@@ -232,7 +242,7 @@ def add_exam():
 
         db.session.add(new_exam)
         db.session.commit()
-        flash("Exam added successfully with mapped courses!", "success")
+        flash("Exam added successfully with date and courses!", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error adding exam: {str(e)}", "error")
@@ -513,18 +523,15 @@ def delete_counselling_round(round_id):
 # ==========================================
 # DASHBOARD
 # ==========================================
-# ==========================================
-# DASHBOARD
-# ==========================================
 @app.route('/')
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    total_students = Student.query.count()
-    pending_students = Student.query.filter_by(is_approved=False).count()
-    total_forms = Form.query.count()
-    active_counselling = Counselling.query.count()
     today = date.today()
+
+    # 🚨 NEW: Fetch Master Exams and sort by Date (TBD at the bottom)
+    master_exams = Exam.query.all()
+    master_exams_sorted = sorted(master_exams, key=lambda x: x.exam_date or date.max)
 
     upcoming_exam_forms = Form.query.filter(
         Form.end_date >= today,
@@ -548,8 +555,6 @@ def dashboard():
             counselling_grouped[exam_name] = []
         counselling_grouped[exam_name].append(form)
 
-    recent_students = Student.query.order_by(Student.created_at.desc()).limit(5).all()
-
     # TASK SYSTEM ADDITIONS
     staff_members = Staff.query.order_by(Staff.username.asc()).all()
     if current_user.role == 'admin':
@@ -557,17 +562,12 @@ def dashboard():
     else:
         pending_tasks = Task.query.filter_by(assigned_to=current_user.username, status='Pending').order_by(Task.end_date.asc()).all()
 
-    # Fetch ALL active counsellings for the Task Modal dropdown
     all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
     return render_template('dashboard.html',
-                           total_students=total_students,
-                           pending_students=pending_students,
-                           total_forms=total_forms,
-                           active_counselling=active_counselling,
+                           master_exams=master_exams_sorted, # Pass to HTML!
                            upcoming_exam_forms=upcoming_exam_forms,
                            counselling_grouped=counselling_grouped,
-                           recent_students=recent_students,
                            staff_members=staff_members,
                            pending_tasks=pending_tasks,
                            all_counsellings=all_counsellings)

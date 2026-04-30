@@ -47,6 +47,7 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="ps-4 text-dark w-25">Exam Name</th>
+                                    <th>Exam Date</th>
                                     <th class="text-dark">Mapped Target Courses</th>
                                     <th class="text-dark text-center">Actions</th>
                                 </tr>
@@ -64,6 +65,15 @@
                                             <span class="text-muted small fst-italic">No courses mapped</span>
                                         {% endif %}
                                     </td>
+
+                                    <td>
+                                        {% if item.exam_date %}
+                                            <span class="badge bg-light text-dark border"><i class="far fa-calendar-alt text-danger me-1"></i>{{ item.exam_date.strftime('%d %b %Y') }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">Not Announced</span>
+                                        {% endif %}
+                                    </td>
+
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editExamModal{{ exam.id }}" title="Edit Exam"><i class="fas fa-edit"></i></button>
@@ -219,6 +229,12 @@
                         <label class="form-label fw-bold">Exam Name (e.g. JEE Main)</label>
                         <input type="text" name="name" class="form-control" required>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="date" name="exam_date" class="form-control" value="{{ item.exam_date.strftime('%Y-%m-%d') if item is defined and item.exam_date else '' }}">
+                    </div>
+
                     <div class="mb-2">
                         <label class="form-label fw-bold text-success">Map to Target Courses</label>
                         <select name="course_ids" class="form-select" multiple style="height: 120px;">
@@ -321,6 +337,12 @@
                         <label class="form-label fw-bold">Exam Name</label>
                         <input type="text" name="name" class="form-control" value="{{ exam.name }}" required>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="date" name="exam_date" class="form-control" value="{{ item.exam_date.strftime('%Y-%m-%d') if item is defined and item.exam_date else '' }}">
+                    </div>
+
                     <div class="mb-2">
                         <label class="form-label fw-bold text-success">Update Target Courses</label>
                         <select name="course_ids" class="form-select" multiple style="height: 120px;">

@@ -1,49 +1,46 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid pt-3">
 
-    <div class="mb-4">
-        <h2 class="fw-bold" style="color: var(--brand-red);">Welcome to Mission Control</h2>
-        <p class="text-muted">Here is what is happening across VidyaSaarthi today.</p>
-    </div>
-
-    <!-- KPI CARDS -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #3b82f6 !important;">
-                <div class="card-body">
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Pipeline</h6>
-                    <h2 class="fw-bold mb-0" style="color: #1e293b;">{{ total_students }}</h2>
-                    <small class="text-muted">Students tracked</small>
-                </div>
-            </div>
+    <!-- MASTER ENTRANCE EXAM DATES ROW (NEW TOP SECTION) -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold" style="color: var(--brand-red);"><i class="fas fa-calendar-alt text-primary me-2"></i>Master Entrance Exam Dates</h5>
+            <a href="{{ url_for('master_data') }}" class="btn btn-sm btn-outline-secondary">Manage Exams</a>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--brand-yellow) !important;">
-                <div class="card-body">
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Pending Approvals</h6>
-                    <h2 class="fw-bold mb-0 text-warning">{{ pending_students }}</h2>
-                    <small class="text-muted">Requires action</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--brand-red) !important;">
-                <div class="card-body">
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Tracked Forms</h6>
-                    <h2 class="fw-bold mb-0 text-danger">{{ total_forms }}</h2>
-                    <small class="text-muted">Exams & Counselling</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #10b981 !important;">
-                <div class="card-body">
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Active Counselling</h6>
-                    <h2 class="fw-bold mb-0 text-success">{{ active_counselling }}</h2>
-                    <small class="text-muted">Master processes</small>
-                </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Entrance Exam</th>
+                            <th class="text-danger">Official Test Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exam in master_exams %}
+                        <tr>
+                            <td class="ps-4 fw-bold" style="font-size: 1.05rem;">
+                                {{ exam.name }}
+                            </td>
+                            <td class="fw-bold {% if exam.exam_date %}text-dark{% else %}text-muted{% endif %}">
+                                {% if exam.exam_date %}
+                                    <i class="far fa-calendar-check text-success me-2"></i> {{ exam.exam_date.strftime('%d %b %Y') }}
+                                {% else %}
+                                    <i class="far fa-clock me-2"></i> To be announced
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center py-4 text-muted">
+                                <i class="fas fa-exclamation-circle mb-2 d-block fs-4"></i> No entrance exams configured yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -51,11 +48,11 @@
     <!-- DEADLINES ROW -->
     <div class="row g-4 mb-4">
 
-        <!-- EXAM DEADLINES -->
+        <!-- EXAM FORMS DEADLINES -->
         <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
                 <div class="card-header bg-dark text-white py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Upcoming Exam Deadlines</h6>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Upcoming Exam Forms Deadlines</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -81,7 +78,7 @@
                                 <tr>
                                     <td colspan="2" class="text-center py-5 text-muted">
                                         <i class="fas fa-calendar-check fs-4 mb-2 text-success d-block"></i>
-                                        No upcoming exam deadlines.
+                                        No upcoming exam form deadlines.
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -92,11 +89,11 @@
             </div>
         </div>
 
-        <!-- COUNSELLING DEADLINES -->
+        <!-- COUNSELLING FORMS DEADLINES -->
         <div class="col-md-6">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
                 <div class="card-header py-3" style="background-color: var(--brand-blue);">
-                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Deadlines</h6>
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -131,7 +128,7 @@
                                     <tr>
                                         <td colspan="2" class="text-center py-5 text-muted">
                                             <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i>
-                                            No upcoming counselling deadlines.
+                                            No upcoming counselling form deadlines.
                                         </td>
                                     </tr>
                                 {% endif %}
@@ -144,7 +141,7 @@
     </div>
 
     <!-- ASSIGNED TASKS & ACTIVITIES ROW -->
-    <div class="card shadow-sm border-0 mb-4">
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
             <h5 class="mb-0 fw-bold" style="color: #333;"><i class="fas fa-tasks text-primary me-2"></i>Assigned Activities & Workflows</h5>
             <button class="btn btn-sm btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
@@ -217,7 +214,7 @@
      ========================================== -->
 <div class="modal fade" id="addTaskModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow">
             <form action="/tasks/add" method="POST">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold">Assign New Activity</h5>
@@ -275,7 +272,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-primary fw-bold w-100">Assign Task</button>
                 </div>
             </form>
@@ -289,7 +286,7 @@
 {% for task in pending_tasks %}
 <div class="modal fade" id="editTaskModal{{ task.id }}" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow">
             <form action="/tasks/edit/{{ task.id }}" method="POST">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Activity</h5>
@@ -350,7 +347,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Save Updates</button>
                 </div>
             </form>
