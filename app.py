@@ -828,7 +828,9 @@ def add_student():
             db.session.rollback()
             flash(f"Error saving student: {str(e)}", "error")
 
-        return render_template('add_student.html')
+    staff_members = Staff.query.order_by(Staff.username.asc()).all()
+    return render_template('add_student.html', staff_members=staff_members)
+
 @app.route('/student/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_student(id):
