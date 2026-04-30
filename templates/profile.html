@@ -50,10 +50,10 @@
                     <p class="mb-0 mt-2 small text-muted">
                         {% if student.profile_completion < 50 %}
                             <strong class="text-danger">Critical Warning:</strong> This profile is missing vital information. Admission workflows may fail.
-                        {% elif student.profile_completion < 85 %}
-                            <strong class="text-warning text-dark">Incomplete:</strong> Several core data fields are still empty. Please complete the profile.
+                        {% elif student.profile_completion < 100 %}
+                            <strong class="text-warning text-dark">Incomplete:</strong> This score represents 74 core fields and 26 standard documents. Please complete the missing fields.
                         {% else %}
-                            <strong class="text-success">Healthy Profile:</strong> All critical data fields have been captured successfully.
+                            <strong class="text-success">Perfect Profile:</strong> 100% of all data fields and documents are verified!
                         {% endif %}
                     </p>
                 </div>
@@ -82,7 +82,7 @@
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Email Address:</span> <strong>{{ student.email_address or 'Pending' }}</strong></li>
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Date of Birth:</span> <strong>{{ student.dob.strftime('%d %b %Y') if student.dob else 'Pending' }}</strong></li>
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Category:</span> <strong>{{ student.category or 'Pending' }}</strong></li>
-                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Home State:</span> <strong>{{ student.state_ut or 'Pending' }}</strong></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between border-bottom-0"><span class="text-muted">Home State:</span> <strong>{{ student.state_ut or 'Pending' }}</strong></li>
                     </ul>
                 </div>
             </div>
@@ -106,6 +106,269 @@
         </div>
     </div>
 
+    <!-- ==========================================
+         🚨 RESTORED: ADMISSIONS JOURNEY
+         ========================================== -->
+    <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px;">
+        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-road text-warning me-2"></i>Admissions Journey</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-light fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#addExamResultModal">
+                    <i class="fas fa-plus me-1"></i> Exam Result
+                </button>
+                <button class="btn btn-sm btn-primary fw-bold text-white" data-bs-toggle="modal" data-bs-target="#registerCounsellingModal">
+                    <i class="fas fa-plus me-1"></i> Counselling Reg.
+                </button>
+                <button class="btn btn-sm fw-bold text-dark" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addRoundResultModal">
+                    <i class="fas fa-plus me-1"></i> Round Allotment
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <!-- TABS FOR THE JOURNEY -->
+            <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="journeyTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold" id="couns-tab" data-bs-toggle="tab" data-bs-target="#couns" type="button" role="tab">Counselling Processes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">Exam Scores</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="rounds-tab" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab">Round Allotments</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="journeyTabsContent">
+                <!-- 1. COUNSELLING REGISTRATIONS -->
+                <div class="tab-pane fade show active" id="couns" role="tabpanel">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Counselling Process</th>
+                                    <th>Status</th>
+                                    <th>App / User ID</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in student.counselling_registrations %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">{{ reg.counselling.name }}</td>
+                                    <td><span class="badge {% if reg.registration_status == 'Planned' %}bg-secondary{% elif reg.registration_status == 'Registered' %}bg-success{% else %}bg-warning text-dark{% endif %}">{{ reg.registration_status }}</span></td>
+                                    <td><small class="text-muted">{{ reg.application_number or 'N/A' }} <br> {{ reg.login_username or '' }}</small></td>
+                                    <td class="text-center">
+                                        <form action="{{ url_for('delete_counselling_reg', reg_id=reg.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this registration?');">
+                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No counselling processes tracked yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. EXAM SCORES -->
+                <div class="tab-pane fade" id="exams" role="tabpanel">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Exam Name</th>
+                                    <th>Score / %ile</th>
+                                    <th>Ranks (AIR / State)</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for res in student.exam_results %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">{{ res.exam.name if res.exam else 'Unknown' }}<br><small class="text-muted fw-normal">App: {{ res.application_number or 'N/A' }}</small></td>
+                                    <td><strong>{{ res.score or '-' }}</strong> / <span class="text-primary">{{ res.percentile or '-' }}%ile</span></td>
+                                    <td><span class="text-danger fw-bold">AIR: {{ res.all_india_rank or '-' }}</span><br><small>State: {{ res.state_rank or '-' }}</small></td>
+                                    <td class="text-center">
+                                        <form action="{{ url_for('delete_exam_result', result_id=res.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this exam score?');">
+                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No exam scores recorded yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. ROUND ALLOTMENTS -->
+                <div class="tab-pane fade" id="rounds" role="tabpanel">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Round</th>
+                                    <th>Allotted Institute</th>
+                                    <th>Post-Action Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for res in student.round_results %}
+                                <tr>
+                                    <td class="ps-4"><span class="badge bg-dark">Round {{ res.round.round_number }}</span><br><small class="text-muted">{{ res.round.counselling.name }}</small></td>
+                                    <td class="fw-bold text-success">{{ res.allotted_institute or 'No Allotment' }}<br><small class="text-muted fw-normal">{{ res.allotted_branch or '' }}</small></td>
+                                    <td><span class="badge bg-primary">{{ res.post_allotment_action or 'Pending' }}</span></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">No round allotments tracked yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==========================================
+     RESTORED MODALS FOR ADMISSIONS JOURNEY
+     ========================================== -->
+
+<!-- Register Counselling Modal -->
+<div class="modal fade" id="registerCounsellingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('register_student_counselling', student_id=student.id) }}" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Register for Counselling</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Counselling Process</label>
+                        <select name="counselling_id" class="form-select" required>
+                            <option value="">Choose...</option>
+                            {% for c in active_counsellings %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Registration Status</label>
+                        <select name="registration_status" class="form-select">
+                            <option value="Planned">Planned</option>
+                            <option value="Registered">Registered / Form Filled</option>
+                            <option value="Choice Filling">Choice Filling Completed</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Application Number <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="text" name="application_number" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Add to Journey</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Exam Result Modal -->
+<div class="modal fade" id="addExamResultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('add_exam_result', student_id=student.id) }}" method="POST">
+                <div class="modal-header bg-light border-0">
+                    <h5 class="modal-title fw-bold text-dark">Add Exam Score</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Exam Name</label>
+                        <select name="exam_id" class="form-select" required>
+                            <option value="">Choose...</option>
+                            {% for e in exams %}
+                            <option value="{{ e.id }}">{{ e.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Score / Marks</label>
+                            <input type="number" step="0.01" name="score" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Percentile</label>
+                            <input type="number" step="0.0000001" name="percentile" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">All India Rank</label>
+                            <input type="number" name="all_india_rank" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">State Rank</label>
+                            <input type="number" name="state_rank" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Score</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Round Result Modal -->
+<div class="modal fade" id="addRoundResultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('add_round_result', student_id=student.id) }}" method="POST">
+                <div class="modal-header" style="background-color: var(--brand-yellow);">
+                    <h5 class="modal-title fw-bold text-dark">Record Seat Allotment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Active Round</label>
+                        <select name="round_id" class="form-select" required>
+                            <option value="">Choose Round...</option>
+                            {% for reg in student.counselling_registrations %}
+                                <optgroup label="{{ reg.counselling.name }}">
+                                {% for r in reg.counselling.rounds %}
+                                    <option value="{{ r.id }}">Round {{ r.round_number }}</option>
+                                {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Allotted Institute</label>
+                        <input type="text" name="allotted_institute" class="form-control text-success fw-bold">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Post-Allotment Decision</label>
+                        <select name="post_allotment_action" class="form-select">
+                            <option value="Float">Float (Upgrade)</option>
+                            <option value="Freeze">Freeze (Lock Seat)</option>
+                            <option value="Slide">Slide</option>
+                            <option value="Withdraw">Withdraw</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Save Allotment</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- ==========================================

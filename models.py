@@ -123,30 +123,64 @@ class Student(db.Model):
 
     @property
     def profile_completion(self):
-        # The 18 critical fields that make up a "Healthy" profile
-        fields_to_check = [
-            self.full_name, self.mobile_number, self.email_address,
-            self.dob, self.gender, self.category, self.aadhaar_no,
-            self.state_ut, self.district, self.pin_code,
-            self.father_name, self.mother_name, self.family_income,
-            self.class_10_year, self.class_10_board,
-            self.class_12_year, self.class_12_board,
-            self.exam_type
+        # 1. ALL 74 Database Fields (Nothing is left behind)
+        core_fields = [
+            self.exam_type, self.forms_filled, self.other_forms_filled,
+            self.full_name, self.gender, self.dob, self.blood_group, self.religion,
+            self.identification_mark, self.category, self.aadhaar_no, self.nationality, self.nativity,
+            self.mobile_number, self.alt_mobile_number, self.emergency_mobile,
+            self.email_address, self.alt_email, self.emergency_email,
+            self.house_no, self.street_name, self.post_office, self.pin_code, self.state_ut, self.district,
+            self.father_name, self.father_aadhaar_no, self.father_education, self.father_occupation,
+            self.father_designation, self.father_organization,
+            self.mother_name, self.mother_aadhaar_no, self.mother_education, self.mother_occupation,
+            self.mother_designation, self.mother_organization,
+            self.family_income,
+            self.bank_holder_name, self.bank_name, self.bank_branch, self.bank_address, self.bank_account_no,
+            self.bank_ifsc,
+            self.class_10_year, self.class_10_school, self.class_10_school_type, self.class_10_state,
+            self.class_10_serial, self.class_10_reg_no, self.class_10_board, self.class_10_issue_date,
+            self.class_10_roll_no,
+            self.class_11_year, self.class_11_school, self.class_11_state, self.class_11_roll_no,
+            self.passed_appearing, self.studied_sanskrit, self.registration_no_apaar_id,
+            self.class_12_year, self.class_12_school, self.class_12_school_type, self.class_12_school_code,
+            self.class_12_center_code, self.class_12_state, self.class_12_serial, self.class_12_reg_no,
+            self.class_12_board, self.class_12_issue_date, self.class_12_roll_no, self.class_12_admit_card_id
         ]
-        # Count how many fields actually have text/data in them
-        filled = sum(1 for f in fields_to_check if f and str(f).strip())
-        return int((filled / len(fields_to_check)) * 100)
+
+        # 2. ALL 26 Master Document Types
+        MASTER_DOC_TYPES = [
+            'photo', 'student_signature', 'aadhaar_card', '10th_marksheet', '11th_marksheet', '12th_marksheet',
+            'bank_proof', 'birth_certificate', 'residence_proof', 'caste_certificate', 'ews_certificate',
+            'family_id', 'character_certificate', 'improvement_marksheet', 'neet_jee_result', 'passport',
+            'school_leaving_certificate', 'transfer_certificate', 'father_aadhaar', 'mother_aadhaar',
+            'neet_jee_admit_card', 'student_pan_card', 'apaar_id_doc', 'fingerprints', 'driving_license',
+            '12th_admit_card'
+        ]
+
+        # Count filled core fields
+        filled_core = sum(1 for f in core_fields if f is not None and str(f).strip() != '')
+
+        # Count filled documents
+        attached_docs = [doc.doc_type for doc in self.documents if doc.drive_link and doc.drive_link.strip() != '']
+        filled_docs = sum(1 for doc_type in MASTER_DOC_TYPES if doc_type in attached_docs)
+
+        # Calculate strict percentage (Total exactly 100 points)
+        total_fields = len(core_fields) + len(MASTER_DOC_TYPES)
+        total_filled = filled_core + filled_docs
+
+        if total_fields == 0: return 0
+        return int((total_filled / total_fields) * 100)
 
     @property
     def completion_color(self):
-        # Automatically determine the UI color based on the score
         score = self.profile_completion
         if score < 50:
-            return "danger"  # Red (Critical missing info)
-        elif score < 85:
-            return "warning"  # Yellow (Needs work)
+            return "danger"
+        elif score < 99:
+            return "warning"  # Yellow until literally 100%
         else:
-            return "success"  # Green (Healthy!)
+            return "success"
 
 
 class StudentExamResult(db.Model):
