@@ -17,7 +17,8 @@
          COUNSELOR TABS
          ========================================== -->
     <ul class="nav nav-tabs mb-4 border-bottom-0" id="taskTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
-        {% for staff in staff_members %}
+        <!-- 🚨 FIX: Exclude admin role from tabs -->
+        {% for staff in staff_members if staff.role != 'admin' %}
             <!-- Only show tabs to Admins OR to the specific counselor logged in -->
             {% if current_user.role == 'admin' or staff.username == current_user.username %}
 
@@ -51,7 +52,8 @@
          TAB CONTENT PANES
          ========================================== -->
     <div class="tab-content" id="taskTabsContent">
-        {% for staff in staff_members %}
+        <!-- 🚨 FIX: Exclude admin role from tab panes -->
+        {% for staff in staff_members if staff.role != 'admin' %}
             {% if current_user.role == 'admin' or staff.username == current_user.username %}
             {% set is_active = (current_user.role != 'admin' and staff.username == current_user.username) or (current_user.role == 'admin' and loop.first) %}
 
@@ -169,7 +171,8 @@
                         <label class="form-label fw-bold">Assign To</label>
                         <select name="assigned_to" class="form-select" required>
                             <option value="">Select Counselor...</option>
-                            {% for staff in staff_members %}
+                            <!-- 🚨 FIX: Hide admin from dropdown -->
+                            {% for staff in staff_members if staff.role != 'admin' %}
                             <option value="{{ staff.username }}">{{ staff.username }} ({{ staff.role }})</option>
                             {% endfor %}
                         </select>
@@ -225,7 +228,7 @@
                         <label class="form-label fw-bold">Task Title</label>
                         <input type="text" name="title" class="form-control" value="{{ task.title }}" required>
                     </div>
-                    
+
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-bold text-primary">Start Date</label>
@@ -240,7 +243,8 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Assign To</label>
                         <select name="assigned_to" class="form-select" required>
-                            {% for staff in staff_members %}
+                            <!-- 🚨 FIX: Hide admin from dropdown -->
+                            {% for staff in staff_members if staff.role != 'admin' %}
                             <option value="{{ staff.username }}" {% if task.assigned_to == staff.username %}selected{% endif %}>
                                 {{ staff.username }} ({{ staff.role }})
                             </option>
