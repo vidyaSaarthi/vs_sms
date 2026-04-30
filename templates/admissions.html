@@ -154,6 +154,11 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
+                                                        <!-- 🚨 NEW: View Registered Students Button -->
+                                                        {% if form.counselling_id %}
+                                                            <a href="{{ url_for('student_pipeline', counselling=form.counselling_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
+                                                        {% endif %}
+
                                                         {% if form.prospectus_link %}
                                                             <a href="{{ form.prospectus_link }}" target="_blank" class="btn btn-sm btn-outline-success" title="View Prospectus"><i class="fas fa-file-pdf"></i></a>
                                                         {% endif %}
