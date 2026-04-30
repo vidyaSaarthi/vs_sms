@@ -13,37 +13,9 @@
         </a>
     </div>
 
-    <!-- NEW: PIPELINE COHORT TABS -->
-    <ul class="nav nav-tabs mb-4 border-bottom-0" id="pipelineTabs" style="border-bottom: 2px solid #dee2e6 !important;">
-        <li class="nav-item">
-            <a class="nav-link fw-bold px-4 py-3 {% if active_tab == 'all' %}active shadow-sm border-bottom-0 text-dark{% else %}text-muted{% endif %}"
-               href="{{ url_for('student_pipeline', tab='all', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}"
-               {% if active_tab == 'all' %}style="border-top: 3px solid var(--brand-red); background-color: #fff;"{% endif %}>
-               <i class="fas fa-users me-2"></i>All Students
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link fw-bold px-4 py-3 {% if active_tab == 'jee' %}active shadow-sm border-bottom-0 text-primary{% else %}text-muted{% endif %}"
-               href="{{ url_for('student_pipeline', tab='jee', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}"
-               {% if active_tab == 'jee' %}style="border-top: 3px solid #3b82f6; background-color: #fff;"{% endif %}>
-               <i class="fas fa-microchip me-2"></i>JEE Students
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link fw-bold px-4 py-3 {% if active_tab == 'neet' %}active shadow-sm border-bottom-0 text-success{% else %}text-muted{% endif %}"
-               href="{{ url_for('student_pipeline', tab='neet', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}"
-               {% if active_tab == 'neet' %}style="border-top: 3px solid #10b981; background-color: #fff;"{% endif %}>
-               <i class="fas fa-stethoscope me-2"></i>NEET Students
-            </a>
-        </li>
-    </ul>
-
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
         <div class="card-body">
             <form method="GET" action="/students" class="row g-2 align-items-center">
-
-                <!-- HIDDEN INPUT: Preserves the active tab when a user submits a search/filter! -->
-                <input type="hidden" name="tab" value="{{ active_tab }}">
 
                 <div class="col-md-3">
                     <div class="input-group">
@@ -52,9 +24,16 @@
                     </div>
                 </div>
 
-                <!-- Exam Dropdown Removed! Replaced by tabs above. -->
-
                 <div class="col-md-2">
+                    <select class="form-select" name="exam">
+                        <option value="">All Exams</option>
+                        <option value="JEE" {% if exam_filter == 'JEE Main' %}selected{% endif %}>JEE</option>
+                        <option value="NEET" {% if exam_filter == 'NEET' %}selected{% endif %}>NEET</option>
+                        <option value="CUET" {% if exam_filter == 'CUET' %}selected{% endif %}>CUET</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
                     <select class="form-select" name="counsellor">
                         <option value="">All Counsellors</option>
                         {% for c in counsellors %}
@@ -101,7 +80,7 @@
                     <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
                         <h4 class="card-title fw-bold mb-0" style="color: var(--brand-red);">{{ student.full_name }}</h4>
 
-                        <!-- JEE/NEET Badge Removed! Context is now handled by the tabs. -->
+                        <span class="badge" style="background-color: var(--brand-red); color: white; font-size: 0.85rem;">{{ student.exam_type }}</span>
                         <span class="badge bg-white text-dark shadow-sm" style="font-size: 0.85rem;"><i class="fas fa-user-tie me-1" style="color: #4a4a4a;"></i> {{ student.created_by or 'Unknown' }}</span>
                         <span class="badge" style="background-color: #b5cadd; color: #333; font-size: 0.85rem;">{{ student.academic_status or 'Fresher' }}</span>
                     </div>
@@ -112,7 +91,7 @@
                     </div>
                 </div>
 
-                <div class="mt-3 d-grid gap-2 p-3 pt-0">
+                <div class="mt-3 d-grid gap-2">
                     <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: var(--brand-red);">
                         <i class="fas fa-route me-1"></i> Admissions Journey
                     </a>
