@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VidyaSaarthi | ERP System</title>
+    <title>VidyaSaarthi | Counselling System</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -54,16 +54,20 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid #e2e8f0;
-            transition: margin-left 0.3s ease-in-out;
+            /* 🚨 NEW: Smooth width shrink instead of margin hide */
+            transition: width 0.3s ease-in-out;
+            overflow-x: hidden;
+            white-space: nowrap;
         }
 
+        /* 🚨 NEW: Shrinks to icon size */
         .sidebar.collapsed {
-            margin-left: calc(-1 * var(--sidebar-width));
+            width: 76px;
         }
 
         .sidebar-header {
             padding: 25px 20px;
-            text-align: center;
+            text-align: left;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -83,6 +87,7 @@
             padding: 20px 15px;
             flex-grow: 1;
             overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .nav-item {
@@ -92,7 +97,7 @@
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
+            padding: 12px 15px; /* Adjusted slightly for perfect icon centering */
             color: var(--vs-text-muted);
             font-weight: 600;
             border-radius: 10px;
@@ -105,6 +110,7 @@
             margin-right: 12px;
             color: #94a3b8;
             transition: color 0.2s ease;
+            text-align: center;
         }
 
         /* Hover & Active States */
@@ -119,7 +125,7 @@
         }
 
         .sidebar-footer {
-            padding: 20px;
+            padding: 20px 15px;
             border-top: 1px solid #f1f5f9;
         }
 
@@ -134,8 +140,9 @@
             transition: margin-left 0.3s ease-in-out;
         }
 
+        /* 🚨 NEW: Keeps content aligned with the 76px shrunken sidebar */
         .main-wrapper.expanded {
-            margin-left: 0;
+            margin-left: 76px;
         }
 
         .topbar {
@@ -277,8 +284,9 @@
 
         <div class="sidebar" id="appSidebar">
             <div class="sidebar-header">
+                <!-- 🚨 UPDATE: Renamed to VS logo and Counselling System -->
                 <a href="{{ url_for('dashboard') }}" class="sidebar-brand">VidyaSaarthi</a>
-                <div class="small text-muted fw-bold mt-1">ERP System</div>
+                <div class="small text-muted fw-bold mt-1">Counselling System</div>
             </div>
 
             <div class="sidebar-menu">
@@ -325,8 +333,8 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="{{ url_for('logout') }}" class="btn btn-light text-danger w-100 fw-bold border shadow-sm">
-                    <i class="fas fa-sign-out-alt me-2"></i> Secure Logout
+                <a href="{{ url_for('logout') }}" class="btn btn-light text-danger w-100 fw-bold border shadow-sm" style="overflow:hidden;" title="Secure Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
         </div>
@@ -335,10 +343,8 @@
 
             <div class="topbar">
                 <div class="d-flex align-items-center">
-                    <button id="sidebarToggle" class="btn btn-sm btn-light border me-3 shadow-sm" title="Toggle Sidebar">
-                        <i class="fas fa-bars fs-5 text-dark"></i>
-                    </button>
-                    <h5 class="mb-0 fw-bold text-dark">
+                    <!-- 🚨 REMOVED Hamburger button entirely since Hover handles it natively now! -->
+                    <h5 class="mb-0 fw-bold text-dark ms-2">
                         <i class="fas fa-shield-alt text-success me-2"></i>Secure Portal
                     </h5>
                 </div>
@@ -373,7 +379,7 @@
             </div> </div> {% else %}
             </div> </div> {% endif %}
 
-    <!-- GLOBAL PASSWORD MODAL (Updated with SaaS styles) -->
+    <!-- GLOBAL PASSWORD MODAL -->
     {% if current_user.is_authenticated %}
     <div class="modal fade" id="changePasswordModal" tabindex="-1">
         <div class="modal-dialog">
@@ -408,31 +414,27 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- 🚨 NEW: Single, unified Hover-to-Expand logic -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const toggleBtn = document.getElementById("sidebarToggle");
             const sidebar = document.getElementById("appSidebar");
             const mainWrapper = document.getElementById("mainWrapper");
 
-            // Only run if the elements exist (i.e. user is logged in)
-            if (toggleBtn && sidebar && mainWrapper) {
-                // 1. Check browser memory when the page loads
-                if (localStorage.getItem("sidebarState") === "collapsed") {
-                    sidebar.classList.add("collapsed");
-                    mainWrapper.classList.add("expanded");
-                }
+            if (sidebar && mainWrapper) {
+                // 1. Auto-collapse on load to save screen space (shrinks to 76px)
+                sidebar.classList.add("collapsed");
+                mainWrapper.classList.add("expanded");
 
-                // 2. Listen for the toggle button click
-                toggleBtn.addEventListener("click", function() {
-                    sidebar.classList.toggle("collapsed");
-                    mainWrapper.classList.toggle("expanded");
+                // 2. Expand on mouse enter
+                sidebar.addEventListener('mouseenter', function() {
+                    sidebar.classList.remove('collapsed');
+                    mainWrapper.classList.remove('expanded');
+                });
 
-                    // Save the new state to browser memory
-                    if (sidebar.classList.contains("collapsed")) {
-                        localStorage.setItem("sidebarState", "collapsed");
-                    } else {
-                        localStorage.setItem("sidebarState", "expanded");
-                    }
+                // 3. Collapse on mouse leave
+                sidebar.addEventListener('mouseleave', function() {
+                    sidebar.classList.add('collapsed');
+                    mainWrapper.classList.add('expanded');
                 });
             }
         });
