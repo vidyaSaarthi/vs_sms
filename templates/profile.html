@@ -18,6 +18,12 @@
             <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-warning fw-bold shadow-sm">
                 <i class="fas fa-edit me-2"></i>Edit Student Data
             </a>
+
+            <!-- 🚨 NEW: Delete Button -->
+            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteStudentModal">
+                <i class="fas fa-trash-alt me-1"></i> Delete
+            </button>
+
         </div>
     </div>
 

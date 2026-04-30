@@ -26,14 +26,14 @@
             <a class="nav-link fw-bold px-4 py-3 {% if active_tab == 'jee' %}active shadow-sm border-bottom-0 text-primary{% else %}text-muted{% endif %}"
                href="{{ url_for('student_pipeline', tab='jee', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}"
                {% if active_tab == 'jee' %}style="border-top: 3px solid #3b82f6; background-color: #fff;"{% endif %}>
-               <i class="fas fa-microchip me-2"></i>JEE Pipeline
+               <i class="fas fa-microchip me-2"></i>JEE Students
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link fw-bold px-4 py-3 {% if active_tab == 'neet' %}active shadow-sm border-bottom-0 text-success{% else %}text-muted{% endif %}"
                href="{{ url_for('student_pipeline', tab='neet', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}"
                {% if active_tab == 'neet' %}style="border-top: 3px solid #10b981; background-color: #fff;"{% endif %}>
-               <i class="fas fa-stethoscope me-2"></i>NEET Pipeline
+               <i class="fas fa-stethoscope me-2"></i>NEET Students
             </a>
         </li>
     </ul>
