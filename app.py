@@ -646,6 +646,24 @@ def extract_dynamic_marks(prefix, group):
 @login_required
 def add_student():
     if request.method == 'POST':
+
+        # 1. Capture inputs, strip accidental spaces, convert blanks to None
+        aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
+        mobile_number = request.form.get('mobile_number', '').strip() or None
+
+        # 2. SMART DUPLICATE CHECK: Tell us exactly WHO has the duplicate!
+        if aadhaar_no:
+            conflict = Student.query.filter_by(aadhaar_no=aadhaar_no).first()
+            if conflict:
+                flash(f"Error: Aadhaar '{aadhaar_no}' is already registered to {conflict.full_name}!", "error")
+                return redirect(url_for('add_student'))
+
+        if mobile_number:
+            conflict = Student.query.filter_by(mobile_number=mobile_number).first()
+            if conflict:
+                flash(f"Error: Mobile number '{mobile_number}' is already registered to {conflict.full_name}!", "error")
+                return redirect(url_for('add_student'))
+
         emails = [e.strip().lower() for e in [request.form.get('email_address'), request.form.get('alt_email'), request.form.get('emergency_email')] if e and e.strip()]
         if len(emails) != len(set(emails)):
             flash("Validation Error: All provided email addresses must be unique.")
