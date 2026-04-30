@@ -7,28 +7,40 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- PREMIUM SAAS AESTHETICS (Typography) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* VidyaSaarthi Brand Colors */
+            /* VidyaSaarthi Brand Palette */
             --brand-red: #cc0000;
             --brand-yellow: #f6e89e;
             --brand-blue: #ccdfed;
-            --brand-primary: #cc0000;
-            --sidebar-width: 280px;
-            --bg-color: #f4f7f6;
-        }
+            --brand-white: #ffffff;
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: #333;
-            overflow-x: hidden;
+            /* UI System Palette */
+            --vs-bg: #f8fafc; /* Ultra-soft gray for the main background */
+            --vs-text-main: #1e293b;
+            --vs-text-muted: #64748b;
+            --sidebar-width: 280px;
         }
 
         /* ==========================================
-           1. SIDEBAR STYLING
+           1. GLOBAL TYPOGRAPHY & BACKGROUND
+           ========================================== */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--vs-bg);
+            color: var(--vs-text-main);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==========================================
+           2. SIDEBAR STYLING
            ========================================== */
         .sidebar {
             width: var(--sidebar-width);
@@ -36,17 +48,15 @@
             position: fixed;
             top: 0;
             left: 0;
-            background: #ffffff;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
+            background: var(--brand-white);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03);
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(204, 223, 237, 0.5);
-            /* NEW: Smooth transition for collapsing */
+            border-right: 1px solid #e2e8f0;
             transition: margin-left 0.3s ease-in-out;
         }
 
-        /* NEW: Collapsed state hides sidebar off-screen */
         .sidebar.collapsed {
             margin-left: calc(-1 * var(--sidebar-width));
         }
@@ -54,7 +64,7 @@
         .sidebar-header {
             padding: 25px 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(204, 223, 237, 0.5);
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .sidebar-brand {
@@ -83,25 +93,25 @@
             display: flex;
             align-items: center;
             padding: 12px 20px;
-            color: #555;
+            color: var(--vs-text-muted);
             font-weight: 600;
             border-radius: 10px;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .nav-link i {
             width: 24px;
             font-size: 1.1rem;
             margin-right: 12px;
-            color: #888;
-            transition: color 0.3s ease;
+            color: #94a3b8;
+            transition: color 0.2s ease;
         }
 
         /* Hover & Active States */
         .nav-link:hover, .nav-link.active {
             background-color: #fff0f0;
             color: var(--brand-red);
-            transform: translateX(5px);
+            transform: translateX(4px);
         }
 
         .nav-link:hover i, .nav-link.active i {
@@ -110,35 +120,34 @@
 
         .sidebar-footer {
             padding: 20px;
-            border-top: 1px solid rgba(204, 223, 237, 0.5);
+            border-top: 1px solid #f1f5f9;
         }
 
         /* ==========================================
-           2. MAIN CONTENT AREA
+           3. MAIN CONTENT AREA
            ========================================== */
         .main-wrapper {
             margin-left: var(--sidebar-width);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            /* NEW: Smooth transition for expanding */
             transition: margin-left 0.3s ease-in-out;
         }
 
-        /* NEW: Expanded state fills the whole screen */
         .main-wrapper.expanded {
             margin-left: 0;
         }
 
         .topbar {
             height: 75px;
-            background: #ffffff;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            background: var(--brand-white);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 30px;
             z-index: 999;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .content-area {
@@ -147,16 +156,104 @@
         }
 
         /* ==========================================
-           3. MISC AESTHETICS (Used globally)
+           4. PREMIUM SAAS COMPONENTS
            ========================================== */
-        .btn-brand-red {
-            background-color: var(--brand-red);
-            color: white;
-            font-weight: bold;
+
+        /* Floating Cards */
+        .card {
+            border: none !important;
+            background: var(--brand-white);
+            border-radius: 16px !important;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04) !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .btn-brand-red:hover {
-            background-color: #aa0000;
+
+        /* Sleek Table Formatting */
+        .table-responsive {
+            border-radius: 12px;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table thead th {
+            background-color: var(--brand-blue) !important;
+            color: var(--vs-text-main);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            border-bottom: none;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .table tbody td {
+            padding: 1rem 0.5rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--vs-text-main);
+            font-weight: 500;
+        }
+        .table-hover tbody tr:hover td {
+            background-color: #f8fafc !important;
+        }
+
+        /* Button Glow-Ups */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            padding: 0.5rem 1.25rem;
+            transition: all 0.2s;
+        }
+        .btn-primary, .btn-brand-red {
+            background-color: var(--brand-red) !important;
+            border-color: var(--brand-red) !important;
             color: white;
+            box-shadow: 0 4px 12px rgba(204, 0, 0, 0.2);
+        }
+        .btn-primary:hover, .btn-brand-red:hover {
+            background-color: #a30000 !important;
+            border-color: #a30000 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(204, 0, 0, 0.3);
+        }
+        .btn-warning {
+            background-color: var(--brand-yellow) !important;
+            border-color: var(--brand-yellow) !important;
+            color: #333 !important;
+        }
+
+        /* Modern Modals */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 1.5rem;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Form Inputs */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+            box-shadow: none !important;
+            background-color: #ffffff;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--brand-red);
+            box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1) !important;
+        }
+        .form-label {
+            font-weight: 600;
+            color: var(--vs-text-main);
+            margin-bottom: 0.4rem;
         }
     </style>
 </head>
@@ -167,7 +264,7 @@
             <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1050; width: 100%; max-width: 600px;">
                 {% for category, message in messages %}
                     {% set alert_class = 'alert-success border-success' if category == 'success' else 'alert-danger border-danger' if category == 'error' else 'alert-info border-info' %}
-                    <div class="alert {{ alert_class }} alert-dismissible fade show shadow text-center fw-bold" role="alert" style="border-left: 5px solid;">
+                    <div class="alert {{ alert_class }} alert-dismissible fade show shadow text-center fw-bold" role="alert" style="border-left: 5px solid; border-radius: 12px;">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -192,10 +289,9 @@
                         </a>
                     </li>
 
-                    <!-- ADD THIS LINK TO YOUR SIDEBAR -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'tasks_page' %}active fw-bold text-danger{% else %}text-dark{% endif %}" href="{{ url_for('tasks_page') }}">
-                            <i class="fas fa-clipboard-list me-2" style="width: 20px;"></i> Task Management
+                        <a class="nav-link {% if request.endpoint == 'tasks_page' %}active text-danger{% endif %}" href="{{ url_for('tasks_page') }}">
+                            <i class="fas fa-clipboard-list"></i> Task Management
                         </a>
                     </li>
 
@@ -222,7 +318,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/settings/master' in request.path %}active{% endif %}" href="{{ url_for('master_data') }}">
-                            <i class="fas fa-cogs"></i> Master Data
+                            <i class="fas fa-database"></i> Master Data
                         </a>
                     </li>
                 </ul>
@@ -248,13 +344,13 @@
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="dropdown">
-                        <div class="bg-light rounded-pill px-3 py-2 border shadow-sm dropdown-toggle" data-bs-toggle="dropdown" style="cursor: pointer;">
+                        <div class="bg-light rounded-pill px-3 py-2 border shadow-sm dropdown-toggle" data-bs-toggle="dropdown" style="cursor: pointer; transition: all 0.2s;">
                             <i class="fas fa-user-circle text-muted me-2"></i>
                             <span class="fw-bold text-dark">Counselor: <span style="color: var(--brand-red);">{{ current_user.username|capitalize }}</span></span>
                         </div>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 10px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px; min-width: 200px;">
                             <li>
-                                <a class="dropdown-item fw-bold text-dark py-2" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <a class="dropdown-item fw-bold text-dark py-2 px-3" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                                     <i class="fas fa-key me-2 text-warning"></i> Change Password
                                 </a>
                             </li>
@@ -265,7 +361,7 @@
 
             <div class="content-area">
     {% else %}
-        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--bg-color);">
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--vs-bg);">
             <div class="container">
     {% endif %}
 
@@ -277,31 +373,32 @@
             </div> </div> {% else %}
             </div> </div> {% endif %}
 
+    <!-- GLOBAL PASSWORD MODAL (Updated with SaaS styles) -->
     {% if current_user.is_authenticated %}
     <div class="modal fade" id="changePasswordModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-content">
                 <form action="{{ url_for('change_password') }}" method="POST">
-                    <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
+                    <div class="modal-header bg-dark text-white border-0">
                         <h5 class="modal-title fw-bold"><i class="fas fa-lock me-2 text-warning"></i>Update Security Credentials</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">Current Password</label>
+                            <label class="form-label">Current Password</label>
                             <input type="password" name="current_password" class="form-control bg-light" required>
                         </div>
                         <div class="mb-3 border-top pt-3">
-                            <label class="form-label fw-bold small text-primary">New Password</label>
+                            <label class="form-label text-primary">New Password</label>
                             <input type="password" name="new_password" class="form-control" required minlength="6">
                         </div>
                         <div class="mb-2">
-                            <label class="form-label fw-bold small text-primary">Confirm New Password</label>
+                            <label class="form-label text-primary">Confirm New Password</label>
                             <input type="password" name="confirm_password" class="form-control" required minlength="6">
                         </div>
                     </div>
-                    <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
-                        <button type="submit" class="btn text-dark fw-bold w-100" style="background-color: var(--brand-yellow);">Update Password</button>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="submit" class="btn text-dark w-100" style="background-color: var(--brand-yellow);">Update Password</button>
                     </div>
                 </form>
             </div>
