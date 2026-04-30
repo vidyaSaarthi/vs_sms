@@ -67,13 +67,13 @@
         </li>
         <li class="nav-item">
             <a class="nav-link {% if active_tab == 'jee' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('student_pipeline', tab='jee', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}" style="border-radius: 10px; {% if active_tab == 'jee' %}background-color: var(--brand-blue); color: var(--vs-text-main);{% endif %}">
-                <i class="fas fa-cogs me-1"></i> JEE Pipeline
+                <i class="fas fa-cogs me-1"></i> JEE Students
                 <span class="badge ms-2 rounded-pill {% if active_tab == 'jee' %}bg-white text-dark{% else %}bg-secondary{% endif %}">{{ jee_count }}</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {% if active_tab == 'neet' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('student_pipeline', tab='neet', search=search_query, counsellor=counsellor_filter, status=status_filter, counselling=counselling_filter) }}" style="border-radius: 10px; {% if active_tab == 'neet' %}background-color: var(--brand-red); color: white;{% endif %}">
-                <i class="fas fa-stethoscope me-1"></i> NEET Pipeline
+                <i class="fas fa-stethoscope me-1"></i> NEET Students
                 <span class="badge ms-2 rounded-pill {% if active_tab == 'neet' %}bg-white text-danger{% else %}bg-secondary{% endif %}">{{ neet_count }}</span>
             </a>
         </li>
@@ -132,11 +132,9 @@
                         <!-- 🚨 UPDATED ACTION BUTTONS 🚨 -->
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-2">
-                                <!-- Opens the Verification Print Sheet in a new tab -->
                                 <a href="{{ url_for('export_verification', id=student.id) }}" target="_blank" class="btn btn-sm btn-dark fw-bold shadow-sm px-3">
-                                    <i class="fas fa-file-alt me-1"></i> Open Profile
+                                    <i class="fas fa-file-alt me-1"></i> Profile
                                 </a>
-                                <!-- Opens the Dedicated Journey & Health Page -->
                                 <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-sm fw-bold shadow-sm px-3" style="background-color: var(--brand-yellow); color: #333;">
                                     <i class="fas fa-road me-1"></i> Journey
                                 </a>

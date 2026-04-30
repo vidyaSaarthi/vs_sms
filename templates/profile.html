@@ -85,10 +85,17 @@
             </div>
         </div>
         <div class="card-body p-0">
+           <!-- TABS FOR THE JOURNEY -->
             <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="journeyTabs" role="tablist">
-                <li class="nav-item" role="presentation"><button class="nav-link active fw-bold" id="couns-tab" data-bs-toggle="tab" data-bs-target="#couns" type="button" role="tab">Counselling Processes</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link fw-bold" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">Exam Forms & Scores</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link fw-bold" id="rounds-tab" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab">Round Allotments</button></li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold" id="couns-tab" data-bs-toggle="tab" data-bs-target="#couns" type="button" role="tab">Counselling Forms</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">Exam Forms & Scores</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="rounds-tab" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab">Round Allotments</button>
+                </li>
             </ul>
 
             <div class="tab-content" id="journeyTabsContent">
@@ -289,8 +296,7 @@
                         <label class="form-label fw-bold">Registration Status</label>
                         <select name="registration_status" class="form-select">
                             <option value="Planned">Planned</option>
-                            <option value="Registered">Registered / Form Filled</option>
-                            <option value="Choice Filling">Choice Filling Completed</option>
+                            <option value="Completed">Completed</option>
                         </select>
                     </div>
 
@@ -490,8 +496,7 @@
                         <label class="form-label fw-bold">Registration Status</label>
                         <select name="registration_status" class="form-select">
                             <option value="Planned" {% if reg.registration_status == 'Planned' %}selected{% endif %}>Planned</option>
-                            <option value="Registered" {% if reg.registration_status == 'Registered' %}selected{% endif %}>Registered / Form Filled</option>
-                            <option value="Choice Filling" {% if reg.registration_status == 'Choice Filling' %}selected{% endif %}>Choice Filling Completed</option>
+                            <option value="Completed" {% if reg.registration_status == 'Completed' %}selected{% endif %}>Completed</option>
                         </select>
                     </div>
 
