@@ -1330,6 +1330,21 @@ def add_task():
         flash(f"Error creating task: {str(e)}", "error")
     return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
 
+@app.route('/student/edit_round_result/<int:result_id>', methods=['POST'])
+@login_required
+def edit_round_result(result_id):
+    result = StudentRoundResult.query.get_or_404(result_id)
+    student_id = result.student_id
+    try:
+        result.round_id = request.form.get('round_id')
+        result.allotted_institute = request.form.get('allotted_institute')
+        result.post_allotment_action = request.form.get('post_allotment_action')
+        db.session.commit()
+        flash("Round allotment updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating allotment: {str(e)}", "error")
+    return redirect(url_for('view_student', id=student_id))
 
 @app.route('/tasks/edit/<int:task_id>', methods=['POST'])
 @login_required
