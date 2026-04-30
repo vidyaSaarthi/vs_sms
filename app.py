@@ -129,7 +129,27 @@ def master_data():
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
-    return render_template('master_data.html', exams=exams, states=states, universities=universities, courses=courses)
+
+    # 🚨 NEW: Fetching the Counselling data we moved over from Admissions
+    counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
+    counselling_grouped = {}
+    for c in counsellings:
+        exam_name = c.exam.name if c.exam else "Independent Processes"
+        if exam_name not in counselling_grouped:
+            counselling_grouped[exam_name] = []
+        counselling_grouped[exam_name].append(c)
+
+    exam_course_mapping = {}
+    for exam in exams:
+        exam_course_mapping[exam.id] = [{'id': c.id, 'name': c.name} for c in exam.courses]
+
+    # 🚨 NEW: Added the missing variables to the render_template
+    return render_template('master_data.html', exams=exams, states=states,
+                           universities=universities, courses=courses,
+                           counsellings=counsellings,
+                           counselling_grouped=counselling_grouped,
+                           exam_course_mapping=exam_course_mapping)
 
 # ==========================================
 # EDIT MASTER DATA (Exams, States, Unis, Courses)
