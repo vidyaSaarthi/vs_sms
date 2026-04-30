@@ -367,7 +367,7 @@ def add_counselling():
     db.session.add(new_counselling)
     db.session.commit()
     flash(f"Counselling process '{name}' created successfully!", "success")
-    return redirect(url_for('admissions_hub'))
+    return redirect(url_for('master_data'))
 
 @app.route('/admissions/edit_counselling/<int:item_id>', methods=['POST'])
 @login_required
@@ -392,7 +392,7 @@ def edit_counselling(item_id):
 
     db.session.commit()
     flash("Counselling process updated successfully!", "success")
-    return redirect(url_for('admissions_hub'))
+    return redirect(url_for('master_data'))
 
 @app.route('/admissions/add_form', methods=['POST'])
 @login_required
@@ -495,7 +495,7 @@ def delete_counselling_record(item_id):
             flash("⚠️ Cannot delete: There is still at least one student registered for this process.", "error")
         else:
             flash(f"⚠️ Cannot delete due to database constraint.", "error")
-    return redirect(url_for('admissions_hub'))
+    return redirect(url_for('master_data'))
 
 @app.route('/admissions/delete/form/<int:item_id>', methods=['POST'])
 @login_required
@@ -524,7 +524,7 @@ def add_counselling_round(counselling_id):
     except Exception as e:
         db.session.rollback()
         flash(f"Error adding round: {str(e)}", "error")
-    return redirect(url_for('admissions_hub'))
+    return redirect(url_for('master_data'))
 
 @app.route('/admissions/delete_round/<int:round_id>', methods=['POST'])
 @login_required
@@ -537,7 +537,7 @@ def delete_counselling_round(round_id):
     except IntegrityError:
         db.session.rollback()
         flash("⚠️ Cannot delete this round because students already have seat allotments saved under it.", "error")
-    return redirect(url_for('admissions_hub'))
+    return redirect(url_for('master_data'))
 
 
 # ==========================================

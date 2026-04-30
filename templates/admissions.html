@@ -420,25 +420,7 @@
         }
     }
 
-    // TAB MEMORY
-    document.addEventListener("DOMContentLoaded", function() {
-        let activeTabId = localStorage.getItem('formsHubActiveTab');
 
-        if (activeTabId) {
-            let tabElement = document.querySelector(activeTabId);
-            if (tabElement) {
-                let tab = new bootstrap.Tab(tabElement);
-                tab.show();
-            }
-        }
-
-        let tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
-        tabButtons.forEach(function(btn) {
-            btn.addEventListener('shown.bs.tab', function(event) {
-                localStorage.setItem('formsHubActiveTab', '#' + event.target.id);
-            });
-        });
-    });
 </script>
 
 {% endblock %}
