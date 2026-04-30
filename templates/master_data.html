@@ -1,90 +1,104 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container-fluid">
-    
-    <div class="mb-4">
-        <h2 class="fw-bold" style="color: var(--brand-red);"><i class="fas fa-cogs me-2"></i>Master Database</h2>
-        <p class="text-muted">Manage core entity lists (Courses, Exams, States, Universities) used throughout the ERP.</p>
+<div class="container-fluid pt-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #333;"><i class="fas fa-database text-primary me-2"></i>Master Database</h2>
+            <p class="text-muted mb-0">Manage exams, states, universities, and courses used across the ERP.</p>
+        </div>
     </div>
 
-    <ul class="nav nav-tabs mb-4" id="masterTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold text-dark" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">
-                <i class="fas fa-pen-nib me-1"></i> Entrance Exams
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-dark" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses" type="button" role="tab">
-                <i class="fas fa-graduation-cap me-1"></i> Degree Courses
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-dark" id="states-tab" data-bs-toggle="tab" data-bs-target="#states" type="button" role="tab">
-                <i class="fas fa-map-marker-alt me-1"></i> States
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-dark" id="universities-tab" data-bs-toggle="tab" data-bs-target="#universities" type="button" role="tab">
-                <i class="fas fa-university me-1"></i> Universities
-            </button>
-        </li>
-    </ul>
+    <div class="row g-4">
 
-    <div class="tab-content" id="masterTabsContent">
-
-        <div class="tab-pane fade show active" id="exams" role="tabpanel">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color: #333;">Recognized Entrance Exams</h5>
-                    <button class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: var(--brand-red);" data-bs-toggle="modal" data-bs-target="#addExamModal">
+        <!-- ==========================================
+             1. ENTRANCE EXAMS SECTION
+             ========================================== -->
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-pen-nib text-warning me-2"></i>Entrance Exams</h5>
+                    <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addExamModal">
                         <i class="fas fa-plus me-1"></i> Add Exam
                     </button>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover mb-0 align-middle">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="ps-4 text-dark w-25">Exam Name</th>
-                                    <th>Exam Date</th>
-                                    <th class="text-dark">Mapped Target Courses</th>
-                                    <th class="text-dark text-center">Actions</th>
+                                    <th class="ps-4">Exam Name</th>
+                                    <th>Official Test Date</th>
+                                    <th>Mapped Courses</th>
+                                    <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for exam in exams %}
                                 <tr>
-                                    <td class="ps-4 fw-bold">{{ exam.name }}</td>
+                                    <td class="ps-4 fw-bold text-dark">{{ exam.name }}</td>
                                     <td>
-                                        {% if exam.courses %}
-                                            {% for c in exam.courses %}
-                                                <span class="badge border border-primary text-primary me-1 mb-1">{{ c.name }}</span>
-                                            {% endfor %}
-                                        {% else %}
-                                            <span class="text-muted small fst-italic">No courses mapped</span>
-                                        {% endif %}
-                                    </td>
-
-                                    <td>
-                                        {% if item.exam_date %}
-                                            <span class="badge bg-light text-dark border"><i class="far fa-calendar-alt text-danger me-1"></i>{{ item.exam_date.strftime('%d %b %Y') }}</span>
+                                        {% if exam.exam_date %}
+                                            <span class="badge bg-light text-dark border"><i class="far fa-calendar-alt text-danger me-1"></i>{{ exam.exam_date.strftime('%d %b %Y') }}</span>
                                         {% else %}
                                             <span class="text-muted small">Not Announced</span>
                                         {% endif %}
                                     </td>
-
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editExamModal{{ exam.id }}" title="Edit Exam"><i class="fas fa-edit"></i></button>
-                                            <form action="/settings/master/delete/exam/{{ exam.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this exam? Warning: This will affect related counselling processes.');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exam"><i class="fas fa-trash"></i></button>
-                                            </form>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                        {% for c in exam.courses %}
+                                            <span class="badge bg-secondary" style="font-size: 0.75rem;">{{ c.name }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">No courses mapped</span>
+                                        {% endfor %}
                                         </div>
                                     </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-warning fw-bold text-dark me-1" data-bs-toggle="modal" data-bs-target="#editExamModal{{ exam.id }}"><i class="fas fa-edit"></i></button>
+                                        <form action="{{ url_for('delete_master_data', data_type='exam', item_id=exam.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this Exam?');">
+                                            <button type="submit" class="btn btn-sm btn-danger fw-bold"><i class="fas fa-trash-alt"></i></button>
+                                        </form>
+                                    </td>
                                 </tr>
-                                {% else %}
-                                <tr><td colspan="3" class="text-center py-4 text-muted">No exams have been added to the master list.</td></tr>
+
+                                <!-- EDIT EXAM MODAL -->
+                                <div class="modal fade" id="editExamModal{{ exam.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content border-0 shadow">
+                                            <form action="{{ url_for('edit_master_data', data_type='exam', item_id=exam.id) }}" method="POST">
+                                                <div class="modal-header bg-warning text-dark">
+                                                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Exam</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body p-4 text-start">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Exam Name</label>
+                                                        <input type="text" name="name" class="form-control" value="{{ exam.name }}" required>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
+                                                        <input type="date" name="exam_date" class="form-control" value="{{ exam.exam_date.strftime('%Y-%m-%d') if exam.exam_date else '' }}">
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Map Courses</label>
+                                                        <select multiple name="course_ids" class="form-select" style="height: 120px;">
+                                                            {% for course in courses %}
+                                                                <option value="{{ course.id }}" {% if course in exam.courses %}selected{% endif %}>{{ course.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <small class="text-muted d-block mt-1">Hold CTRL (or CMD on Mac) to select multiple courses.</small>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Save Updates</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -93,364 +107,224 @@
             </div>
         </div>
 
-        <div class="tab-pane fade" id="courses" role="tabpanel">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color: #333;">Degree Courses</h5>
-                    <button class="btn btn-sm text-dark fw-bold shadow-sm" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addCourseModal">
-                        <i class="fas fa-plus me-1"></i> Add Course
-                    </button>
+        <!-- ==========================================
+             2. STATES SECTION
+             ========================================== -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h6 class="mb-0 fw-bold" style="color: var(--brand-blue);"><i class="fas fa-map-marker-alt me-2"></i>States / Regions</h6>
+                    <button class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addStateModal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 text-dark">Course Title (e.g. B.Tech, MBBS)</th>
-                                    <th class="text-dark text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for course in courses %}
-                                <tr>
-                                    <td class="ps-4 fw-bold">{{ course.name }}</td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ course.id }}" title="Edit Course"><i class="fas fa-edit"></i></button>
-                                            <form action="/settings/master/delete/course/{{ course.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this course?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Course"><i class="fas fa-trash"></i></button>
-                                            </form>
+                    <ul class="list-group list-group-flush">
+                        {% for state in states %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="fw-bold text-dark">{{ state.name }}</span>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editStateModal{{ state.id }}"><i class="fas fa-edit"></i></button>
+                                <form action="{{ url_for('delete_master_data', data_type='state', item_id=state.id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this State?');">
+                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        </li>
+
+                        <!-- Edit State Modal -->
+                        <div class="modal fade" id="editStateModal{{ state.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content shadow border-0">
+                                    <form action="{{ url_for('edit_master_data', data_type='state', item_id=state.id) }}" method="POST">
+                                        <div class="modal-body p-4">
+                                            <label class="form-label fw-bold">Edit State Name</label>
+                                            <input type="text" name="name" class="form-control mb-3" value="{{ state.name }}" required>
+                                            <button type="submit" class="btn btn-primary fw-bold w-100">Update</button>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="2" class="text-center py-4 text-muted">No courses added.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="tab-pane fade" id="states" role="tabpanel">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color: #333;">States & Regions</h5>
-                    <button class="btn btn-sm text-white fw-bold shadow-sm bg-dark" data-bs-toggle="modal" data-bs-target="#addStateModal">
-                        <i class="fas fa-plus me-1"></i> Add State
-                    </button>
+        <!-- ==========================================
+             3. UNIVERSITIES SECTION
+             ========================================== -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h6 class="mb-0 fw-bold" style="color: var(--brand-red);"><i class="fas fa-university me-2"></i>Universities</h6>
+                    <button class="btn btn-sm btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#addUniModal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 text-dark">State Name</th>
-                                    <th class="text-dark text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for state in states %}
-                                <tr>
-                                    <td class="ps-4 fw-bold">{{ state.name }}</td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editStateModal{{ state.id }}" title="Edit State"><i class="fas fa-edit"></i></button>
-                                            <form action="/settings/master/delete/state/{{ state.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this state?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
-                                            </form>
+                    <ul class="list-group list-group-flush">
+                        {% for uni in universities %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="fw-bold text-dark">{{ uni.name }}</span>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editUniModal{{ uni.id }}"><i class="fas fa-edit"></i></button>
+                                <form action="{{ url_for('delete_master_data', data_type='university', item_id=uni.id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this University?');">
+                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        </li>
+
+                        <!-- Edit Uni Modal -->
+                        <div class="modal fade" id="editUniModal{{ uni.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content shadow border-0">
+                                    <form action="{{ url_for('edit_master_data', data_type='university', item_id=uni.id) }}" method="POST">
+                                        <div class="modal-body p-4">
+                                            <label class="form-label fw-bold">Edit University Name</label>
+                                            <input type="text" name="name" class="form-control mb-3" value="{{ uni.name }}" required>
+                                            <button type="submit" class="btn btn-primary fw-bold w-100">Update</button>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="2" class="text-center py-4 text-muted">No states added.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="tab-pane fade" id="universities" role="tabpanel">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold" style="color: #333;">Independent Universities</h5>
-                    <button class="btn btn-sm text-dark fw-bold shadow-sm border" style="background-color: #e2e8f0;" data-bs-toggle="modal" data-bs-target="#addUniversityModal">
-                        <i class="fas fa-plus me-1"></i> Add University
-                    </button>
+        <!-- ==========================================
+             4. COURSES SECTION
+             ========================================== -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h6 class="mb-0 fw-bold text-success"><i class="fas fa-graduation-cap me-2"></i>Courses</h6>
+                    <button class="btn btn-sm btn-outline-success fw-bold" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 text-dark">University Name</th>
-                                    <th class="text-dark text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for uni in universities %}
-                                <tr>
-                                    <td class="ps-4 fw-bold">{{ uni.name }}</td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editUniversityModal{{ uni.id }}" title="Edit University"><i class="fas fa-edit"></i></button>
-                                            <form action="/settings/master/delete/university/{{ uni.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this university?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
-                                            </form>
+                    <ul class="list-group list-group-flush">
+                        {% for course in courses %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="fw-bold text-dark">{{ course.name }}</span>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm text-warning" data-bs-toggle="modal" data-bs-target="#editCourseModal{{ course.id }}"><i class="fas fa-edit"></i></button>
+                                <form action="{{ url_for('delete_master_data', data_type='course', item_id=course.id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this Course?');">
+                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        </li>
+
+                        <!-- Edit Course Modal -->
+                        <div class="modal fade" id="editCourseModal{{ course.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-sm">
+                                <div class="modal-content shadow border-0">
+                                    <form action="{{ url_for('edit_master_data', data_type='course', item_id=course.id) }}" method="POST">
+                                        <div class="modal-body p-4">
+                                            <label class="form-label fw-bold">Edit Course Name</label>
+                                            <input type="text" name="name" class="form-control mb-3" value="{{ course.name }}" required>
+                                            <button type="submit" class="btn btn-primary fw-bold w-100">Update</button>
                                         </div>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr><td colspan="2" class="text-center py-4 text-muted">No universities added.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
 
     </div>
+
 </div>
 
+<!-- ==========================================
+     GLOBAL ADD MODALS
+     ========================================== -->
+
+<!-- ADD EXAM MODAL -->
 <div class="modal fade" id="addExamModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/add_exam" method="POST">
-                <div class="modal-header text-white" style="background-color: var(--brand-red);">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('add_exam') }}" method="POST">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold">Add Entrance Exam</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Exam Name (e.g. JEE Main)</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
-                        <input type="date" name="exam_date" class="form-control" value="{{ item.exam_date.strftime('%Y-%m-%d') if item is defined and item.exam_date else '' }}">
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label fw-bold text-success">Map to Target Courses</label>
-                        <select name="course_ids" class="form-select" multiple style="height: 120px;">
-                            {% for course in courses %}
-                            <option value="{{ course.id }}">{{ course.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple courses.</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Exam</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addCourseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/add" method="POST">
-                <input type="hidden" name="data_type" value="course">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title fw-bold">Add Target Course</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Course Title (e.g. B.Tech, MBBS)</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success fw-bold w-100">Save Course</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addStateModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/add" method="POST">
-                <input type="hidden" name="data_type" value="state">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title fw-bold">Add State</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">State Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary fw-bold w-100">Save State</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addUniversityModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/add" method="POST">
-                <input type="hidden" name="data_type" value="university">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title fw-bold">Add University</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">University Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-secondary fw-bold w-100">Save University</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-{% for exam in exams %}
-<div class="modal fade" id="editExamModal{{ exam.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/edit/exam/{{ exam.id }}" method="POST">
-                <div class="modal-header text-dark bg-warning">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Exam</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-4">
                         <label class="form-label fw-bold">Exam Name</label>
-                        <input type="text" name="name" class="form-control" value="{{ exam.name }}" required>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. JEE Main 2026" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Official Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
-                        <input type="date" name="exam_date" class="form-control" value="{{ item.exam_date.strftime('%Y-%m-%d') if item is defined and item.exam_date else '' }}">
+                        <input type="date" name="exam_date" class="form-control">
                     </div>
 
-                    <div class="mb-2">
-                        <label class="form-label fw-bold text-success">Update Target Courses</label>
-                        <select name="course_ids" class="form-select" multiple style="height: 120px;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Map Courses <span class="text-muted fw-normal">(Optional)</span></label>
+                        <select multiple name="course_ids" class="form-select" style="height: 120px;">
                             {% for course in courses %}
-                            <option value="{{ course.id }}" {% if course in exam.courses %}selected{% endif %}>{{ course.name }}</option>
+                                <option value="{{ course.id }}">{{ course.name }}</option>
                             {% endfor %}
                         </select>
-                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple courses.</small>
+                        <small class="text-muted d-block mt-1">Hold CTRL (or CMD on Mac) to select multiple courses.</small>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Save Exam</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endfor %}
 
-{% for course in courses %}
-<div class="modal fade" id="editCourseModal{{ course.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/edit/course/{{ course.id }}" method="POST">
-                <div class="modal-header text-dark bg-warning">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Course</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+<!-- ADD STATE MODAL -->
+<div class="modal fade" id="addStateModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('add_master_data') }}" method="POST">
+                <input type="hidden" name="data_type" value="state">
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Course Title</label>
-                        <input type="text" name="name" class="form-control" value="{{ course.name }}" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
+                    <label class="form-label fw-bold">New State Name</label>
+                    <input type="text" name="name" class="form-control mb-3" placeholder="e.g. Haryana" required>
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Add State</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endfor %}
 
-{% for state in states %}
-<div class="modal fade" id="editStateModal{{ state.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/edit/state/{{ state.id }}" method="POST">
-                <div class="modal-header text-dark bg-warning">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit State</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+<!-- ADD UNIVERSITY MODAL -->
+<div class="modal fade" id="addUniModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('add_master_data') }}" method="POST">
+                <input type="hidden" name="data_type" value="university">
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">State Name</label>
-                        <input type="text" name="name" class="form-control" value="{{ state.name }}" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
+                    <label class="form-label fw-bold">New University Name</label>
+                    <input type="text" name="name" class="form-control mb-3" placeholder="e.g. Delhi University" required>
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Add University</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endfor %}
 
-{% for uni in universities %}
-<div class="modal fade" id="editUniversityModal{{ uni.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="/settings/master/edit/university/{{ uni.id }}" method="POST">
-                <div class="modal-header text-dark bg-warning">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit University</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+<!-- ADD COURSE MODAL -->
+<div class="modal fade" id="addCourseModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('add_master_data') }}" method="POST">
+                <input type="hidden" name="data_type" value="course">
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">University Name</label>
-                        <input type="text" name="name" class="form-control" value="{{ uni.name }}" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
+                    <label class="form-label fw-bold">New Course Name</label>
+                    <input type="text" name="name" class="form-control mb-3" placeholder="e.g. B.Tech Computer Science" required>
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Add Course</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endfor %}
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let activeTabId = localStorage.getItem('masterTabsActive');
-        if (activeTabId) {
-            let tabElement = document.querySelector(activeTabId);
-            if (tabElement) {
-                let tab = new bootstrap.Tab(tabElement);
-                tab.show();
-            }
-        }
-        let tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
-        tabButtons.forEach(function(btn) {
-            btn.addEventListener('shown.bs.tab', function(event) {
-                localStorage.setItem('masterTabsActive', '#' + event.target.id);
-            });
-        });
-    });
-</script>
 
 {% endblock %}
