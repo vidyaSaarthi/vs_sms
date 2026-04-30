@@ -532,6 +532,38 @@
 </div>
 {% endfor %}
 
+<!-- ==========================================
+     DELETE STUDENT SECURITY MODAL
+     ========================================== -->
+<div class="modal fade" id="deleteStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ url_for('delete_student', id=student.id) }}" method="POST">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Permanently Delete Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-start">
+                    <div class="alert alert-danger" style="border-radius: 8px;">
+                        <i class="fas fa-skull-crossbones me-2"></i><strong>Warning:</strong> This action cannot be undone.
+                    </div>
+                    <p>This will permanently wipe <strong>{{ student.full_name }}</strong> and all of their associated documents, exam results, and counselling registrations from the database.</p>
+
+                    <div class="mb-3 mt-4">
+                        <label class="form-label fw-bold text-dark">Admin PIN required to confirm:</label>
+                        <input type="password" name="admin_pin" class="form-control form-control-lg text-center fw-bold" placeholder="• • • •" required autocomplete="off">
+                        <small class="text-muted d-block mt-2">Enter the master security PIN to authorize deletion.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Wipe Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function toggleAppDetailsField() {
     const status = document.getElementById('regStatusSelect').value;
@@ -561,4 +593,5 @@ function toggleEditAppDetailsField(regId) {
     }
 }
 </script>
+
 {% endblock %}
