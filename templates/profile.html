@@ -142,6 +142,60 @@
                             {% endif %}
                         </div>
 
+                        <!-- ... existing blue tracking alert ... -->
+
+                        <!-- NEW: Collapsible Registration Details -->
+                        <div class="mb-3">
+                            <button class="btn btn-sm text-secondary border w-100 bg-white shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#regDetails{{ reg.id }}" aria-expanded="false" style="border-radius: 8px;">
+                                <i class="fas fa-lock me-2 text-warning"></i>View Portal Credentials & Details <i class="fas fa-chevron-down ms-1" style="font-size: 0.8em;"></i>
+                            </button>
+
+                            <div class="collapse mt-2" id="regDetails{{ reg.id }}">
+                                <div class="card card-body bg-light border-0 p-3 shadow-inner" style="border-radius: 8px;">
+                                    <div class="row g-3" style="font-size: 0.9rem;">
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Application No.</small>
+                                            <span class="text-dark fw-bold">{{ reg.application_number or 'N/A' }}</span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Portal Username</small>
+                                            <span class="text-dark">{{ reg.login_username or 'N/A' }}</span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Portal Password</small>
+                                            <span class="text-dark font-monospace bg-white px-2 py-1 border rounded">{{ reg.login_password or 'N/A' }}</span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Registered Mobile</small>
+                                            <span class="text-dark">{{ reg.registered_mobile or 'N/A' }}</span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Registered Email</small>
+                                            <span class="text-dark">{{ reg.registered_email or 'N/A' }}</span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <small class="text-muted d-block fw-bold text-uppercase" style="font-size: 0.75rem;">Confirmation Page</small>
+                                            {% if reg.form_confirmation_link %}
+                                                <a href="{{ reg.form_confirmation_link }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold">
+                                                    <i class="fas fa-external-link-alt me-1"></i> Open Drive
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">Not Uploaded</span>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                         <button class="btn btn-sm btn-outline-dark w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#addRoundResultModal{{ reg.id }}">
                             <i class="fas fa-plus-circle me-1"></i> Add Round Result
                         </button>
