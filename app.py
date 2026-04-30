@@ -642,6 +642,7 @@ def extract_dynamic_marks(prefix, group):
     obts = request.form.getlist(f'{prefix}_{group}_obt[]')
     return [{"name": n, "max": m, "obt": o} for n, m, o in zip(names, maxs, obts) if n.strip()]
 
+
 @app.route('/student/add', methods=['GET', 'POST'])
 @login_required
 def add_student():
@@ -651,7 +652,7 @@ def add_student():
         aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
         mobile_number = request.form.get('mobile_number', '').strip() or None
 
-        # 2. SMART DUPLICATE CHECK: Tell us exactly WHO has the duplicate!
+        # 2. SMART DUPLICATE CHECK
         if aadhaar_no:
             conflict = Student.query.filter_by(aadhaar_no=aadhaar_no).first()
             if conflict:
@@ -664,12 +665,14 @@ def add_student():
                 flash(f"Error: Mobile number '{mobile_number}' is already registered to {conflict.full_name}!", "error")
                 return redirect(url_for('add_student'))
 
-        emails = [e.strip().lower() for e in [request.form.get('email_address'), request.form.get('alt_email'), request.form.get('emergency_email')] if e and e.strip()]
+        emails = [e.strip().lower() for e in [request.form.get('email_address'), request.form.get('alt_email'),
+                                              request.form.get('emergency_email')] if e and e.strip()]
         if len(emails) != len(set(emails)):
             flash("Validation Error: All provided email addresses must be unique.")
             return render_template('add_student.html')
 
-        phones = [p.strip() for p in [request.form.get('mobile_number'), request.form.get('alt_mobile_number'), request.form.get('emergency_mobile')] if p and p.strip()]
+        phones = [p.strip() for p in [request.form.get('mobile_number'), request.form.get('alt_mobile_number'),
+                                      request.form.get('emergency_mobile')] if p and p.strip()]
         if len(phones) != len(set(phones)):
             flash("Validation Error: All provided phone numbers must be strictly different.")
             return render_template('add_student.html')
@@ -686,14 +689,19 @@ def add_student():
             c10_marks = {
                 "main": {
                     "eng": {"max": request.form.get('c10_main_eng_max'), "obt": request.form.get('c10_main_eng_obt')},
-                    "math": {"max": request.form.get('c10_main_math_max'), "obt": request.form.get('c10_main_math_obt')},
+                    "math": {"max": request.form.get('c10_main_math_max'),
+                             "obt": request.form.get('c10_main_math_obt')},
                     "sci": {"max": request.form.get('c10_main_sci_max'), "obt": request.form.get('c10_main_sci_obt')},
                     "sst": {"max": request.form.get('c10_main_sst_max'), "obt": request.form.get('c10_main_sst_obt')}
                 },
                 "other": {"subjects": extract_dynamic_marks('c10', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c10', 'add')},
-                "overall_main": {"max": request.form.get('c10_overall_main_max'), "obt": request.form.get('c10_overall_main_obt'), "perc": request.form.get('c10_overall_main_perc')},
-                "overall_grand": {"max": request.form.get('c10_overall_grand_max'), "obt": request.form.get('c10_overall_grand_obt'), "perc": request.form.get('c10_overall_grand_perc')}
+                "overall_main": {"max": request.form.get('c10_overall_main_max'),
+                                 "obt": request.form.get('c10_overall_main_obt'),
+                                 "perc": request.form.get('c10_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c10_overall_grand_max'),
+                                  "obt": request.form.get('c10_overall_grand_obt'),
+                                  "perc": request.form.get('c10_overall_grand_perc')}
             }
 
             c12_marks = {
@@ -704,8 +712,12 @@ def add_student():
                 },
                 "other": {"subjects": extract_dynamic_marks('c12', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c12', 'add')},
-                "overall_main": {"max": request.form.get('c12_overall_main_max'), "obt": request.form.get('c12_overall_main_obt'), "perc": request.form.get('c12_overall_main_perc')},
-                "overall_grand": {"max": request.form.get('c12_overall_grand_max'), "obt": request.form.get('c12_overall_grand_obt'), "perc": request.form.get('c12_overall_grand_perc')}
+                "overall_main": {"max": request.form.get('c12_overall_main_max'),
+                                 "obt": request.form.get('c12_overall_main_obt'),
+                                 "perc": request.form.get('c12_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c12_overall_grand_max'),
+                                  "obt": request.form.get('c12_overall_grand_obt'),
+                                  "perc": request.form.get('c12_overall_grand_perc')}
             }
 
             new_student = Student(
@@ -714,9 +726,13 @@ def add_student():
                 full_name=request.form.get('full_name'), dob=dob_val, gender=request.form.get('gender'),
                 blood_group=request.form.get('blood_group'), religion=request.form.get('religion'),
                 category=request.form.get('category'), identification_mark=request.form.get('identification_mark'),
-                aadhaar_no=request.form.get('aadhaar_no'), nationality=request.form.get('nationality'),
+
+                # ✅ FIX: Using the cleaned variables here!
+                aadhaar_no=aadhaar_no,
+                mobile_number=mobile_number,
+
+                nationality=request.form.get('nationality'),
                 nativity=request.form.get('nativity'),
-                mobile_number=request.form.get('mobile_number'),
                 alt_mobile_number=request.form.get('alt_mobile_number'),
                 emergency_mobile=request.form.get('emergency_mobile'),
                 email_address=request.form.get('email_address'), alt_email=request.form.get('alt_email'),
@@ -780,13 +796,15 @@ def add_student():
             for doc_type in MASTER_DOC_TYPES:
                 raw_link = request.form.get(f"{doc_type}_url")
                 if raw_link and raw_link.strip():
-                    db.session.add(Document(student_id=new_student.id, doc_type=doc_type, drive_link=convert_to_embed_link(raw_link.strip())))
+                    db.session.add(Document(student_id=new_student.id, doc_type=doc_type,
+                                            drive_link=convert_to_embed_link(raw_link.strip())))
 
             custom_names = request.form.getlist('custom_doc_name[]')
             custom_urls = request.form.getlist('custom_doc_url[]')
             for name, url in zip(custom_names, custom_urls):
                 if name and name.strip() and url and url.strip():
-                    db.session.add(Document(student_id=new_student.id, doc_type=name.strip(), drive_link=convert_to_embed_link(url.strip())))
+                    db.session.add(Document(student_id=new_student.id, doc_type=name.strip(),
+                                            drive_link=convert_to_embed_link(url.strip())))
 
             db.session.commit()
             flash(f"Student {new_student.full_name} added successfully!")
@@ -800,7 +818,6 @@ def add_student():
             flash(f"Error saving student: {str(e)}")
 
     return render_template('add_student.html')
-
 @app.route('/student/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_student(id):
