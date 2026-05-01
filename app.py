@@ -562,7 +562,7 @@ def dashboard():
     # master_exams_sorted = sorted(master_exams, key=lambda x: x.exam_date or date.max)
 
     # 🚨 Notice we use "Exam.query" here, not "master_exams.query"
-    master_exams = Exam.query.filter(
+    master_exams_sorted = Exam.query.filter(
         (Exam.exam_date >= today) | (Exam.exam_date == None)
     ).order_by(Exam.exam_date.asc()).all()
 
