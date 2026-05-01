@@ -63,23 +63,33 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
 
+<!--                                            &lt;!&ndash; 🚨 NEW: Add Activity Button &ndash;&gt;-->
+<!--                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">-->
+<!--                                                <i class="fas fa-calendar-plus"></i>-->
+<!--                                            </button>-->
+
+<!--                                            {% if form.exam_id %}-->
+
+<!--                                            &lt;!&ndash; 🚨 NEW: Add Activity Button &ndash;&gt;-->
+<!--                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">-->
+<!--                                                <i class="fas fa-calendar-plus"></i>-->
+<!--                                            </button>-->
+
+<!--                                            {% if form.exam_id %}-->
+
+<!--                                            {% if form.exam_id %}-->
+<!--                                                <a href="{{ url_for('student_pipeline', exam_id=form.exam_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>-->
+<!--                                            {% endif %}-->
+
                                             <!-- 🚨 NEW: Add Activity Button -->
                                             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">
                                                 <i class="fas fa-calendar-plus"></i>
                                             </button>
-
-                                            {% if form.exam_id %}
-
-                                            <!-- 🚨 NEW: Add Activity Button -->
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">
-                                                <i class="fas fa-calendar-plus"></i>
-                                            </button>
-
-                                            {% if form.exam_id %}
 
                                             {% if form.exam_id %}
                                                 <a href="{{ url_for('student_pipeline', exam_id=form.exam_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
                                             {% endif %}
+
 
                                             <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
                                                 <i class="fas fa-id-badge"></i>
