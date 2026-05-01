@@ -5,7 +5,7 @@ from datetime import datetime, date
 from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 # Consolidated Imports
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task
@@ -173,6 +173,10 @@ def edit_master_data(data_type, item_id):
             exam_date_str = request.form.get('exam_date')
             item.exam_date = datetime.strptime(exam_date_str, '%Y-%m-%d').date() if exam_date_str else None
 
+            exam_end_date_str = request.form.get('exam_end_date')
+            # Convert string to Python date object if it exists
+            item.exam_end_date = datetime.strptime(exam_end_date_str, '%Y-%m-%d').date() if exam_end_date_str else None
+
             # Keep your existing courses logic
             raw_course_ids = request.form.getlist('course_ids')
             item.courses = []
@@ -255,11 +259,16 @@ def add_exam():
     try:
         # 🚨 NEW: Capture the date
         exam_date_str = request.form.get('exam_date')
+        exam_end_date_str = request.form.get('exam_end_date')  # 🚨 ADD THIS
+
         exam_date_val = datetime.strptime(exam_date_str, '%Y-%m-%d').date() if exam_date_str else None
+        exam_end_val = datetime.strptime(exam_end_date_str,
+                                         '%Y-%m-%d').date() if exam_end_date_str else None  # 🚨 ADD THIS
 
         new_exam = Exam(
             name=request.form.get('name'),
-            exam_date=exam_date_val # 🚨 NEW: Save to DB
+            exam_date=exam_date_val,
+            exam_end_date=exam_end_val  # 🚨 SAVE THIS TO DB
         )
 
         # Capture and convert to integers (Keep your existing courses logic!)
@@ -561,9 +570,14 @@ def dashboard():
     master_exams = Exam.query.all()
     # master_exams_sorted = sorted(master_exams, key=lambda x: x.exam_date or date.max)
 
-    # 🚨 Notice we use "Exam.query" here, not "master_exams.query"
+    # Show exams if:
+    # 1. Start date is today or in future
+    # 2. OR End date is today or in future (handles the last days of a window)
+    # 3. OR Date is not yet announced
     master_exams_sorted = Exam.query.filter(
-        (Exam.exam_date >= today) | (Exam.exam_date == None)
+        (Exam.exam_date >= today) |
+        (Exam.exam_end_date >= today) |
+        (Exam.exam_date == None)
     ).order_by(Exam.exam_date.asc()).all()
 
 

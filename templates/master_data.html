@@ -70,7 +70,14 @@
                                     <td class="ps-4 fw-bold text-dark">{{ exam.name }}</td>
                                     <td>
                                         {% if exam.exam_date %}
-                                            <span class="badge bg-light text-dark border"><i class="far fa-calendar-alt text-danger me-1"></i>{{ exam.exam_date.strftime('%d %b %Y') }}</span>
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="far fa-calendar-alt text-danger me-1"></i>
+                                                {% if exam.exam_end_date %}
+                                                    {{ exam.exam_date.strftime('%d %b') }} - {{ exam.exam_end_date.strftime('%d %b %Y') }}
+                                                {% else %}
+                                                    {{ exam.exam_date.strftime('%d %b %Y') }}
+                                                {% endif %}
+                                            </span>
                                         {% else %}
                                             <span class="text-muted small">Not Announced</span>
                                         {% endif %}
@@ -110,6 +117,12 @@
                                                     <div class="mb-3">
                                                         <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label> <!-- 🚨 Renamed -->
                                                         <input type="date" name="exam_date" class="form-control" value="{{ exam.exam_date.strftime('%Y-%m-%d') if exam.exam_date else '' }}">
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Exam End Date <span class="text-muted fw-normal">(Optional)</span></label>
+                                                        <input type="date" name="exam_end_date" class="form-control"
+                                                               value="{{ exam.exam_end_date.strftime('%Y-%m-%d') if exam.exam_end_date else '' }}">
                                                     </div>
 
                                                     <div class="mb-3">
@@ -385,6 +398,12 @@
                         <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label> <!-- 🚨 Renamed -->
                         <input type="date" name="exam_date" class="form-control">
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Exam End Date <span class="text-muted fw-normal">(For multi-day windows)</span></label>
+                        <input type="date" name="exam_end_date" class="form-control">
+                    </div>
+
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Map Courses <span class="text-muted fw-normal">(Optional)</span></label>

@@ -53,11 +53,14 @@
                                 {% for exam in master_exams %}
                                 <tr>
                                     <td class="ps-4 fw-bold" style="font-size: 1.05rem;">{{ exam.name }}</td>
-                                    <td class="fw-bold {% if exam.exam_date %}text-dark{% else %}text-muted{% endif %}">
-                                        {% if exam.exam_date %}
-                                            <i class="far fa-calendar-check text-success me-2"></i> {{ exam.exam_date.strftime('%d %b %Y') }}
+                                    <td>
+                                        <i class="far fa-calendar-alt text-danger me-1"></i>
+                                        {% if exam.exam_end_date %}
+                                            {{ exam.exam_date.strftime('%d %b') }} - {{ exam.exam_end_date.strftime('%d %b %Y') }}
+                                        {% elif exam.exam_date %}
+                                            {{ exam.exam_date.strftime('%d %b %Y') }}
                                         {% else %}
-                                            <i class="far fa-clock me-2"></i> To be announced
+                                            <span class="text-muted small">TBA</span>
                                         {% endif %}
                                     </td>
                                 </tr>

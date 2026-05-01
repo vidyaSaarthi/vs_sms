@@ -266,6 +266,7 @@ class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     exam_date = db.Column(db.Date, nullable=True)
+    exam_end_date = db.Column(db.Date, nullable=True)  # 🚨 NEW: The End Date
 
     # Relationship to Courses
     courses = db.relationship('Course', secondary=exam_courses, backref=db.backref('exams', lazy=True))
