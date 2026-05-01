@@ -6,12 +6,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0" style="color: #333;"><i class="fas fa-home text-primary me-2"></i>Deadlines</h2>
-            <p class="text-muted mb-0">Your overview of master exam dates and upcoming deadlines.</p>
+            <p class="text-muted mb-0">Your overview of master exam dates, forms, and specific activities.</p>
         </div>
     </div>
 
     <!-- DASHBOARD TABS -->
-    <ul class="nav nav-tabs mb-4 border-bottom-0" id="dashboardTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
+    <ul class="nav nav-tabs mb-4 border-bottom-0" id="dashboardTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important; flex-wrap: nowrap; overflow-x: auto;">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exams-tab" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" role="tab" style="border-top: 3px solid var(--brand-red); color: #333;">
                 <i class="far fa-calendar-alt me-2"></i>Exam Dates
@@ -19,12 +19,18 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exam-forms-tab" data-bs-toggle="tab" data-bs-target="#tab-exam-forms" type="button" role="tab" style="border-top: 3px solid var(--brand-yellow); color: #333;">
-                <i class="fas fa-pen-nib me-2"></i>Exam Form Deadlines
+                <i class="fas fa-pen-nib me-2"></i>Exam Forms
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="couns-forms-tab" data-bs-toggle="tab" data-bs-target="#tab-couns-forms" type="button" role="tab" style="border-top: 3px solid var(--brand-blue); color: #333;">
-                <i class="fas fa-sitemap me-2"></i>Counselling Form Deadlines
+                <i class="fas fa-sitemap me-2"></i>Counselling Forms
+            </button>
+        </li>
+        <!-- 🚨 4TH TAB FOR ACTIVITIES -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" id="activities-tab" data-bs-toggle="tab" data-bs-target="#tab-activities" type="button" role="tab" style="border-top: 3px solid #8e44ad; color: #333;">
+                <i class="fas fa-tasks me-2"></i>Activity Deadlines
             </button>
         </li>
     </ul>
@@ -32,9 +38,7 @@
     <!-- TAB CONTENT -->
     <div class="tab-content" id="dashboardTabsContent">
 
-        <!-- ==========================================
-             TAB 1: MASTER EXAM DATES
-             ========================================== -->
+        <!-- TAB 1: MASTER EXAM DATES -->
         <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
             <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
                 <div class="card-header bg-white py-3 border-bottom">
@@ -43,7 +47,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                         <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                            <thead class="bg-light sticky-top" style="z-index: 1;">
                                 <tr>
                                     <th class="ps-4 bg-light">Entrance Exam</th>
                                     <th class="text-danger bg-light">Exam Date</th>
@@ -67,11 +71,7 @@
                                     </td>
                                 </tr>
                                 {% else %}
-                                <tr>
-                                    <td colspan="2" class="text-center py-4 text-muted">
-                                        <i class="fas fa-exclamation-circle mb-2 d-block fs-4"></i> No entrance exams configured yet.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="2" class="text-center py-4 text-muted">No entrance exams configured yet.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -80,9 +80,7 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             TAB 2: EXAM FORMS DEADLINES
-             ========================================== -->
+        <!-- TAB 2: EXAM FORMS DEADLINES -->
         <div class="tab-pane fade" id="tab-exam-forms" role="tabpanel">
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
                 <div class="card-header bg-dark text-white py-3">
@@ -91,7 +89,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                         <table class="table table-hover mb-0 align-middle">
-                            <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                            <thead class="bg-light sticky-top" style="z-index: 1;">
                                 <tr>
                                     <th class="ps-4 bg-light">Exam Form</th>
                                     <th class="text-danger bg-light" style="width: 200px;">Deadline</th>
@@ -103,40 +101,13 @@
                                     <td class="ps-4 fw-bold">
                                         {{ form.name }}
                                         {% if form.document_link %}
-                                            <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted" title="Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                            <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted"><i class="fas fa-external-link-alt"></i></a>
                                         {% endif %}
                                     </td>
-                                    <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
+                                    <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}</td>
                                 </tr>
-
-                                <!-- 🚨 NEW: Show Events Attached to this Exam Form -->
-                                {% for event in form.events %}
-                                <tr style="background-color: rgba(246, 232, 158, 0.1);">
-                                    <td class="ps-5 text-muted">
-                                        <i class="fas fa-level-up-alt fa-rotate-90 me-2 text-danger"></i>
-                                        <strong>{{ event.event_name }}</strong>
-                                        {% if event.event_link %}
-                                            <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-muted"><i class="fas fa-external-link-alt"></i></a>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-danger fw-bold">
-                                        {% if event.start_date and event.end_date %}
-                                            {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
-                                        {% elif event.end_date %}
-                                            {{ event.end_date.strftime('%d %b %Y') }}
-                                        {% else %}
-                                            <span class="text-muted small">TBA</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-
                                 {% else %}
-                                <tr>
-                                    <td colspan="2" class="text-center py-5 text-muted">
-                                        <i class="fas fa-calendar-check fs-4 mb-2 text-success d-block"></i> No upcoming exam form deadlines.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="2" class="text-center py-5 text-muted">No upcoming exam form deadlines.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -145,29 +116,12 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             TAB 3: COUNSELLING FORMS DEADLINES
-             ========================================== -->
+        <!-- TAB 3: COUNSELLING FORMS DEADLINES -->
         <div class="tab-pane fade" id="tab-couns-forms" role="tabpanel">
-
-            <!-- Custom Styles specifically for the sub-tabs -->
             <style>
-                .couns-pill.active {
-                    background-color: var(--brand-white) !important;
-                    color: var(--brand-red) !important;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-                }
-                .couns-pill {
-                    background-color: rgba(255, 255, 255, 0.5);
-                    color: var(--vs-text-main);
-                    border-radius: 8px;
-                    font-weight: 700;
-                    transition: all 0.2s ease;
-                    border: 1px solid rgba(255, 255, 255, 0.4);
-                }
-                .couns-pill:hover:not(.active) {
-                    background-color: rgba(255, 255, 255, 0.8);
-                }
+                .couns-pill.active { background-color: var(--brand-white) !important; color: var(--brand-red) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important; }
+                .couns-pill { background-color: rgba(255, 255, 255, 0.5); border-radius: 8px; font-weight: 700; transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.4); }
+                .couns-pill:hover:not(.active) { background-color: rgba(255, 255, 255, 0.8); }
             </style>
 
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
@@ -175,7 +129,6 @@
                     <h5 class="mb-3 fw-bold text-dark"><i class="fas fa-sitemap text-danger me-2"></i>Upcoming Counselling Forms Deadlines</h5>
 
                     {% if counselling_grouped %}
-                    <!-- DYNAMIC EXAM SUB-TABS (JEE, NEET, etc.) -->
                     <ul class="nav nav-pills gap-2" id="counsSubTabs" role="tablist">
                         {% for exam_name, forms in counselling_grouped.items() %}
                         <li class="nav-item" role="presentation">
@@ -195,7 +148,7 @@
                             <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="pill-{{ loop.index }}" role="tabpanel">
                                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                                     <table class="table table-hover mb-0 align-middle">
-                                        <thead class="bg-light sticky-top" style="z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                                        <thead class="bg-light sticky-top" style="z-index: 1;">
                                             <tr>
                                                 <th class="ps-4 bg-light">Process & Form</th>
                                                 <th class="text-danger bg-light" style="width: 200px;">Deadline</th>
@@ -207,34 +160,11 @@
                                                 <td class="ps-4 fw-bold" style="border-left: 3px solid var(--brand-blue);">
                                                     {{ form.name }}
                                                     {% if form.document_link %}
-                                                        <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted" title="Form Link"><i class="fas fa-external-link-alt"></i></a>
+                                                        <a href="{{ form.document_link }}" target="_blank" class="ms-2 text-muted"><i class="fas fa-external-link-alt"></i></a>
                                                     {% endif %}
                                                 </td>
-                                                <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
+                                                <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') if form.end_date else 'No Deadline Set' }}</td>
                                             </tr>
-
-                                            <!-- 🚨 NEW: Show Events Attached to this Counselling Form -->
-                                            {% for event in form.events %}
-                                            <tr style="background-color: rgba(246, 232, 158, 0.1);">
-                                                <td class="ps-5 text-muted" style="border-left: 3px solid var(--brand-blue);">
-                                                    <i class="fas fa-level-up-alt fa-rotate-90 me-2 text-danger"></i>
-                                                    <strong>{{ event.event_name }}</strong>
-                                                    {% if event.event_link %}
-                                                        <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-muted"><i class="fas fa-external-link-alt"></i></a>
-                                                    {% endif %}
-                                                </td>
-                                                <td class="text-danger fw-bold">
-                                                    {% if event.start_date and event.end_date %}
-                                                        {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
-                                                    {% elif event.end_date %}
-                                                        {{ event.end_date.strftime('%d %b %Y') }}
-                                                    {% else %}
-                                                        <span class="text-muted small">TBA</span>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-
                                             {% endfor %}
                                         </tbody>
                                     </table>
@@ -242,10 +172,62 @@
                             </div>
                             {% endfor %}
                         {% else %}
-                            <div class="text-center py-5 text-muted">
-                                <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i> No upcoming counselling form deadlines.
-                            </div>
+                            <div class="text-center py-5 text-muted">No upcoming counselling form deadlines.</div>
                         {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🚨 TAB 4: NEW ACTIVITIES TAB -->
+        <div class="tab-pane fade" id="tab-activities" role="tabpanel">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden; max-width: 900px;">
+                <div class="card-header text-white py-3" style="background-color: #8e44ad;">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-tasks text-warning me-2"></i>Upcoming Activities & Micro-Deadlines</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light sticky-top" style="z-index: 1;">
+                                <tr>
+                                    <th class="ps-4 bg-light">Activity Name</th>
+                                    <th class="bg-light">Associated Form</th>
+                                    <th class="text-danger bg-light" style="width: 250px;">Deadline Window</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in upcoming_activities %}
+                                <tr>
+                                    <td class="ps-4 fw-bold" style="font-size: 1.05rem;">
+                                        <i class="fas fa-level-up-alt fa-rotate-90 text-muted me-2"></i>
+                                        {{ event.event_name }}
+                                        {% if event.event_link %}
+                                            <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-primary"><i class="fas fa-external-link-alt"></i></a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold text-secondary">
+                                        {{ event.parent_form.name }}
+                                        <span class="badge border ms-2 bg-light text-dark">{{ event.parent_form.form_type }}</span>
+                                    </td>
+                                    <td class="text-danger fw-bold">
+                                        {% if event.start_date and event.end_date %}
+                                            {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b %Y') }}
+                                        {% elif event.end_date %}
+                                            By {{ event.end_date.strftime('%d %b %Y') }}
+                                        {% else %}
+                                            <span class="text-muted">TBA</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-5 text-muted">
+                                        <i class="fas fa-check-circle fs-4 mb-2 text-success d-block"></i> No upcoming sub-activities or correction windows.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

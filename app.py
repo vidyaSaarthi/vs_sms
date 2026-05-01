@@ -7,6 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
 
 # Consolidated Imports
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task, FormEvent
@@ -599,34 +600,33 @@ def delete_form_event(event_id):
 # ==========================================
 # DASHBOARD
 # ==========================================
+from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
+
+
 @app.route('/')
 @app.route('/dashboard')
 @login_required
 def dashboard():
     today = date.today()
 
-    master_exams = Exam.query.all()
-    # master_exams_sorted = sorted(master_exams, key=lambda x: x.exam_date or date.max)
-
-    # Show exams if:
-    # 1. Start date is today or in future
-    # 2. OR End date is today or in future (handles the last days of a window)
-    # 3. OR Date is not yet announced
+    # 1. Master Exams
     master_exams_sorted = Exam.query.filter(
         (Exam.exam_date >= today) |
         (Exam.exam_end_date >= today) |
         (Exam.exam_date == None)
     ).order_by(Exam.exam_date.asc()).all()
 
+    # 2. Upcoming Exam Forms
+    upcoming_exam_forms = Form.query.filter(
+        Form.form_type == 'Exam',
+        or_(Form.end_date >= today, Form.end_date == None)
+    ).order_by(Form.end_date.asc()).limit(10).all()
 
-    upcoming_exam_forms = Form.query.options(joinedload(Form.events)).filter(
-        Form.end_date >= today,
-        Form.form_type == 'Exam'
-    ).order_by(Form.end_date.asc()).limit(5).all()
-
-    upcoming_couns_forms = Form.query.options(joinedload(Form.events)).filter(
-        Form.end_date >= today,
-        Form.form_type == 'Counselling'
+    # 3. Upcoming Counselling Forms
+    upcoming_couns_forms = Form.query.filter(
+        Form.form_type == 'Counselling',
+        or_(Form.end_date >= today, Form.end_date == None)
     ).order_by(Form.end_date.asc()).all()
 
     counselling_grouped = {}
@@ -641,11 +641,18 @@ def dashboard():
             counselling_grouped[exam_name] = []
         counselling_grouped[exam_name].append(form)
 
-    # 🚨 Notice: Tasks logic has been entirely removed from here to make the dashboard load faster!
+    counselling_grouped = dict(sorted(counselling_grouped.items()))
+
+    # 🚨 4. NEW: Fetch All Upcoming Activities (Regardless of Parent Form)
+    upcoming_activities = FormEvent.query.filter(
+        or_(FormEvent.end_date >= today, FormEvent.end_date == None)
+    ).order_by(FormEvent.end_date.asc()).all()
+
     return render_template('dashboard.html',
                            master_exams=master_exams_sorted,
                            upcoming_exam_forms=upcoming_exam_forms,
-                           counselling_grouped=counselling_grouped)
+                           counselling_grouped=counselling_grouped,
+                           upcoming_activities=upcoming_activities)
 
 
 # ==========================================
