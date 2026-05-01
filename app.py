@@ -1450,25 +1450,38 @@ if __name__ == '__main__':
 @app.route('/reports/application-matrix')
 @login_required
 def application_matrix():
-    # Toggle between JEE and NEET views to keep the grid readable
+    # Toggle between JEE and NEET views to keep the grid relevant
     exam_type = request.args.get('exam_type', 'JEE')
 
-    # Fetch students for the selected exam
+    # Fetch students for the selected exam group
     students = Student.query.filter_by(exam_type=exam_type).order_by(Student.full_name.asc()).all()
     student_ids = [s.id for s in students]
 
-    # --- 1. EXAM MATRIX DATA ---
+    # ==========================================
+    # 1. EXAM MATRIX DATA (Grouped by Course)
+    # ==========================================
     exam_results = StudentExamResult.query.filter(StudentExamResult.student_id.in_(student_ids)).all()
     active_exam_ids = list(set([r.exam_id for r in exam_results]))
     active_exams = Exam.query.filter(Exam.id.in_(active_exam_ids)).order_by(Exam.name.asc()).all()
 
     exam_matrix = {s.id: {} for s in students}
     for r in exam_results:
-        # If application number exists and isn't blank, it's Filled
         has_app_no = bool(r.application_number and r.application_number.strip())
         exam_matrix[r.student_id][r.exam_id] = 'Filled' if has_app_no else 'Pending'
 
-    # --- 2. COUNSELLING MATRIX DATA ---
+    exams_grouped = {}
+    for exam in active_exams:
+        if not exam.courses:
+            exams_grouped.setdefault("General / Untagged", []).append(exam)
+        else:
+            for course in exam.courses:
+                exams_grouped.setdefault(course.name, []).append(exam)
+    # Sort the dictionary alphabetically by course name
+    exams_grouped = dict(sorted(exams_grouped.items()))
+
+    # ==========================================
+    # 2. COUNSELLING MATRIX DATA (Grouped by Course)
+    # ==========================================
     couns_regs = StudentCounsellingRegistration.query.filter(
         StudentCounsellingRegistration.student_id.in_(student_ids)).all()
     active_couns_ids = list(set([r.counselling_id for r in couns_regs]))
@@ -1477,14 +1490,22 @@ def application_matrix():
 
     couns_matrix = {s.id: {} for s in students}
     for r in couns_regs:
-        # If application number exists and isn't blank, it's Filled
         has_app_no = bool(r.application_number and r.application_number.strip())
         couns_matrix[r.student_id][r.counselling_id] = 'Filled' if has_app_no else 'Pending'
 
+    couns_grouped = {}
+    for c in active_counsellings:
+        if not c.courses:
+            couns_grouped.setdefault("General / Untagged", []).append(c)
+        else:
+            for course in c.courses:
+                couns_grouped.setdefault(course.name, []).append(c)
+    couns_grouped = dict(sorted(couns_grouped.items()))
+
     return render_template('application_matrix.html',
                            students=students,
-                           active_exams=active_exams,
+                           exams_grouped=exams_grouped,
                            exam_matrix=exam_matrix,
-                           active_counsellings=active_counsellings,
+                           couns_grouped=couns_grouped,
                            couns_matrix=couns_matrix,
                            exam_type=exam_type)
