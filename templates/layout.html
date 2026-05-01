@@ -303,10 +303,20 @@
                         </a>
                     </li>
 
-                    <!-- ADMISSIONS SECTION -->
-                    <li class="nav-item mt-3 mb-1">
-                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Admissions</span>
+                    <!-- COMPLIANCE SECTION -->
+<!--                    <li class="nav-item mt-3 mb-1">-->
+<!--                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Compliance</span>-->
+<!--                    </li>-->
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/reports/form-compliance' in request.path %}active{% endif %}" href="{{ url_for('form_compliance') }}">
+                            <i class="fas fa-shield-alt text-success"></i> Form Compliance
+                        </a>
                     </li>
+
+                    <!-- ADMISSIONS SECTION -->
+<!--                    <li class="nav-item mt-3 mb-1">-->
+<!--                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Admissions</span>-->
+<!--                    </li>-->
 
                     <li class="nav-item">
                         <a class="nav-link {% if '/reports/application-matrix' in request.path %}active{% endif %}" href="{{ url_for('application_matrix') }}">
@@ -314,15 +324,7 @@
                         </a>
                     </li>
 
-                    <!-- COMPLIANCE SECTION -->
-                    <li class="nav-item mt-3 mb-1">
-                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Compliance</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/reports/form-compliance' in request.path %}active{% endif %}" href="{{ url_for('form_compliance') }}">
-                            <i class="fas fa-shield-alt text-success"></i> Form Compliance
-                        </a>
-                    </li>
+
 
                     <li class="nav-item">
                         <a class="nav-link {% if '/student' in request.path %}active{% endif %}" href="{{ url_for('student_pipeline') }}">
