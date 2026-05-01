@@ -63,25 +63,7 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
 
-<!--                                            &lt;!&ndash; 🚨 NEW: Add Activity Button &ndash;&gt;-->
-<!--                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">-->
-<!--                                                <i class="fas fa-calendar-plus"></i>-->
-<!--                                            </button>-->
-
-<!--                                            {% if form.exam_id %}-->
-
-<!--                                            &lt;!&ndash; 🚨 NEW: Add Activity Button &ndash;&gt;-->
-<!--                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">-->
-<!--                                                <i class="fas fa-calendar-plus"></i>-->
-<!--                                            </button>-->
-
-<!--                                            {% if form.exam_id %}-->
-
-<!--                                            {% if form.exam_id %}-->
-<!--                                                <a href="{{ url_for('student_pipeline', exam_id=form.exam_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>-->
-<!--                                            {% endif %}-->
-
-                                            <!-- 🚨 NEW: Add Activity Button -->
+                                            <!-- 🚨 Add Activity Button -->
                                             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">
                                                 <i class="fas fa-calendar-plus"></i>
                                             </button>
@@ -89,7 +71,6 @@
                                             {% if form.exam_id %}
                                                 <a href="{{ url_for('student_pipeline', exam_id=form.exam_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
                                             {% endif %}
-
 
                                             <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewAdmitCardModal{{ form.id }}" title="Admit Card Details">
                                                 <i class="fas fa-id-badge"></i>
@@ -114,7 +95,7 @@
                                     </td>
                                 </tr>
 
-                                <!-- 🚨 NEW: Show Attached Events under the form -->
+                                <!-- 🚨 Show Attached Events under the form -->
                                 {% if form.events %}
                                 <tr style="background-color: #f8f9fa;">
                                     <td colspan="5" class="py-2 px-4 border-bottom">
@@ -208,12 +189,12 @@
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
 
-                                                        <!-- 🚨 NEW: Add Activity Button -->
+                                                        <!-- 🚨 Add Activity Button -->
                                                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity">
                                                             <i class="fas fa-calendar-plus"></i>
                                                         </button>
 
-                                                        <!-- 🚨 NEW: View Registered Students Button -->
+                                                        <!-- 🚨 View Registered Students Button -->
                                                         {% if form.counselling_id %}
                                                             <a href="{{ url_for('student_pipeline', counselling=form.counselling_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
                                                         {% endif %}
@@ -233,7 +214,7 @@
                                                 </td>
                                             </tr>
 
-                                            <!-- 🚨 NEW: Show Attached Events under the form -->
+                                            <!-- 🚨 Show Attached Events under the form -->
                                             {% if form.events %}
                                             <tr style="background-color: #f8f9fa;">
                                                 <td colspan="5" class="py-2 px-4 border-bottom">
@@ -479,7 +460,7 @@
 </div>
 {% endfor %}
 
-<!-- 🚨 NEW: Add Event Modal Loop -->
+<!-- 🚨 Add Event Modal Loop -->
 {% for form in forms %}
 <div class="modal fade" id="addEventModal{{ form.id }}" tabindex="-1">
     <div class="modal-dialog">
@@ -546,8 +527,6 @@
             admitDiv.style.display = 'none';
         }
     }
-
-
 </script>
 
 {% endblock %}
