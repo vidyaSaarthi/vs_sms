@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid pt-4 pb-5">
+    
+    <!-- Header & Filter Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #cc0000; text-shadow: 1px 1px 2px rgba(204,0,0,0.1);">
+                <i class="fas fa-th me-2"></i>Application Matrix
+            </h2>
+            <p class="text-muted mb-0 fw-bold">Live tracking of Entrance Exams & Counselling forms.</p>
+        </div>
+        
+        <div class="btn-group shadow-sm" role="group" style="border-radius: 10px; overflow: hidden;">
+            <a href="{{ url_for('application_matrix', exam_type='JEE') }}" class="btn fw-bold px-4 {% if exam_type == 'JEE' %}btn-primary{% else %}btn-light border{% endif %}" style="{% if exam_type == 'JEE' %}background-color: #cc0000; border-color: #cc0000;{% endif %}">JEE Students</a>
+            <a href="{{ url_for('application_matrix', exam_type='NEET') }}" class="btn fw-bold px-4 {% if exam_type == 'NEET' %}btn-primary{% else %}btn-light border{% endif %}" style="{% if exam_type == 'NEET' %}background-color: #cc0000; border-color: #cc0000;{% endif %}">NEET Students</a>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4 border-bottom-0" id="matrixTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold px-4 py-3 shadow-sm border-bottom-0" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" style="border-top: 3px solid var(--brand-blue); color: #333;">
+                <i class="fas fa-pen-nib me-2"></i>Entrance Exams Matrix
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0" data-bs-toggle="tab" data-bs-target="#tab-couns" type="button" style="border-top: 3px solid var(--brand-yellow); color: #333;">
+                <i class="fas fa-sitemap me-2"></i>Counselling Matrix
+            </button>
+        </li>
+    </ul>
+
+    <!-- Viral CSS for Sticky Tables -->
+    <style>
+        .matrix-table-wrapper {
+            max-height: 65vh;
+            overflow: auto;
+            border-radius: 0 0 15px 15px;
+            background-color: #fff;
+        }
+        .matrix-table th {
+            position: sticky; top: 0; z-index: 10;
+            background-color: #ccdfed !important; 
+            color: #333; font-weight: 800; text-align: center;
+            border-bottom: 2px solid #a6cbe6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .matrix-table th:first-child, .matrix-table td:first-child {
+            position: sticky; left: 0; z-index: 20;
+            background-color: #f6e89e !important; 
+            font-weight: 700; color: #111;
+            border-right: 2px solid #e5d580;
+            box-shadow: 4px 0 6px rgba(0,0,0,0.05);
+        }
+        .matrix-table th:first-child {
+            z-index: 30; /* Corner cell absolute top */
+            background-color: #cc0000 !important; color: #ffffff;
+            border-right: none;
+        }
+        /* 3D Badges */
+        .badge-filled {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white; border-radius: 6px; padding: 6px 12px;
+            box-shadow: 0 3px 6px rgba(56, 239, 125, 0.4);
+        }
+        .badge-pending {
+            background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+            color: #000; border-radius: 6px; padding: 6px 12px;
+            box-shadow: 0 3px 6px rgba(242, 201, 76, 0.4);
+        }
+        .matrix-table tbody tr:hover td { background-color: rgba(204, 223, 237, 0.2); }
+        .matrix-table tbody tr:hover td:first-child { background-color: #f0e192 !important; }
+    </style>
+
+    <div class="tab-content">
+        <!-- ==========================================
+             TAB 1: EXAM MATRIX
+             ========================================== -->
+        <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
+            <div class="card border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="matrix-table-wrapper">
+                    <table class="table table-bordered matrix-table mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4 py-3 text-start" style="min-width: 200px;">Student Name</th>
+                                {% for exam in active_exams %}
+                                    <th class="py-3" style="min-width: 140px;">{{ exam.name }}</th>
+                                {% endfor %}
+                                {% if not active_exams %}<th class="py-3 text-muted">No active exams found.</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td class="ps-4 py-3"><a href="{{ url_for('view_student', id=student.id) }}" class="text-decoration-none text-dark d-block">{{ student.full_name }}</a></td>
+                                {% for exam in active_exams %}
+                                    <td class="text-center py-3">
+                                        {% set status = exam_matrix[student.id].get(exam.id) %}
+                                        {% if status == 'Filled' %}
+                                            <span class="badge badge-filled fw-bold fs-6"><i class="fas fa-check-circle me-1"></i>Filled</span>
+                                        {% elif status == 'Pending' %}
+                                            <span class="badge badge-pending fw-bold fs-6"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
+                                        {% else %}
+                                            <span class="text-muted" style="opacity: 0.3;">-</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                {% if not active_exams %}<td></td>{% endif %}
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="{{ active_exams|length + 1 }}" class="text-center py-5 text-muted fw-bold">No students found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             TAB 2: COUNSELLING MATRIX
+             ========================================== -->
+        <div class="tab-pane fade" id="tab-couns" role="tabpanel">
+            <div class="card border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="matrix-table-wrapper">
+                    <table class="table table-bordered matrix-table mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4 py-3 text-start" style="min-width: 200px;">Student Name</th>
+                                {% for c in active_counsellings %}
+                                    <th class="py-3" style="min-width: 140px;">{{ c.name }}</th>
+                                {% endfor %}
+                                {% if not active_counsellings %}<th class="py-3 text-muted">No active processes found.</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td class="ps-4 py-3"><a href="{{ url_for('view_student', id=student.id) }}" class="text-decoration-none text-dark d-block">{{ student.full_name }}</a></td>
+                                {% for c in active_counsellings %}
+                                    <td class="text-center py-3">
+                                        {% set status = couns_matrix[student.id].get(c.id) %}
+                                        {% if status == 'Filled' %}
+                                            <span class="badge badge-filled fw-bold fs-6"><i class="fas fa-check-circle me-1"></i>Filled</span>
+                                        {% elif status == 'Pending' %}
+                                            <span class="badge badge-pending fw-bold fs-6"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
+                                        {% else %}
+                                            <span class="text-muted" style="opacity: 0.3;">-</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                {% if not active_counsellings %}<td></td>{% endif %}
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="{{ active_counsellings|length + 1 }}" class="text-center py-5 text-muted fw-bold">No students found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

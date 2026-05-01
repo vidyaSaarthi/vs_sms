@@ -1445,3 +1445,46 @@ def init_db():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
+
+
+@app.route('/reports/application-matrix')
+@login_required
+def application_matrix():
+    # Toggle between JEE and NEET views to keep the grid readable
+    exam_type = request.args.get('exam_type', 'JEE')
+
+    # Fetch students for the selected exam
+    students = Student.query.filter_by(exam_type=exam_type).order_by(Student.full_name.asc()).all()
+    student_ids = [s.id for s in students]
+
+    # --- 1. EXAM MATRIX DATA ---
+    exam_results = StudentExamResult.query.filter(StudentExamResult.student_id.in_(student_ids)).all()
+    active_exam_ids = list(set([r.exam_id for r in exam_results]))
+    active_exams = Exam.query.filter(Exam.id.in_(active_exam_ids)).order_by(Exam.name.asc()).all()
+
+    exam_matrix = {s.id: {} for s in students}
+    for r in exam_results:
+        # If application number exists and isn't blank, it's Filled
+        has_app_no = bool(r.application_number and r.application_number.strip())
+        exam_matrix[r.student_id][r.exam_id] = 'Filled' if has_app_no else 'Pending'
+
+    # --- 2. COUNSELLING MATRIX DATA ---
+    couns_regs = StudentCounsellingRegistration.query.filter(
+        StudentCounsellingRegistration.student_id.in_(student_ids)).all()
+    active_couns_ids = list(set([r.counselling_id for r in couns_regs]))
+    active_counsellings = Counselling.query.filter(Counselling.id.in_(active_couns_ids)).order_by(
+        Counselling.name.asc()).all()
+
+    couns_matrix = {s.id: {} for s in students}
+    for r in couns_regs:
+        # If application number exists and isn't blank, it's Filled
+        has_app_no = bool(r.application_number and r.application_number.strip())
+        couns_matrix[r.student_id][r.counselling_id] = 'Filled' if has_app_no else 'Pending'
+
+    return render_template('application_matrix.html',
+                           students=students,
+                           active_exams=active_exams,
+                           exam_matrix=exam_matrix,
+                           active_counsellings=active_counsellings,
+                           couns_matrix=couns_matrix,
+                           exam_type=exam_type)
