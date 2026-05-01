@@ -219,23 +219,32 @@ def add_master_data():
 
     return redirect(url_for('master_data'))
 
+from sqlalchemy.exc import IntegrityError, ProgrammingError # Ensure these are imported at the top of app.py!
+
 @app.route('/settings/master/delete/<data_type>/<int:item_id>', methods=['POST'])
 @login_required
 def delete_master_data(data_type, item_id):
-    model_map = {'exam': Exam, 'state': State, 'university': University, 'course': Course}
-    model = model_map.get(data_type)
-    if not model: return redirect(url_for('master_data'))
-
-    item = model.query.get_or_404(item_id)
-    item_name = item.name
+    # Determine which model to query based on data_type
+    if data_type == 'exam':
+        item = Exam.query.get_or_404(item_id)
+    elif data_type == 'state':
+        item = State.query.get_or_404(item_id)
+    elif data_type == 'university':
+        item = University.query.get_or_404(item_id)
+    elif data_type == 'course':
+        item = Course.query.get_or_404(item_id)
+    else:
+        flash('Invalid data type.', 'error')
+        return redirect(url_for('master_data'))
 
     try:
         db.session.delete(item)
         db.session.commit()
-        flash(f"Deleted '{item_name}' successfully!", "success")
-    except IntegrityError:
+        flash(f'{data_type.capitalize()} deleted successfully.', 'success')
+    except (IntegrityError, ProgrammingError):
+        # If Postgres blocks it due to foreign keys, rollback the transaction and warn the user
         db.session.rollback()
-        flash(f"⚠️ Cannot delete '{item_name}' because it is actively being used by a College or Student record.", "error")
+        flash(f'Cannot delete this {data_type.capitalize()} because it is actively linked to students or counselling processes. Please remove those connections first.', 'error')
 
     return redirect(url_for('master_data'))
 
