@@ -303,21 +303,25 @@
                         </a>
                     </li>
 
+                    <!-- ADMISSIONS SECTION -->
                     <li class="nav-item mt-3 mb-1">
                         <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Admissions</span>
                     </li>
-                        <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link {% if '/student' in request.path %}active{% endif %}" href="{{ url_for('student_pipeline') }}">
                             <i class="fas fa-users"></i> Students
                         </a>
                     </li>
+
+                    <!-- DATABASE SECTION -->
+                    <li class="nav-item mt-3 mb-1">
+                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Database</span>
+                    </li>
+                    <!-- 🚨 MOVED: Forms Directory now sits here -->
                     <li class="nav-item">
                         <a class="nav-link {% if '/admissions' in request.path %}active{% endif %}" href="{{ url_for('admissions_hub') }}">
                             <i class="fas fa-file-signature"></i> Forms Directory
                         </a>
-                    </li>
-                    <li class="nav-item mt-3 mb-1">
-                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Database</span>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/colleges' in request.path %}active{% endif %}" href="{{ url_for('college_directory') }}">
