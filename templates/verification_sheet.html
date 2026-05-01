@@ -74,13 +74,41 @@
             <div class="col-4"><span class="data-label">Alternative Email:</span><div class="data-value">{{ student.alt_email or '' }}</div></div>
             <div class="col-4"><span class="data-label">Emergency Email:</span><div class="data-value">{{ student.emergency_email or '' }}</div></div>
 
-            <div class="col-12 mt-2"><span class="data-label">Full Address:</span>
-                <div class="data-value">
-                    {{ student.house_no or '' }} {{ student.street_name or '' }}
-                    {{ student.post_office or '' }} {{ student.district or '' }}
-                    {{ student.state_ut or '' }} {{ student.pin_code or '' }}
+<!--            <div class="col-12 mt-2"><span class="data-label">Full Address:</span>-->
+<!--                <div class="data-value">-->
+<!--                    {{ student.house_no or '' }} {{ student.street_name or '' }}-->
+<!--                    {{ student.post_office or '' }} {{ student.district or '' }}-->
+<!--                    {{ student.state_ut or '' }} {{ student.pin_code or '' }}-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="row mt-2">
+                <div class="col-6 mb-2">
+                    <span class="text-muted small d-block">House Name / No.</span>
+                    <strong>{{ student.house_no }}</strong>
+                </div>
+                <div class="col-6 mb-2">
+                    <span class="text-muted small d-block">Street Name</span>
+                    <strong>{{ student.street_name }}</strong>
+                </div>
+                <div class="col-6 mb-2">
+                    <span class="text-muted small d-block">Post Office</span>
+                    <strong>{{ student.post_office }}</strong>
+                </div>
+                <div class="col-6 mb-2">
+                    <span class="text-muted small d-block">District</span>
+                    <strong>{{ student.district }}</strong>
+                </div>
+                <div class="col-6 mb-2">
+                    <span class="text-muted small d-block">State / Union Territory</span>
+                    <strong>{{ student.state_ut if student.state_ut else 'Not Assigned' }}</strong>
+                </div>
+                <div class="col-6 mb-2">
+                    <span class="text-muted small d-block">PIN Code</span>
+                    <strong>{{ student.pin_code }}</strong>
                 </div>
             </div>
+
         </div>
     </div>
 
