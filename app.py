@@ -6,6 +6,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
+from sqlalchemy.orm import joinedload
 
 # Consolidated Imports
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task, FormEvent
@@ -618,12 +619,12 @@ def dashboard():
     ).order_by(Exam.exam_date.asc()).all()
 
 
-    upcoming_exam_forms = Form.query.filter(
+    upcoming_exam_forms = Form.query.options(joinedload(Form.events)).filter(
         Form.end_date >= today,
         Form.form_type == 'Exam'
     ).order_by(Form.end_date.asc()).limit(5).all()
 
-    upcoming_couns_forms = Form.query.filter(
+    upcoming_couns_forms = Form.query.options(joinedload(Form.events)).filter(
         Form.end_date >= today,
         Form.form_type == 'Counselling'
     ).order_by(Form.end_date.asc()).all()
