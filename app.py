@@ -1509,3 +1509,71 @@ def application_matrix():
                            couns_grouped=couns_grouped,
                            couns_matrix=couns_matrix,
                            exam_type=exam_type)
+
+
+@app.route('/reports/form-compliance')
+@login_required
+def form_compliance():
+    today = date.today()
+
+    incomplete_couns = []
+    incomplete_exam_regs = []
+    missing_exam_results = []
+
+    # 1. COUNSELLING REGISTRATION CHECK
+    couns_regs = StudentCounsellingRegistration.query.all()
+    for reg in couns_regs:
+        fields = [
+            ('Status', reg.registration_status),
+            ('Link', reg.form_confirmation_link),
+            ('App No', reg.application_number),
+            ('Username', reg.login_username),
+            ('Password', reg.login_password),
+            ('Email', reg.registered_email),
+            ('Mobile', reg.registered_mobile)
+        ]
+        missing = [name for name, val in fields if not val or not str(val).strip()]
+        if missing:
+            incomplete_couns.append({
+                'student': reg.student,
+                'process_name': reg.counselling.name,
+                'missing_fields': missing
+            })
+
+    # 2. EXAM FORM & RESULT CHECK
+    exam_results = StudentExamResult.query.all()
+    for res in exam_results:
+        # A. Registration Phase Check
+        reg_fields = [
+            ('Link', res.form_confirmation_link),
+            ('App No', res.application_number),
+            ('Username', res.login_username),
+            ('Password', res.login_password),
+            ('Email', res.registered_email),
+            ('Mobile', res.registered_mobile)
+        ]
+        reg_missing = [name for name, val in reg_fields if not val or not str(val).strip()]
+        if reg_missing:
+            incomplete_exam_regs.append({
+                'student': res.student,
+                'exam_name': res.exam.name,
+                'missing_fields': reg_missing
+            })
+
+        # B. Result Phase Check (All empty AND end date passed)
+        is_result_empty = (res.score is None and res.percentile is None and
+                           res.all_india_rank is None and res.state_rank is None)
+
+        # Safely determine the end date (fallback to start date if end date isn't set)
+        exam_end = res.exam.exam_end_date or res.exam.exam_date
+
+        if is_result_empty and exam_end and exam_end < today:
+            missing_exam_results.append({
+                'student': res.student,
+                'exam_name': res.exam.name
+            })
+
+    return render_template('form_compliance.html',
+                           incomplete_couns=incomplete_couns,
+                           incomplete_exam_regs=incomplete_exam_regs,
+                           missing_exam_results=missing_exam_results)
