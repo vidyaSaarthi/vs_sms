@@ -561,8 +561,8 @@ def dashboard():
     master_exams = Exam.query.all()
     # master_exams_sorted = sorted(master_exams, key=lambda x: x.exam_date or date.max)
 
-    # 🚨 Fetch only future exams, or exams where the date isn't announced yet
-    master_exams_sorted = master_exams.query.filter(
+    # 🚨 Notice we use "Exam.query" here, not "master_exams.query"
+    master_exams = Exam.query.filter(
         (Exam.exam_date >= today) | (Exam.exam_date == None)
     ).order_by(Exam.exam_date.asc()).all()
 
