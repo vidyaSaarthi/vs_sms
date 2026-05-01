@@ -108,6 +108,29 @@
                                     </td>
                                     <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
                                 </tr>
+
+                                <!-- 🚨 NEW: Show Events Attached to this Exam Form -->
+                                {% for event in form.events %}
+                                <tr style="background-color: rgba(246, 232, 158, 0.1);">
+                                    <td class="ps-5 text-muted">
+                                        <i class="fas fa-level-up-alt fa-rotate-90 me-2 text-danger"></i>
+                                        <strong>{{ event.event_name }}</strong>
+                                        {% if event.event_link %}
+                                            <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-muted"><i class="fas fa-external-link-alt"></i></a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-danger fw-bold">
+                                        {% if event.start_date and event.end_date %}
+                                            {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
+                                        {% elif event.end_date %}
+                                            {{ event.end_date.strftime('%d %b %Y') }}
+                                        {% else %}
+                                            <span class="text-muted small">TBA</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
                                 {% else %}
                                 <tr>
                                     <td colspan="2" class="text-center py-5 text-muted">
@@ -189,6 +212,29 @@
                                                 </td>
                                                 <td class="text-danger fw-bold">{{ form.end_date.strftime('%d %b %Y') }}</td>
                                             </tr>
+
+                                            <!-- 🚨 NEW: Show Events Attached to this Counselling Form -->
+                                            {% for event in form.events %}
+                                            <tr style="background-color: rgba(246, 232, 158, 0.1);">
+                                                <td class="ps-5 text-muted" style="border-left: 3px solid var(--brand-blue);">
+                                                    <i class="fas fa-level-up-alt fa-rotate-90 me-2 text-danger"></i>
+                                                    <strong>{{ event.event_name }}</strong>
+                                                    {% if event.event_link %}
+                                                        <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-muted"><i class="fas fa-external-link-alt"></i></a>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-danger fw-bold">
+                                                    {% if event.start_date and event.end_date %}
+                                                        {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
+                                                    {% elif event.end_date %}
+                                                        {{ event.end_date.strftime('%d %b %Y') }}
+                                                    {% else %}
+                                                        <span class="text-muted small">TBA</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+
                                             {% endfor %}
                                         </tbody>
                                     </table>

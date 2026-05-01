@@ -330,6 +330,23 @@ class Form(db.Model):
     prospectus_link = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # 🚨 NEW RELATIONSHIP: One Form has Many Events
+    events = db.relationship('FormEvent', backref='parent_form', lazy=True, cascade="all, delete-orphan")
+
+
+# 🚨 NEW TABLE
+class FormEvent(db.Model):
+    __tablename__ = 'form_events'
+    id = db.Column(db.Integer, primary_key=True)
+    form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=False)
+
+    event_name = db.Column(db.String(150), nullable=False)  # e.g., "Correction Window", "Admit Card Download"
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
+    event_link = db.Column(db.String(500), nullable=True)  # Link specific to this activity
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 # ==========================================
 # 4. ROUNDS & SCHEDULES

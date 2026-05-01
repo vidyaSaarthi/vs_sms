@@ -63,6 +63,20 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
 
+                                            <!-- 🚨 NEW: Add Activity Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">
+                                                <i class="fas fa-calendar-plus"></i>
+                                            </button>
+
+                                            {% if form.exam_id %}
+
+                                            <!-- 🚨 NEW: Add Activity Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity (e.g. Correction Window)">
+                                                <i class="fas fa-calendar-plus"></i>
+                                            </button>
+
+                                            {% if form.exam_id %}
+
                                             {% if form.exam_id %}
                                                 <a href="{{ url_for('student_pipeline', exam_id=form.exam_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
                                             {% endif %}
@@ -89,6 +103,35 @@
                                         </div>
                                     </td>
                                 </tr>
+
+                                <!-- 🚨 NEW: Show Attached Events under the form -->
+                                {% if form.events %}
+                                <tr style="background-color: #f8f9fa;">
+                                    <td colspan="5" class="py-2 px-4 border-bottom">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% for event in form.events %}
+                                            <span class="badge border bg-white text-dark shadow-sm py-2 px-3">
+                                                <i class="fas fa-thumbtack text-danger me-1"></i> <strong>{{ event.event_name }}</strong>
+                                                <span class="ms-2 text-muted">
+                                                    {% if event.start_date and event.end_date %}
+                                                        {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
+                                                    {% elif event.end_date %}
+                                                        By {{ event.end_date.strftime('%d %b') }}
+                                                    {% endif %}
+                                                </span>
+                                                {% if event.event_link %}
+                                                    <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-primary"><i class="fas fa-link"></i></a>
+                                                {% endif %}
+                                                <form action="{{ url_for('delete_form_event', event_id=event.id) }}" method="POST" class="d-inline ms-2" onsubmit="return confirm('Delete this activity?');">
+                                                    <button type="submit" class="btn btn-link text-danger p-0 m-0 border-0"><i class="fas fa-times"></i></button>
+                                                </form>
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+
                                 {% else %}
                                 <tr><td colspan="5" class="text-center py-4 text-muted">No active exam forms being tracked.</td></tr>
                                 {% endfor %}
@@ -154,6 +197,12 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
+
+                                                        <!-- 🚨 NEW: Add Activity Button -->
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addEventModal{{ form.id }}" title="Add Activity">
+                                                            <i class="fas fa-calendar-plus"></i>
+                                                        </button>
+
                                                         <!-- 🚨 NEW: View Registered Students Button -->
                                                         {% if form.counselling_id %}
                                                             <a href="{{ url_for('student_pipeline', counselling=form.counselling_id) }}" class="btn btn-sm btn-outline-primary" title="View Registered Students"><i class="fas fa-users"></i></a>
@@ -173,6 +222,35 @@
                                                     </div>
                                                 </td>
                                             </tr>
+
+                                            <!-- 🚨 NEW: Show Attached Events under the form -->
+                                            {% if form.events %}
+                                            <tr style="background-color: #f8f9fa;">
+                                                <td colspan="5" class="py-2 px-4 border-bottom">
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        {% for event in form.events %}
+                                                        <span class="badge border bg-white text-dark shadow-sm py-2 px-3">
+                                                            <i class="fas fa-thumbtack text-danger me-1"></i> <strong>{{ event.event_name }}</strong>
+                                                            <span class="ms-2 text-muted">
+                                                                {% if event.start_date and event.end_date %}
+                                                                    {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
+                                                                {% elif event.end_date %}
+                                                                    By {{ event.end_date.strftime('%d %b') }}
+                                                                {% endif %}
+                                                            </span>
+                                                            {% if event.event_link %}
+                                                                <a href="{{ event.event_link }}" target="_blank" class="ms-2 text-primary"><i class="fas fa-link"></i></a>
+                                                            {% endif %}
+                                                            <form action="{{ url_for('delete_form_event', event_id=event.id) }}" method="POST" class="d-inline ms-2" onsubmit="return confirm('Delete this activity?');">
+                                                                <button type="submit" class="btn btn-link text-danger p-0 m-0 border-0"><i class="fas fa-times"></i></button>
+                                                            </form>
+                                                        </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+
                                             {% endfor %}
                                         </tbody>
                                     </table>
@@ -384,6 +462,45 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- 🚨 NEW: Add Event Modal Loop -->
+{% for form in forms %}
+<div class="modal fade" id="addEventModal{{ form.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg border-0">
+            <form action="{{ url_for('add_form_event', form_id=form.id) }}" method="POST">
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-calendar-plus me-2"></i>Add Activity to {{ form.name }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Activity Name</label>
+                        <input type="text" name="event_name" class="form-control" placeholder="e.g. Correction Window, Merit List Release" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Start Date</label>
+                            <input type="date" name="start_date" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">End Date (Deadline)</label>
+                            <input type="date" name="end_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Specific Link <span class="text-muted fw-normal">(Optional)</span></label>
+                        <input type="url" name="event_link" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-secondary text-white w-100 fw-bold">Save Activity</button>
                 </div>
             </form>
         </div>

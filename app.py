@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 # Consolidated Imports
-from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task
+from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task, FormEvent
 
 app = Flask(__name__)
 
@@ -556,6 +556,43 @@ def delete_counselling_round(round_id):
         db.session.rollback()
         flash("⚠️ Cannot delete this round because students already have seat allotments saved under it.", "error")
     return redirect(url_for('master_data'))
+
+
+@app.route('/admissions/form/<int:form_id>/add_event', methods=['POST'])
+@login_required
+def add_form_event(form_id):
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        new_event = FormEvent(
+            form_id=form_id,
+            event_name=request.form.get('event_name'),
+            start_date=datetime.strptime(start_str, '%Y-%m-%d').date() if start_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else None,
+            event_link=request.form.get('event_link')
+        )
+        db.session.add(new_event)
+        db.session.commit()
+        flash("Event added to form successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding event: {str(e)}", "error")
+    return redirect(url_for('admissions_hub'))
+
+
+@app.route('/admissions/delete_event/<int:event_id>', methods=['POST'])
+@login_required
+def delete_form_event(event_id):
+    event = FormEvent.query.get_or_404(event_id)
+    try:
+        db.session.delete(event)
+        db.session.commit()
+        flash("Event removed.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Error removing event.", "error")
+    return redirect(url_for('admissions_hub'))
 
 
 # ==========================================
