@@ -1972,6 +1972,86 @@ def view_legacy_data():
     """
     return html
 
+
+@app.route('/admin/legacy-forms-tracker')
+@login_required
+def legacy_forms_tracker():
+    # Security check
+    if current_user.username != 'admin':
+        return "Unauthorized", 403
+
+    # Fetch ALL form submissions where the form_id is blank (Legacy)
+    unlinked_submissions = StudentFormSubmission.query.filter_by(form_id=None).all()
+
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Legacy Forms Tracker</title>
+        <style>
+            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f8f9fa; color: #333; }}
+            h2 {{ color: #1a202c; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }}
+            .alert-info {{ background-color: #e0f2fe; color: #0369a1; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; border-left: 5px solid #0284c7; }}
+            table {{ width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
+            th, td {{ padding: 15px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: middle; }}
+            th {{ background-color: #f1f5f9; text-transform: uppercase; font-size: 0.85rem; color: #475569; }}
+            tr:hover {{ background-color: #f8fafc; }}
+            .btn {{ display: inline-block; padding: 8px 15px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }}
+            .btn:hover {{ background: #1d4ed8; }}
+            .hint-text {{ font-family: monospace; font-size: 0.9rem; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; }}
+        </style>
+    </head>
+    <body>
+        <h2>🔍 Legacy Forms To-Do List</h2>
+        <div class="alert-info">
+            There are currently {len(unlinked_submissions)} forms in the database that are displaying as "Legacy Form Submission".
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Journey (Umbrella)</th>
+                    <th>Saved Credentials (Hint)</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+
+    for sub in unlinked_submissions:
+        # Check if this legacy form belongs to an Exam or a Counselling process
+        journey_name = "Unknown"
+        if sub.counselling_id and sub.counselling:
+            journey_name = f"📁 Counselling: <strong>{sub.counselling.name}</strong>"
+        elif sub.exam_id and sub.exam:
+            journey_name = f"📝 Exam: <strong>{sub.exam.name}</strong>"
+
+        # Show a snippet of what credentials it holds, so you know which form to link it to
+        hints = []
+        if sub.application_number: hints.append(f"App No: {sub.application_number}")
+        if sub.login_username: hints.append(f"User: {sub.login_username}")
+        hint_str = "<br>".join(hints) if hints else "<em>No App No or Username saved</em>"
+
+        html += f"""
+            <tr>
+                <td style="font-size: 1.1rem;"><strong>{sub.student.full_name if sub.student else 'Unknown Student'}</strong></td>
+                <td>{journey_name}</td>
+                <td><span class="hint-text">{hint_str}</span></td>
+                <td style="text-align: right;">
+                    <a href='/student/{sub.student_id}' target='_blank' class='btn'>Go to Profile →</a>
+                </td>
+            </tr>
+        """
+
+    html += """
+            </tbody>
+        </table>
+    </body>
+    </html>
+    """
+    return html
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
 
