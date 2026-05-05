@@ -1283,34 +1283,53 @@ def add_exam_result(student_id):
 @app.route('/student/edit_exam_result/<int:result_id>', methods=['POST'])
 @login_required
 def edit_exam_result(result_id):
-    result = StudentExamResult.query.get_or_404(result_id)
-    student_id = result.student_id
+    res = StudentExamResult.query.get_or_404(result_id)
+    student_id = res.student_id
     try:
-        result.exam_id = request.form.get('exam_id')
-        result.application_number = request.form.get('application_number')
-        result.login_username = request.form.get('login_username')
-        result.login_password = request.form.get('login_password')
-        result.registered_email = request.form.get('registered_email')
-        result.registered_mobile = request.form.get('registered_mobile')
-        result.form_confirmation_link = request.form.get('form_confirmation_link')
+        # 1. Update the Exam Scores
+        res.exam_id = request.form.get('exam_id')
+        res.score = request.form.get('score') or None
+        res.percentile = request.form.get('percentile') or None
+        res.all_india_rank = request.form.get('all_india_rank') or None
+        res.state_rank = request.form.get('state_rank') or None
 
-        score_val = request.form.get('score')
-        result.score = float(score_val) if score_val and score_val.strip() else None
+        # 2. Update the Associated Form Submission & Credentials
+        submission_id = request.form.get('submission_id')
+        form_id_val = request.form.get('form_id')
+        app_no = request.form.get('application_number')
+        user = request.form.get('login_username')
+        pw = request.form.get('login_password')
+        link = request.form.get('form_confirmation_link')
 
-        perc_val = request.form.get('percentile')
-        result.percentile = float(perc_val) if perc_val and perc_val.strip() else None
-
-        air_val = request.form.get('all_india_rank')
-        result.all_india_rank = int(air_val) if air_val and air_val.strip() else None
-
-        state_val = request.form.get('state_rank')
-        result.state_rank = int(state_val) if state_val and state_val.strip() else None
+        if submission_id:
+            # If a milestone already exists for this exam, update it
+            sub = StudentFormSubmission.query.get(submission_id)
+            if sub:
+                sub.form_id = int(form_id_val) if form_id_val else None
+                sub.application_number = app_no
+                sub.login_username = user
+                sub.login_password = pw
+                sub.form_confirmation_link = link
+        else:
+            # If they didn't have credentials before, but added them now, create the milestone
+            if form_id_val or app_no or user or pw or link:
+                new_sub = StudentFormSubmission(
+                    student_id=student_id,
+                    exam_id=res.exam_id,
+                    form_id=int(form_id_val) if form_id_val else None,
+                    application_number=app_no,
+                    login_username=user,
+                    login_password=pw,
+                    form_confirmation_link=link
+                )
+                db.session.add(new_sub)
 
         db.session.commit()
-        flash("Exam details updated successfully!", "success")
+        flash("Exam and form details updated successfully!", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Error updating exam details: {str(e)}", "error")
+        flash(f"Error updating exam: {str(e)}", "error")
+
     return redirect(url_for('view_student', id=student_id))
 
 

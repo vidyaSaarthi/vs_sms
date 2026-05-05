@@ -644,6 +644,11 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('edit_exam_result', result_id=res.id) }}" method="POST">
+
+                <!-- 🚨 Find the associated milestone to pre-fill the data -->
+                {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
+                <input type="hidden" name="submission_id" value="{{ exam_sub.id if exam_sub else '' }}">
+
                 <div class="modal-header bg-light border-0">
                     <h5 class="modal-title fw-bold text-dark">Edit Exam Score</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -669,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <input type="number" step="0.0000001" name="percentile" class="form-control" value="{{ res.percentile or '' }}">
                         </div>
                     </div>
-                    <div class="row g-2">
+                    <div class="row g-2 mb-4">
                         <div class="col-6">
                             <label class="form-label fw-bold text-danger">All India Rank</label>
                             <input type="number" name="all_india_rank" class="form-control" value="{{ res.all_india_rank or '' }}">
@@ -677,6 +682,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-6">
                             <label class="form-label fw-bold">State Rank</label>
                             <input type="number" name="state_rank" class="form-control" value="{{ res.state_rank or '' }}">
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Associated Form & Credentials</h6>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Link to Master Form</label>
+                        <select name="form_id" class="form-select">
+                            <option value="">Leave unlinked (Legacy)</option>
+                            {% for form in master_forms if form.exam_id == res.exam_id %}
+                            <option value="{{ form.id }}" {% if exam_sub and exam_sub.form_id == form.id %}selected{% endif %}>{{ form.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">App Number</label>
+                            <input type="text" name="application_number" class="form-control form-control-sm" value="{{ exam_sub.application_number if exam_sub else '' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Form Link</label>
+                            <input type="text" name="form_confirmation_link" class="form-control form-control-sm" value="{{ exam_sub.form_confirmation_link if exam_sub else '' }}">
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-primary">Username</label>
+                            <input type="text" name="login_username" class="form-control form-control-sm" value="{{ exam_sub.login_username if exam_sub else '' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">Password</label>
+                            <input type="text" name="login_password" class="form-control form-control-sm" value="{{ exam_sub.login_password if exam_sub else '' }}">
                         </div>
                     </div>
                 </div>
