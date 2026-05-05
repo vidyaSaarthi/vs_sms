@@ -74,10 +74,10 @@
 
             <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-primary fw-bold text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#registerCounsellingModal">
-                    <i class="fas fa-plus me-1"></i> Counselling Reg.
+                    <i class="fas fa-plus me-1"></i> Register Journey
                 </button>
                 <button class="btn btn-sm btn-light fw-bold text-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#addExamResultModal">
-                    <i class="fas fa-plus me-1"></i> Exam Form
+                    <i class="fas fa-plus me-1"></i> Exam Result
                 </button>
                 <button class="btn btn-sm fw-bold text-dark shadow-sm" style="background-color: var(--brand-yellow);" data-bs-toggle="modal" data-bs-target="#addRoundResultModal">
                     <i class="fas fa-plus me-1"></i> Round Allotment
@@ -88,10 +88,10 @@
            <!-- TABS FOR THE JOURNEY -->
             <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="journeyTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active fw-bold" id="couns-tab" data-bs-toggle="tab" data-bs-target="#couns" type="button" role="tab">Counselling Forms</button>
+                    <button class="nav-link active fw-bold" id="couns-tab" data-bs-toggle="tab" data-bs-target="#couns" type="button" role="tab">Counselling Journeys</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">Exam Forms & Scores</button>
+                    <button class="nav-link fw-bold" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams" type="button" role="tab">Exams & Scores</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold" id="rounds-tab" data-bs-toggle="tab" data-bs-target="#rounds" type="button" role="tab">Round Allotments</button>
@@ -100,67 +100,140 @@
 
             <div class="tab-content" id="journeyTabsContent">
 
-                <!-- 1. COUNSELLING REGISTRATIONS -->
-                <div class="tab-pane fade show active" id="couns" role="tabpanel">
-                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4">Process & Status</th>
-                                    <th style="width: 380px;">Portal Credentials</th>
-                                    <th class="text-end pe-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for reg in student.counselling_registrations %}
-                                <tr>
-                                    <td class="ps-4">
-                                        <strong class="text-dark fs-6">{{ reg.counselling.name }}</strong><br>
-                                        <span class="badge mt-1 {% if reg.registration_status == 'Planned' %}bg-secondary{% elif reg.registration_status == 'Registered' %}bg-success{% else %}bg-warning text-dark{% endif %}">{{ reg.registration_status }}</span>
-                                    </td>
-                                    <td>
-                                        <!-- 🚨 SAAS CREDENTIALS VAULT (Now with Form Link!) -->
-                                        <div class="bg-white border rounded p-2 shadow-sm" style="font-size: 0.85rem;">
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">App No:</span> <strong class="text-dark">{{ reg.application_number or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">User:</span> <strong class="text-primary">{{ reg.login_username or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">Pass:</span> <strong class="text-danger">{{ reg.login_password or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">Email:</span> <strong class="text-dark">{{ reg.registered_email or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">Mobile:</span> <strong class="text-dark">{{ reg.registered_mobile or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                                <span class="text-muted">Form Link:</span>
-                                                {% if reg.form_confirmation_link %}
-                                                    <a href="{{ reg.form_confirmation_link }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm"><i class="fas fa-external-link-alt me-1"></i>Open Form</a>
+                <!-- 1. COUNSELLING JOURNEYS (NEW UMBRELLA ARCHITECTURE) -->
+                <div class="tab-pane fade show active p-4" id="couns" role="tabpanel">
+
+                    {% for reg in student.counselling_registrations %}
+                    <div class="card border mb-4 shadow-sm" style="border-radius: 10px;">
+                        <!-- Umbrella Header -->
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-folder-open me-2 text-muted"></i>{{ reg.counselling.name }}</h5>
+                                <span class="badge mt-2 {% if reg.registration_status == 'Planned' %}bg-secondary{% elif reg.registration_status == 'Registered' %}bg-success{% else %}bg-warning text-dark{% endif %}">Status: {{ reg.registration_status }}</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCounsellingRegModal{{ reg.id }}"><i class="fas fa-edit me-1"></i> Edit Status</button>
+                                <form action="{{ url_for('delete_counselling_reg', reg_id=reg.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this entire journey and all its forms?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Milestones (Forms) Body -->
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                {% set milestones = student.form_submissions | selectattr("counselling_id", "equalto", reg.counselling_id) | list %}
+
+                                {% for sub in milestones %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                    <div class="w-25 pe-3 border-end">
+                                        <h6 class="fw-bold mb-1 text-dark">{{ sub.form.name if sub.form else 'Legacy Form Submission' }}</h6>
+                                        <small class="text-muted"><i class="fas fa-calendar-check me-1"></i>{{ sub.submission_date.strftime('%b %d, %Y') if sub.submission_date else 'Unknown' }}</small>
+                                    </div>
+                                    <div class="w-50 px-3">
+                                        <div class="row g-1" style="font-size: 0.85rem;">
+                                            <div class="col-6"><span class="text-muted">App No:</span> <strong class="text-dark">{{ sub.application_number or '-' }}</strong></div>
+                                            <div class="col-6"><span class="text-muted">User:</span> <strong class="text-primary">{{ sub.login_username or '-' }}</strong></div>
+                                            <div class="col-6"><span class="text-muted">Pass:</span> <strong class="text-danger">{{ sub.login_password or '-' }}</strong></div>
+                                            <div class="col-6">
+                                                {% if sub.form_confirmation_link %}
+                                                    <a href="{{ sub.form_confirmation_link }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm"><i class="fas fa-external-link-alt me-1"></i>Open Form</a>
                                                 {% else %}
-                                                    <strong class="text-muted">-</strong>
+                                                    <span class="text-muted">No Link</span>
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCounsellingRegModal{{ reg.id }}" title="Edit Details"><i class="fas fa-edit"></i></button>
-                                            <form action="{{ url_for('delete_counselling_reg', reg_id=reg.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this registration?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                    <div class="w-25 text-end ps-3 border-start">
+                                        <form action="{{ url_for('delete_form_submission', sub_id=sub.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this specific form submission?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
+                                </li>
                                 {% else %}
-                                <tr><td colspan="3" class="text-center py-5 text-muted">No counselling processes tracked yet.</td></tr>
+                                <li class="list-group-item p-4 text-center text-muted">
+                                    <i class="fas fa-file-invoice fs-4 mb-2 opacity-50"></i><br>
+                                    No specific forms logged for this journey yet.
+                                </li>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                            </ul>
+                        </div>
+
+                        <!-- Add Milestone Footer -->
+                        <div class="card-footer bg-white text-end py-3">
+                            <button class="btn btn-sm btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#logFormModal{{ reg.counselling_id }}">
+                                <i class="fas fa-plus me-1"></i> Log Form Submission
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- 🚨 MODAL: Log Form specifically for THIS Umbrella -->
+                    <div class="modal fade" id="logFormModal{{ reg.counselling_id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content border-0 shadow">
+                                <form action="{{ url_for('log_form_submission') }}" method="POST">
+                                    <input type="hidden" name="student_id" value="{{ student.id }}">
+                                    <input type="hidden" name="counselling_id" value="{{ reg.counselling_id }}">
+
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title fw-bold">Log Form for {{ reg.counselling.name }}</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Which form was submitted?</label>
+                                            <select name="form_id" class="form-select" required>
+                                                <option value="">Select form...</option>
+                                                {% for form in master_forms if form.counselling_id == reg.counselling_id %}
+                                                <option value="{{ form.id }}">{{ form.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Portal Credentials Used</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">Form Confirmation Link</label>
+                                            <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://...">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Application Number</label>
+                                            <input type="text" name="application_number" class="form-control">
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">Login Username</label>
+                                                <input type="text" name="login_username" class="form-control">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold text-danger">Login Password</label>
+                                                <input type="text" name="login_password" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">Reg. Email</label>
+                                                <input type="email" name="registered_email" class="form-control" value="{{ student.email_address }}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">Reg. Mobile</label>
+                                                <input type="text" name="registered_mobile" class="form-control" value="{{ student.mobile_number }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light">
+                                        <button type="submit" class="btn btn-primary fw-bold w-100">Save Submission</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted w-100">
+                            <i class="fas fa-folder-open fs-1 mb-3 opacity-25"></i>
+                            <h5>No Counselling Journeys Registered</h5>
+                            <p>Click 'Register Journey' above to begin tracking.</p>
+                        </div>
+                    {% endfor %}
                 </div>
 
                 <!-- 2. EXAM FORMS & SCORES -->
@@ -180,27 +253,23 @@
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown' }}</td>
                                     <td>
-                                        <!-- 🚨 SAAS CREDENTIALS VAULT (Now with Form Link!) -->
+                                        <!-- Look up the credentials from the new submissions table for this exam -->
+                                        {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
+
                                         <div class="bg-white border rounded p-2 shadow-sm" style="font-size: 0.85rem;">
                                             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">App No:</span> <strong class="text-dark">{{ res.application_number or '-' }}</strong>
+                                                <span class="text-muted">App No:</span> <strong class="text-dark">{{ exam_sub.application_number if exam_sub else '-' }}</strong>
                                             </div>
                                             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">User:</span> <strong class="text-primary">{{ res.login_username or '-' }}</strong>
+                                                <span class="text-muted">User:</span> <strong class="text-primary">{{ exam_sub.login_username if exam_sub else '-' }}</strong>
                                             </div>
                                             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">Pass:</span> <strong class="text-danger">{{ res.login_password or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">Email:</span> <strong class="text-dark">{{ res.registered_email or '-' }}</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                                <span class="text-muted">Mobile:</span> <strong class="text-dark">{{ res.registered_mobile or '-' }}</strong>
+                                                <span class="text-muted">Pass:</span> <strong class="text-danger">{{ exam_sub.login_password if exam_sub else '-' }}</strong>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center mt-1">
                                                 <span class="text-muted">Form Link:</span>
-                                                {% if res.form_confirmation_link %}
-                                                    <a href="{{ res.form_confirmation_link }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm"><i class="fas fa-external-link-alt me-1"></i>Open Form</a>
+                                                {% if exam_sub and exam_sub.form_confirmation_link %}
+                                                    <a href="{{ exam_sub.form_confirmation_link }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm"><i class="fas fa-external-link-alt me-1"></i>Open Form</a>
                                                 {% else %}
                                                     <strong class="text-muted">-</strong>
                                                 {% endif %}
@@ -214,7 +283,7 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editExamResultModal{{ res.id }}" title="Edit Details"><i class="fas fa-edit"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editExamResultModal{{ res.id }}" title="Edit Scores"><i class="fas fa-edit"></i></button>
                                             <form action="{{ url_for('delete_exam_result', result_id=res.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this exam form?');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
                                             </form>
@@ -273,17 +342,20 @@
      GLOBAL ADD MODALS
      ========================================== -->
 
-<!-- Register Counselling Modal -->
+<!-- Register Counselling UMBRELLA Modal -->
 <div class="modal fade" id="registerCounsellingModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('register_student_counselling', student_id=student.id) }}" method="POST">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Register for Counselling</h5>
+                    <h5 class="modal-title fw-bold">Register Journey (Umbrella)</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
+                <div class="modal-body p-4 text-center">
+                    <i class="fas fa-folder-plus text-primary fs-1 mb-3"></i>
+                    <p class="text-muted mb-4">Create a master folder for a new counselling process. You can log specific forms/credentials inside it later.</p>
+
+                    <div class="mb-3 text-start">
                         <label class="form-label fw-bold">Select Counselling Process</label>
                         <select name="counselling_id" class="form-select" required>
                             <option value="">Choose...</option>
@@ -292,49 +364,17 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Registration Status</label>
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold">Current Overall Status</label>
                         <select name="registration_status" class="form-select">
-                            <option value="Planned">Planned</option>
-                            <option value="Completed">Completed</option>
+                            <option value="Planned">Planned (No forms filled yet)</option>
+                            <option value="Active">Active / In Progress</option>
+                            <option value="Exited">Exited / Dropped</option>
                         </select>
-                    </div>
-
-                    <h6 class="fw-bold text-muted border-bottom pb-2 mt-4 mb-3">Portal Credentials</h6>
-
-                    <!-- 🚨 NEW: Form Link Input -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Form Confirmation Link</label>
-                        <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://...">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Application Number</label>
-                        <input type="text" name="application_number" class="form-control">
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-primary">Login Username</label>
-                            <input type="text" name="login_username" class="form-control">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-danger">Login Password</label>
-                            <input type="text" name="login_password" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Email</label>
-                            <input type="email" name="registered_email" class="form-control" value="{{ student.email_address }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Mobile</label>
-                            <input type="text" name="registered_mobile" class="form-control" value="{{ student.mobile_number }}">
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-primary fw-bold w-100">Add to Journey</button>
+                    <button type="submit" class="btn btn-primary fw-bold w-100">Create Journey</button>
                 </div>
             </form>
         </div>
@@ -347,12 +387,12 @@
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('add_exam_result', student_id=student.id) }}" method="POST">
                 <div class="modal-header bg-light border-0">
-                    <h5 class="modal-title fw-bold text-dark">Add Exam Form / Score</h5>
+                    <h5 class="modal-title fw-bold text-dark">Add Exam Score</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Exam Name</label>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Exam</label>
                         <select name="exam_id" class="form-select" required>
                             <option value="">Choose...</option>
                             {% for e in exams %}
@@ -361,40 +401,7 @@
                         </select>
                     </div>
 
-                    <h6 class="fw-bold text-muted border-bottom pb-2 mt-4 mb-3">Portal Credentials</h6>
-
-                    <!-- 🚨 NEW: Form Link Input -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Form Confirmation Link</label>
-                        <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://...">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Application Number</label>
-                        <input type="text" name="application_number" class="form-control">
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-primary">Login Username</label>
-                            <input type="text" name="login_username" class="form-control">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-danger">Login Password</label>
-                            <input type="text" name="login_password" class="form-control">
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-4">
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Email</label>
-                            <input type="email" name="registered_email" class="form-control" value="{{ student.email_address }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Mobile</label>
-                            <input type="text" name="registered_mobile" class="form-control" value="{{ student.mobile_number }}">
-                        </div>
-                    </div>
-
-                    <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Results (Fill later if pending)</h6>
+                    <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Results</h6>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label fw-bold">Score / Marks</label>
@@ -405,7 +412,7 @@
                             <input type="number" step="0.0000001" name="percentile" class="form-control">
                         </div>
                     </div>
-                    <div class="row g-2">
+                    <div class="row g-2 mb-4">
                         <div class="col-6">
                             <label class="form-label fw-bold text-danger">All India Rank</label>
                             <input type="number" name="all_india_rank" class="form-control">
@@ -415,9 +422,32 @@
                             <input type="number" name="state_rank" class="form-control">
                         </div>
                     </div>
+
+                    <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Exam Form Credentials (Optional)</h6>
+                    <p class="small text-muted mb-3">Leave blank if credentials are already logged elsewhere.</p>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">App Number</label>
+                            <input type="text" name="application_number" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Form Link</label>
+                            <input type="text" name="form_confirmation_link" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-primary">Username</label>
+                            <input type="text" name="login_username" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">Password</label>
+                            <input type="text" name="login_password" class="form-control form-control-sm">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Form</button>
+                    <button type="submit" class="btn btn-dark fw-bold w-100">Save Exam Data</button>
                 </div>
             </form>
         </div>
@@ -473,68 +503,26 @@
      🚨 EDIT MODALS FOR INDIVIDUAL ROWS
      ========================================== -->
 
-<!-- Edit Counselling Reg Modals -->
+<!-- Edit Counselling UMBRELLA Modals -->
 {% for reg in student.counselling_registrations %}
 <div class="modal fade" id="editCounsellingRegModal{{ reg.id }}" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-sm">
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('edit_counselling_reg', reg_id=reg.id) }}" method="POST">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Edit Counselling Details</h5>
+                    <h6 class="modal-title fw-bold">Edit Status</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Counselling Process</label>
-                        <select name="counselling_id" class="form-select" required>
-                            {% for c in active_counsellings %}
-                            <option value="{{ c.id }}" {% if reg.counselling_id == c.id %}selected{% endif %}>{{ c.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Registration Status</label>
-                        <select name="registration_status" class="form-select">
-                            <option value="Planned" {% if reg.registration_status == 'Planned' %}selected{% endif %}>Planned</option>
-                            <option value="Completed" {% if reg.registration_status == 'Completed' %}selected{% endif %}>Completed</option>
-                        </select>
-                    </div>
-
-                    <h6 class="fw-bold text-muted border-bottom pb-2 mt-4 mb-3">Portal Credentials</h6>
-
-                    <!-- 🚨 NEW: Edit Form Link Input -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Form Confirmation Link</label>
-                        <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://..." value="{{ reg.form_confirmation_link or '' }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Application Number</label>
-                        <input type="text" name="application_number" class="form-control" value="{{ reg.application_number or '' }}">
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-primary">Login Username</label>
-                            <input type="text" name="login_username" class="form-control" value="{{ reg.login_username or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-danger">Login Password</label>
-                            <input type="text" name="login_password" class="form-control" value="{{ reg.login_password or '' }}">
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Email</label>
-                            <input type="email" name="registered_email" class="form-control" value="{{ reg.registered_email or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Mobile</label>
-                            <input type="text" name="registered_mobile" class="form-control" value="{{ reg.registered_mobile or '' }}">
-                        </div>
-                    </div>
+                <div class="modal-body p-3">
+                    <label class="form-label fw-bold small">Overall Journey Status</label>
+                    <select name="registration_status" class="form-select form-select-sm">
+                        <option value="Planned" {% if reg.registration_status == 'Planned' %}selected{% endif %}>Planned</option>
+                        <option value="Active" {% if reg.registration_status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Exited" {% if reg.registration_status == 'Exited' %}selected{% endif %}>Exited / Dropped</option>
+                    </select>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-primary fw-bold w-100">Save Updates</button>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold w-100">Update</button>
                 </div>
             </form>
         </div>
@@ -549,50 +537,17 @@
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('edit_exam_result', result_id=res.id) }}" method="POST">
                 <div class="modal-header bg-light border-0">
-                    <h5 class="modal-title fw-bold text-dark">Edit Exam Details</h5>
+                    <h5 class="modal-title fw-bold text-dark">Edit Exam Score</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label fw-bold">Exam Name</label>
                         <select name="exam_id" class="form-select" required>
                             {% for e in exams %}
                             <option value="{{ e.id }}" {% if res.exam_id == e.id %}selected{% endif %}>{{ e.name }}</option>
                             {% endfor %}
                         </select>
-                    </div>
-
-                    <h6 class="fw-bold text-muted border-bottom pb-2 mt-4 mb-3">Portal Credentials</h6>
-
-                    <!-- 🚨 NEW: Edit Form Link Input -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Form Confirmation Link</label>
-                        <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://..." value="{{ res.form_confirmation_link or '' }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Application Number</label>
-                        <input type="text" name="application_number" class="form-control" value="{{ res.application_number or '' }}">
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-primary">Login Username</label>
-                            <input type="text" name="login_username" class="form-control" value="{{ res.login_username or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold text-danger">Login Password</label>
-                            <input type="text" name="login_password" class="form-control" value="{{ res.login_password or '' }}">
-                        </div>
-                    </div>
-                    <div class="row g-2 mb-4">
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Email</label>
-                            <input type="email" name="registered_email" class="form-control" value="{{ res.registered_email or '' }}">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold">Reg. Mobile</label>
-                            <input type="text" name="registered_mobile" class="form-control" value="{{ res.registered_mobile or '' }}">
-                        </div>
                     </div>
 
                     <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Results</h6>

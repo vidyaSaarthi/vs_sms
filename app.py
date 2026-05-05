@@ -1146,15 +1146,17 @@ def delete_student(id):
 @login_required
 def view_student(id):
     student = Student.query.get_or_404(id)
-
     active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
-
     exams = Exam.query.order_by(Exam.name.asc()).all()
+
+    # 🚨 NEW: Fetch all forms to populate the specific dropdowns!
+    master_forms = Form.query.order_by(Form.name.asc()).all()
 
     return render_template('profile.html',
                            student=student,
                            active_counsellings=active_counsellings,
-                           exams=exams)
+                           exams=exams,
+                           master_forms=master_forms)
 
 
 @app.route('/student/<int:id>/export')
@@ -1178,7 +1180,7 @@ def export_verification(id):
 
 
 # ==========================================
-# ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
+# 1. THE UMBRELLA ROUTE (Modified to be lightweight)
 # ==========================================
 @app.route('/student/<int:student_id>/register_counselling', methods=['POST'])
 @login_required
@@ -1192,27 +1194,20 @@ def register_student_counselling(student_id):
         ).first()
 
         if existing_reg:
-            flash("This student is already registered for this counselling process!", "error")
+            flash("This student is already registered for this umbrella process!", "error")
             return redirect(url_for('view_student', id=student_id))
 
-        app_no = request.form.get('application_number')
         reg_status = request.form.get('registration_status', 'Planned')
 
         registration = StudentCounsellingRegistration(
             student_id=student_id,
             counselling_id=counselling_id,
             registration_status=reg_status,
-            application_number=app_no if app_no and app_no.strip() else None,
-            login_username=request.form.get('login_username'),
-            login_password=request.form.get('login_password'),
-            registered_email=request.form.get('registered_email'),
-            registered_mobile=request.form.get('registered_mobile'),
-            form_confirmation_link=request.form.get('form_confirmation_link'),
             registration_date=date.today()
         )
         db.session.add(registration)
         db.session.commit()
-        flash(f"Counselling process marked as {reg_status}!", "success")
+        flash(f"Counselling umbrella marked as {reg_status}!", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error registering process: {str(e)}", "error")
@@ -1248,25 +1243,14 @@ def delete_counselling_reg(reg_id):
 @login_required
 def edit_counselling_reg(reg_id):
     reg = StudentCounsellingRegistration.query.get_or_404(reg_id)
-    student_id = reg.student_id
-
     try:
-        reg.counselling_id = request.form.get('counselling_id')
         reg.registration_status = request.form.get('registration_status')
-        reg.application_number = request.form.get('application_number')
-        reg.login_username = request.form.get('login_username')
-        reg.login_password = request.form.get('login_password')
-        reg.registered_email = request.form.get('registered_email')
-        reg.registered_mobile = request.form.get('registered_mobile')
-        reg.form_confirmation_link = request.form.get('form_confirmation_link')
-
         db.session.commit()
-        flash("Counselling registration updated successfully!", "success")
+        flash("Umbrella status updated successfully!", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Error updating registration: {str(e)}", "error")
-
-    return redirect(url_for('view_student', id=student_id))
+        flash(f"Error updating status: {str(e)}", "error")
+    return redirect(url_for('view_student', id=reg.student_id))
 
 
 @app.route('/student/<int:student_id>/add_exam_result', methods=['POST'])
@@ -1826,6 +1810,52 @@ def migrate_legacy_forms():
 
     db.session.commit()
     return f"✅ Migration Complete! Safely transferred {migrated_count} legacy credential records to the new Milestones architecture."
+
+
+@app.route('/student/log_form_submission', methods=['POST'])
+@login_required
+def log_form_submission():
+    student_id = request.form.get('student_id')
+
+    # It will belong to either a Counselling Umbrella OR an Exam
+    counselling_id = request.form.get('counselling_id')
+    exam_id = request.form.get('exam_id')
+
+    try:
+        new_sub = StudentFormSubmission(
+            student_id=student_id,
+            counselling_id=int(counselling_id) if counselling_id else None,
+            exam_id=int(exam_id) if exam_id else None,
+            form_id=request.form.get('form_id') or None,
+            application_number=request.form.get('application_number'),
+            login_username=request.form.get('login_username'),
+            login_password=request.form.get('login_password'),
+            registered_email=request.form.get('registered_email'),
+            registered_mobile=request.form.get('registered_mobile'),
+            form_confirmation_link=request.form.get('form_confirmation_link')
+        )
+        db.session.add(new_sub)
+        db.session.commit()
+        flash("Form milestone logged successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error logging form: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
+@app.route('/student/delete_form_submission/<int:sub_id>', methods=['POST'])
+@login_required
+def delete_form_submission(sub_id):
+    sub = StudentFormSubmission.query.get_or_404(sub_id)
+    student_id = sub.student_id
+    try:
+        db.session.delete(sub)
+        db.session.commit()
+        flash("Form submission removed.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Error removing submission.", "error")
+    return redirect(url_for('view_student', id=student_id))
 
 
 if __name__ == '__main__':
