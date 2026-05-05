@@ -541,3 +541,6 @@ class StudentFormSubmission(db.Model):
     submission_date = db.Column(db.Date, default=date.today)
 
     form = db.relationship('Form', backref='student_submissions')
+    # 🚨 NEW: Bridges to get the Umbrella Names for the tracker
+    counselling = db.relationship('Counselling', backref='form_submissions')
+    exam = db.relationship('Exam', backref='form_submissions')
