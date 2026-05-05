@@ -118,6 +118,8 @@ class Student(db.Model):
     counselling_registrations = db.relationship('StudentCounsellingRegistration', backref='student', lazy=True)
     round_results = db.relationship('StudentRoundResult', backref='student', lazy=True)
     exam_results = db.relationship('StudentExamResult', backref='student', lazy=True, cascade="all, delete-orphan")
+    form_submissions = db.relationship('StudentFormSubmission', backref='student', lazy=True,
+                                       cascade="all, delete-orphan")
 
     # ... your existing Student columns are above this ...
 
@@ -537,3 +539,5 @@ class StudentFormSubmission(db.Model):
     registered_mobile = db.Column(db.String(20))
     form_confirmation_link = db.Column(db.String(500))
     submission_date = db.Column(db.Date, default=date.today)
+
+    form = db.relationship('Form', backref='student_submissions')
