@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, date
 
 db = SQLAlchemy()
 
@@ -489,3 +489,28 @@ class Task(db.Model):
     exam = db.relationship('Exam')
     counselling = db.relationship('Counselling')
     form = db.relationship('Form')
+
+
+class FinanceRecord(db.Model):
+    __tablename__ = 'finance_records'
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, default=date.today)
+
+    # Link to the existing Student table
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    student = db.relationship('Student', backref=db.backref('finance_records', lazy=True))
+
+    service_type = db.Column(db.String(100), nullable=False)
+    total_fees = db.Column(db.Float, default=0.0)
+    installment_1 = db.Column(db.Float, default=0.0)
+    installment_2 = db.Column(db.Float, default=0.0)
+    balance = db.Column(db.Float, default=0.0)
+    mode_of_payment = db.Column(db.String(50))
+    beneficiary_name = db.Column(db.String(100))
+    comments = db.Column(db.Text)
+
+    def calculate_balance(self):
+        """Helper method to ensure balance is always calculated correctly"""
+        self.balance = (self.total_fees or 0.0) - (self.installment_1 or 0.0) - (self.installment_2 or 0.0)
+        return self.balance

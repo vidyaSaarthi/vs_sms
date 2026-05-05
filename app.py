@@ -2,15 +2,17 @@ import os
 import re
 import json
 from datetime import datetime, date
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
 
-# Consolidated Imports
-from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, Course, StudentExamResult, Task, FormEvent
+# Consolidated Imports (🚨 FinanceRecord added here)
+from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
+    Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, \
+    Course, StudentExamResult, Task, FormEvent, FinanceRecord
 
 app = Flask(__name__)
 
@@ -59,12 +61,14 @@ with app.app_context():
 
     db.session.commit()
 
+
 def convert_to_embed_link(url):
     if not url: return None
     match = re.search(r'/d/([a-zA-Z0-9_-]+)', url)
     if not match: match = re.search(r'[?&]id=([a-zA-Z0-9_-]+)', url)
     if match: return f"https://drive.google.com/file/d/{match.group(1)}/preview"
     return url
+
 
 MASTER_DOC_TYPES = [
     'photo', 'student_signature', 'aadhaar_card', '10th_marksheet', '11th_marksheet', '12th_marksheet',
@@ -75,8 +79,10 @@ MASTER_DOC_TYPES = [
     '12th_admit_card'
 ]
 
+
 @login_manager.user_loader
 def load_user(user_id): return Staff.query.get(int(user_id))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -90,6 +96,7 @@ def login():
             return redirect(url_for('dashboard'))
         flash('Invalid username or password.')
     return render_template('login.html')
+
 
 # ==========================================
 # SECURITY: CHANGE PASSWORD
@@ -115,11 +122,13 @@ def change_password():
     flash("Password updated successfully! Please log in with your new credentials.", "success")
     return redirect(url_for('logout'))
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
 
 # ==========================================
 # MASTER DATA HUB
@@ -132,7 +141,6 @@ def master_data():
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
 
-    # 🚨 NEW: Fetching the Counselling data we moved over from Admissions
     counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
     counselling_grouped = {}
@@ -146,16 +154,13 @@ def master_data():
     for exam in exams:
         exam_course_mapping[exam.id] = [{'id': c.id, 'name': c.name} for c in exam.courses]
 
-    # 🚨 NEW: Added the missing variables to the render_template
     return render_template('master_data.html', exams=exams, states=states,
                            universities=universities, courses=courses,
                            counsellings=counsellings,
                            counselling_grouped=counselling_grouped,
                            exam_course_mapping=exam_course_mapping)
 
-# ==========================================
-# EDIT MASTER DATA (Exams, States, Unis, Courses)
-# ==========================================
+
 @app.route('/settings/master/edit/<data_type>/<int:item_id>', methods=['POST'])
 @login_required
 def edit_master_data(data_type, item_id):
@@ -171,15 +176,12 @@ def edit_master_data(data_type, item_id):
         item.name = new_name.strip()
 
         if data_type == 'exam':
-            # NEW LOGIC: Update Date
             exam_date_str = request.form.get('exam_date')
             item.exam_date = datetime.strptime(exam_date_str, '%Y-%m-%d').date() if exam_date_str else None
 
             exam_end_date_str = request.form.get('exam_end_date')
-            # Convert string to Python date object if it exists
             item.exam_end_date = datetime.strptime(exam_end_date_str, '%Y-%m-%d').date() if exam_end_date_str else None
 
-            # Keep your existing courses logic
             raw_course_ids = request.form.getlist('course_ids')
             item.courses = []
             if raw_course_ids:
@@ -190,6 +192,7 @@ def edit_master_data(data_type, item_id):
         db.session.commit()
         flash(f"Updated successfully to '{item.name}'!", "success")
     return redirect(url_for('master_data'))
+
 
 @app.route('/settings/master/add', methods=['POST'])
 @login_required
@@ -225,12 +228,10 @@ def add_master_data():
 
     return redirect(url_for('master_data'))
 
-from sqlalchemy.exc import IntegrityError, ProgrammingError # Ensure these are imported at the top of app.py!
 
 @app.route('/settings/master/delete/<data_type>/<int:item_id>', methods=['POST'])
 @login_required
 def delete_master_data(data_type, item_id):
-    # Determine which model to query based on data_type
     if data_type == 'exam':
         item = Exam.query.get_or_404(item_id)
     elif data_type == 'state':
@@ -248,9 +249,10 @@ def delete_master_data(data_type, item_id):
         db.session.commit()
         flash(f'{data_type.capitalize()} deleted successfully.', 'success')
     except (IntegrityError, ProgrammingError):
-        # If Postgres blocks it due to foreign keys, rollback the transaction and warn the user
         db.session.rollback()
-        flash(f'Cannot delete this {data_type.capitalize()} because it is actively linked to students or counselling processes. Please remove those connections first.', 'error')
+        flash(
+            f'Cannot delete this {data_type.capitalize()} because it is actively linked to students or counselling processes. Please remove those connections first.',
+            'error')
 
     return redirect(url_for('master_data'))
 
@@ -259,21 +261,18 @@ def delete_master_data(data_type, item_id):
 @login_required
 def add_exam():
     try:
-        # 🚨 NEW: Capture the date
         exam_date_str = request.form.get('exam_date')
-        exam_end_date_str = request.form.get('exam_end_date')  # 🚨 ADD THIS
+        exam_end_date_str = request.form.get('exam_end_date')
 
         exam_date_val = datetime.strptime(exam_date_str, '%Y-%m-%d').date() if exam_date_str else None
-        exam_end_val = datetime.strptime(exam_end_date_str,
-                                         '%Y-%m-%d').date() if exam_end_date_str else None  # 🚨 ADD THIS
+        exam_end_val = datetime.strptime(exam_end_date_str, '%Y-%m-%d').date() if exam_end_date_str else None
 
         new_exam = Exam(
             name=request.form.get('name'),
             exam_date=exam_date_val,
-            exam_end_date=exam_end_val  # 🚨 SAVE THIS TO DB
+            exam_end_date=exam_end_val
         )
 
-        # Capture and convert to integers (Keep your existing courses logic!)
         raw_course_ids = request.form.getlist('course_ids')
         if raw_course_ids:
             course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
@@ -288,6 +287,7 @@ def add_exam():
         flash(f"Error adding exam: {str(e)}", "error")
     return redirect(url_for('master_data'))
 
+
 # ==========================================
 # ADMISSIONS HUB (MASTER DATA)
 # ==========================================
@@ -296,7 +296,6 @@ def add_exam():
 def admissions_hub():
     today = date.today().strftime('%Y-%m-%d')
 
-    # 1. Sort ALL forms alphabetically by Form Name
     all_forms = Form.query.order_by(Form.name.asc()).all()
     exam_forms = [f for f in all_forms if f.form_type == 'Exam']
     counselling_forms_list = [f for f in all_forms if f.form_type == 'Counselling']
@@ -314,13 +313,12 @@ def admissions_hub():
             counselling_forms_grouped_raw[exam_name] = []
         counselling_forms_grouped_raw[exam_name].append(form)
 
-    # Sort groups alphabetically (Keep 'Independent' at the bottom)
     counselling_forms_grouped = {
         k: counselling_forms_grouped_raw[k]
-        for k in sorted(counselling_forms_grouped_raw.keys(), key=lambda x: (x == "Independent / Unlinked Processes", x))
+        for k in
+        sorted(counselling_forms_grouped_raw.keys(), key=lambda x: (x == "Independent / Unlinked Processes", x))
     }
 
-    # 2. Master Counselling Processes (Already sorted alphabetically by query)
     all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
     counselling_grouped_raw = {}
     for c in all_counsellings:
@@ -329,19 +327,16 @@ def admissions_hub():
             counselling_grouped_raw[exam_name] = []
         counselling_grouped_raw[exam_name].append(c)
 
-    # Sort groups alphabetically (Keep 'Independent' at the bottom)
     counselling_grouped = {
         k: counselling_grouped_raw[k]
         for k in sorted(counselling_grouped_raw.keys(), key=lambda x: (x == "Independent / Unlinked Processes", x))
     }
 
-    # 3. Master Dropdown Data (Sorted Alphabetically)
     exams = Exam.query.order_by(Exam.name.asc()).all()
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
 
-    # JS Mapping dict (Sort the courses inside the JSON map too!)
     exam_course_mapping = {}
     for exam in exams:
         sorted_courses = sorted(exam.courses, key=lambda c: c.name)
@@ -377,7 +372,6 @@ def add_counselling():
         exam_id=int(exam_id_val) if exam_id_val else None
     )
 
-    # NEW LOGIC: Capture and map multiple courses
     raw_course_ids = request.form.getlist('course_ids')
     if raw_course_ids:
         course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
@@ -388,6 +382,7 @@ def add_counselling():
     db.session.commit()
     flash(f"Counselling process '{name}' created successfully!", "success")
     return redirect(url_for('master_data'))
+
 
 @app.route('/admissions/edit_counselling/<int:item_id>', methods=['POST'])
 @login_required
@@ -402,9 +397,8 @@ def edit_counselling(item_id):
     exam_id_val = request.form.get('exam_id')
     c.exam_id = int(exam_id_val) if exam_id_val else None
 
-    # NEW LOGIC: Update mapped multiple courses
     raw_course_ids = request.form.getlist('course_ids')
-    c.courses = [] # Clear existing
+    c.courses = []
     if raw_course_ids:
         course_ids = [int(cid) for cid in raw_course_ids if cid.isdigit()]
         mapped_courses = Course.query.filter(Course.id.in_(course_ids)).all()
@@ -413,6 +407,7 @@ def edit_counselling(item_id):
     db.session.commit()
     flash("Counselling process updated successfully!", "success")
     return redirect(url_for('master_data'))
+
 
 @app.route('/admissions/add_form', methods=['POST'])
 @login_required
@@ -434,7 +429,8 @@ def add_form():
         admit_card_date = None
         admit_card_link = None
 
-    def safe_float(val): return float(val) if val and val.strip() else None
+    def safe_float(val):
+        return float(val) if val and val.strip() else None
 
     new_form = Form(
         name=name,
@@ -456,6 +452,7 @@ def add_form():
     db.session.commit()
     flash(f"Form tracking for '{name}' added successfully!", "success")
     return redirect(url_for('admissions_hub'))
+
 
 @app.route('/admissions/edit_form/<int:item_id>', methods=['POST'])
 @login_required
@@ -481,7 +478,9 @@ def edit_form(item_id):
             form.admit_card_date = None
             form.admit_card_link = None
 
-        def safe_float(val): return float(val) if val and val.strip() else None
+        def safe_float(val):
+            return float(val) if val and val.strip() else None
+
         form.fee_general = safe_float(request.form.get('fee_general'))
         form.fee_obc = safe_float(request.form.get('fee_obc'))
         form.fee_sc_st = safe_float(request.form.get('fee_sc_st'))
@@ -498,6 +497,7 @@ def edit_form(item_id):
 
     return redirect(url_for('admissions_hub'))
 
+
 @app.route('/admissions/delete/counselling/<int:item_id>', methods=['POST'])
 @login_required
 def delete_counselling_record(item_id):
@@ -510,12 +510,15 @@ def delete_counselling_record(item_id):
         db.session.rollback()
         error_str = str(e).lower()
         if 'forms' in error_str:
-            flash("⚠️ Cannot delete: There is a Form/Deadline linked to this process. Please delete or edit the Form first.", "error")
+            flash(
+                "⚠️ Cannot delete: There is a Form/Deadline linked to this process. Please delete or edit the Form first.",
+                "error")
         elif 'student_counselling_registrations' in error_str:
             flash("⚠️ Cannot delete: There is still at least one student registered for this process.", "error")
         else:
             flash(f"⚠️ Cannot delete due to database constraint.", "error")
     return redirect(url_for('master_data'))
+
 
 @app.route('/admissions/delete/form/<int:item_id>', methods=['POST'])
 @login_required
@@ -525,6 +528,7 @@ def delete_form_record(item_id):
     db.session.commit()
     flash("Form deadline removed.", "success")
     return redirect(url_for('admissions_hub'))
+
 
 @app.route('/admissions/counselling/<int:counselling_id>/add_round', methods=['POST'])
 @login_required
@@ -545,6 +549,7 @@ def add_counselling_round(counselling_id):
         db.session.rollback()
         flash(f"Error adding round: {str(e)}", "error")
     return redirect(url_for('master_data'))
+
 
 @app.route('/admissions/delete_round/<int:round_id>', methods=['POST'])
 @login_required
@@ -571,7 +576,7 @@ def add_form_event(form_id):
             form_id=form_id,
             event_name=request.form.get('event_name'),
             start_date=datetime.strptime(start_str, '%Y-%m-%d').date() if start_str else None,
-            end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_date_str else None,
             event_link=request.form.get('event_link')
         )
         db.session.add(new_event)
@@ -600,31 +605,24 @@ def delete_form_event(event_id):
 # ==========================================
 # DASHBOARD
 # ==========================================
-from sqlalchemy.orm import joinedload
-from sqlalchemy import or_
-
-
 @app.route('/')
 @app.route('/dashboard')
 @login_required
 def dashboard():
     today = date.today()
 
-    # 1. Master Exams
     master_exams_sorted = Exam.query.filter(
         (Exam.exam_date >= today) |
         (Exam.exam_end_date >= today) |
         (Exam.exam_date == None)
     ).order_by(Exam.exam_date.asc()).all()
 
-    # 2. Upcoming Exam Forms
-    upcoming_exam_forms = Form.query.filter(
+    upcoming_exam_forms = Form.query.options(joinedload(Form.events)).filter(
         Form.form_type == 'Exam',
         or_(Form.end_date >= today, Form.end_date == None)
     ).order_by(Form.end_date.asc()).limit(10).all()
 
-    # 3. Upcoming Counselling Forms
-    upcoming_couns_forms = Form.query.filter(
+    upcoming_couns_forms = Form.query.options(joinedload(Form.events)).filter(
         Form.form_type == 'Counselling',
         or_(Form.end_date >= today, Form.end_date == None)
     ).order_by(Form.end_date.asc()).all()
@@ -643,7 +641,6 @@ def dashboard():
 
     counselling_grouped = dict(sorted(counselling_grouped.items()))
 
-    # 🚨 4. NEW: Fetch All Upcoming Activities (Regardless of Parent Form)
     upcoming_activities = FormEvent.query.filter(
         or_(FormEvent.end_date >= today, FormEvent.end_date == None)
     ).order_by(FormEvent.end_date.asc()).all()
@@ -658,7 +655,6 @@ def dashboard():
 # ==========================================
 # STUDENT PIPELINE
 # ==========================================
-
 @app.route('/students')
 @login_required
 def student_pipeline():
@@ -682,16 +678,15 @@ def student_pipeline():
     if counsellor_filter: query = query.filter(Student.created_by == counsellor_filter)
     if status_filter: query = query.filter(Student.academic_status == status_filter)
     if counselling_filter:
-        query = query.join(StudentCounsellingRegistration).filter(StudentCounsellingRegistration.counselling_id == int(counselling_filter))
+        query = query.join(StudentCounsellingRegistration).filter(
+            StudentCounsellingRegistration.counselling_id == int(counselling_filter))
     if exam_id_filter:
         query = query.join(StudentExamResult).filter(StudentExamResult.exam_id == int(exam_id_filter))
 
-    # 🚨 NEW: Calculate counts BEFORE filtering by tab!
     all_count = query.count()
     jee_count = query.filter(Student.exam_type == 'JEE').count()
     neet_count = query.filter(Student.exam_type == 'NEET').count()
 
-    # Now apply the active tab filter for what gets shown on screen
     if active_tab == 'jee':
         query = query.filter(Student.exam_type == 'JEE')
     elif active_tab == 'neet':
@@ -706,7 +701,9 @@ def student_pipeline():
                            counsellor_filter=counsellor_filter, status_filter=status_filter,
                            counselling_filter=counselling_filter, exam_id_filter=exam_id_filter,
                            counsellors=counsellor_list, active_counsellings=active_counsellings,
-                           all_count=all_count, jee_count=jee_count, neet_count=neet_count) # Pass counts to UI
+                           all_count=all_count, jee_count=jee_count, neet_count=neet_count)
+
+
 def extract_dynamic_marks(prefix, group):
     names = request.form.getlist(f'{prefix}_{group}_name[]')
     maxs = request.form.getlist(f'{prefix}_{group}_max[]')
@@ -718,17 +715,13 @@ def extract_dynamic_marks(prefix, group):
 @login_required
 def add_student():
     if request.method == 'POST':
-
-        # 🚨 NEW: Ensure Counselor is selected before even talking to the database!
         if not request.form.get('created_by'):
             flash("Validation Error: Please select a Counselor Name (Created By).", "error")
             return redirect(url_for('add_student'))
 
-        # 1. Capture inputs, strip accidental spaces, convert blanks to None
         aadhaar_no = request.form.get('aadhaar_no', '').strip() or None
         mobile_number = request.form.get('mobile_number', '').strip() or None
 
-        # 2. SMART DUPLICATE CHECK
         if aadhaar_no:
             conflict = Student.query.filter_by(aadhaar_no=aadhaar_no).first()
             if conflict:
@@ -803,7 +796,6 @@ def add_student():
                 blood_group=request.form.get('blood_group'), religion=request.form.get('religion'),
                 category=request.form.get('category'), identification_mark=request.form.get('identification_mark'),
 
-                # ✅ FIX: Using the cleaned variables here!
                 aadhaar_no=aadhaar_no,
                 mobile_number=mobile_number,
 
@@ -886,11 +878,10 @@ def add_student():
             flash(f"Student {new_student.full_name} added successfully!", "success")
             return redirect(url_for('dashboard'))
 
-            # 🚨 FIX: Catch the specific error (as 'e') and print the real reason!
         except IntegrityError as e:
             db.session.rollback()
-            print(f"INTEGRITY ERROR DETAILS: {str(e.orig)}")  # Prints to your Railway logs
-            flash(f"Database Error: {str(e.orig)}", "error")  # Shows the real error on screen!
+            print(f"INTEGRITY ERROR DETAILS: {str(e.orig)}")
+            flash(f"Database Error: {str(e.orig)}", "error")
 
         except Exception as e:
             db.session.rollback()
@@ -898,6 +889,7 @@ def add_student():
 
     staff_members = Staff.query.order_by(Staff.username.asc()).all()
     return render_template('add_student.html', staff_members=staff_members)
+
 
 @app.route('/student/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -909,12 +901,14 @@ def edit_student(id):
                 flash("SECURITY BLOCK: Invalid Admin PIN. This record has been Parent Approved and is locked.")
                 return redirect(url_for('edit_student', id=student.id))
 
-        emails = [e.strip().lower() for e in [request.form.get('email_address'), request.form.get('alt_email'), request.form.get('emergency_email')] if e and e.strip()]
+        emails = [e.strip().lower() for e in [request.form.get('email_address'), request.form.get('alt_email'),
+                                              request.form.get('emergency_email')] if e and e.strip()]
         if len(emails) != len(set(emails)):
             flash("Validation Error: All provided email addresses must be unique.")
             return redirect(url_for('edit_student', id=student.id))
 
-        phones = [p.strip() for p in [request.form.get('mobile_number'), request.form.get('alt_mobile_number'), request.form.get('emergency_mobile')] if p and p.strip()]
+        phones = [p.strip() for p in [request.form.get('mobile_number'), request.form.get('alt_mobile_number'),
+                                      request.form.get('emergency_mobile')] if p and p.strip()]
         if len(phones) != len(set(phones)):
             flash("Validation Error: All provided phone numbers must be strictly different.")
             return redirect(url_for('edit_student', id=student.id))
@@ -935,14 +929,19 @@ def edit_student(id):
             c10_marks = {
                 "main": {
                     "eng": {"max": request.form.get('c10_main_eng_max'), "obt": request.form.get('c10_main_eng_obt')},
-                    "math": {"max": request.form.get('c10_main_math_max'), "obt": request.form.get('c10_main_math_obt')},
+                    "math": {"max": request.form.get('c10_main_math_max'),
+                             "obt": request.form.get('c10_main_math_obt')},
                     "sci": {"max": request.form.get('c10_main_sci_max'), "obt": request.form.get('c10_main_sci_obt')},
                     "sst": {"max": request.form.get('c10_main_sst_max'), "obt": request.form.get('c10_main_sst_obt')}
                 },
                 "other": {"subjects": extract_dynamic_marks('c10', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c10', 'add')},
-                "overall_main": {"max": request.form.get('c10_overall_main_max'), "obt": request.form.get('c10_overall_main_obt'), "perc": request.form.get('c10_overall_main_perc')},
-                "overall_grand": {"max": request.form.get('c10_overall_grand_max'), "obt": request.form.get('c10_overall_grand_obt'), "perc": request.form.get('c10_overall_grand_perc')}
+                "overall_main": {"max": request.form.get('c10_overall_main_max'),
+                                 "obt": request.form.get('c10_overall_main_obt'),
+                                 "perc": request.form.get('c10_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c10_overall_grand_max'),
+                                  "obt": request.form.get('c10_overall_grand_obt'),
+                                  "perc": request.form.get('c10_overall_grand_perc')}
             }
 
             c12_marks = {
@@ -953,8 +952,12 @@ def edit_student(id):
                 },
                 "other": {"subjects": extract_dynamic_marks('c12', 'other')},
                 "additional": {"subjects": extract_dynamic_marks('c12', 'add')},
-                "overall_main": {"max": request.form.get('c12_overall_main_max'), "obt": request.form.get('c12_overall_main_obt'), "perc": request.form.get('c12_overall_main_perc')},
-                "overall_grand": {"max": request.form.get('c12_overall_grand_max'), "obt": request.form.get('c12_overall_grand_obt'), "perc": request.form.get('c12_overall_grand_perc')}
+                "overall_main": {"max": request.form.get('c12_overall_main_max'),
+                                 "obt": request.form.get('c12_overall_main_obt'),
+                                 "perc": request.form.get('c12_overall_main_perc')},
+                "overall_grand": {"max": request.form.get('c12_overall_grand_max'),
+                                  "obt": request.form.get('c12_overall_grand_obt'),
+                                  "perc": request.form.get('c12_overall_grand_perc')}
             }
 
             student.exam_type = request.form.get('exam_type')
@@ -1047,14 +1050,16 @@ def edit_student(id):
                 elif embed_link:
                     db.session.add(Document(student_id=student.id, doc_type=doc_type, drive_link=embed_link))
 
-            old_custom_docs = Document.query.filter(Document.student_id == student.id, Document.doc_type.notin_(MASTER_DOC_TYPES)).all()
+            old_custom_docs = Document.query.filter(Document.student_id == student.id,
+                                                    Document.doc_type.notin_(MASTER_DOC_TYPES)).all()
             for od in old_custom_docs: db.session.delete(od)
 
             custom_names = request.form.getlist('custom_doc_name[]')
             custom_urls = request.form.getlist('custom_doc_url[]')
             for name, url in zip(custom_names, custom_urls):
                 if name and name.strip() and url and url.strip():
-                    db.session.add(Document(student_id=student.id, doc_type=name.strip(), drive_link=convert_to_embed_link(url.strip())))
+                    db.session.add(Document(student_id=student.id, doc_type=name.strip(),
+                                            drive_link=convert_to_embed_link(url.strip())))
 
             db.session.commit()
             flash(f"Student {student.full_name} updated successfully!")
@@ -1063,18 +1068,33 @@ def edit_student(id):
         except IntegrityError as e:
             db.session.rollback()
             print(f"🚨 INTEGRITY ERROR DETAILS: {str(e.orig)}")
-            flash("Database Error: A required field is missing or duplicated. Check your terminal logs for details.", "error")
+            flash("Database Error: A required field is missing or duplicated. Check your terminal logs for details.",
+                  "error")
         except Exception as e:
             db.session.rollback()
             flash(f"Error updating student: {str(e)}")
 
-    c10_marks = json.loads(student.class_10_marks_data) if student.class_10_marks_data else {"main": {}, "other": {"subjects": []}, "additional": {"subjects": []}, "overall_main": {}, "overall_grand": {}}
-    c12_marks = json.loads(student.class_12_marks_data) if student.class_12_marks_data else {"main": {}, "other": {"subjects": []}, "additional": {"subjects": []}, "overall_main": {}, "overall_grand": {}}
-    docs = {doc.doc_type: doc.drive_link.replace('/preview', '/view') if doc.drive_link else '' for doc in student.documents}
+    c10_marks = json.loads(student.class_10_marks_data) if student.class_10_marks_data else {"main": {},
+                                                                                             "other": {"subjects": []},
+                                                                                             "additional": {
+                                                                                                 "subjects": []},
+                                                                                             "overall_main": {},
+                                                                                             "overall_grand": {}}
+    c12_marks = json.loads(student.class_12_marks_data) if student.class_12_marks_data else {"main": {},
+                                                                                             "other": {"subjects": []},
+                                                                                             "additional": {
+                                                                                                 "subjects": []},
+                                                                                             "overall_main": {},
+                                                                                             "overall_grand": {}}
+    docs = {doc.doc_type: doc.drive_link.replace('/preview', '/view') if doc.drive_link else '' for doc in
+            student.documents}
     forms_filled_list = [f.strip() for f in student.forms_filled.split(",")] if student.forms_filled else []
-    custom_docs = Document.query.filter(Document.student_id == student.id, Document.doc_type.notin_(MASTER_DOC_TYPES)).all()
+    custom_docs = Document.query.filter(Document.student_id == student.id,
+                                        Document.doc_type.notin_(MASTER_DOC_TYPES)).all()
 
-    return render_template('edit_student.html', student=student, c10_marks=c10_marks, c12_marks=c12_marks, docs=docs, forms_filled_list=forms_filled_list, custom_docs=custom_docs)
+    return render_template('edit_student.html', student=student, c10_marks=c10_marks, c12_marks=c12_marks, docs=docs,
+                           forms_filled_list=forms_filled_list, custom_docs=custom_docs)
+
 
 @app.route('/student/<int:id>/approve', methods=['POST'])
 @login_required
@@ -1084,6 +1104,7 @@ def approve_student(id):
     db.session.commit()
     flash(f"🔒 Security Lock Active! {student.full_name}'s record has been marked as Parent Approved.")
     return redirect(url_for('view_student', id=student.id))
+
 
 @app.route('/student/<int:id>/delete', methods=['POST'])
 @login_required
@@ -1106,10 +1127,8 @@ def delete_student(id):
 def view_student(id):
     student = Student.query.get_or_404(id)
 
-    # 🚨 THE FIX: Force the database to return Counsellings alphabetically
     active_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
-    # Force the database to return Exams alphabetically
     exams = Exam.query.order_by(Exam.name.asc()).all()
 
     return render_template('profile.html',
@@ -1117,20 +1136,27 @@ def view_student(id):
                            active_counsellings=active_counsellings,
                            exams=exams)
 
+
 @app.route('/student/<int:id>/export')
 @login_required
 def export_verification(id):
     student = Student.query.get_or_404(id)
-    c10_marks = json.loads(student.class_10_marks_data) if student.class_10_marks_data else {"main": {}, "other": {"subjects": []}, "additional": {"subjects": []}, "overall_main": {}, "overall_grand": {}}
-    c12_marks = json.loads(student.class_12_marks_data) if student.class_12_marks_data else {"main": {}, "other": {"subjects": []}, "additional": {"subjects": []}, "overall_main": {}, "overall_grand": {}}
-    return render_template('verification_sheet.html', student=student, c10_marks=c10_marks, c12_marks=c12_marks, master_docs=MASTER_DOC_TYPES)
+    c10_marks = json.loads(student.class_10_marks_data) if student.class_10_marks_data else {"main": {},
+                                                                                             "other": {"subjects": []},
+                                                                                             "additional": {
+                                                                                                 "subjects": []},
+                                                                                             "overall_main": {},
+                                                                                             "overall_grand": {}}
+    c12_marks = json.loads(student.class_12_marks_data) if student.class_12_marks_data else {"main": {},
+                                                                                             "other": {"subjects": []},
+                                                                                             "additional": {
+                                                                                                 "subjects": []},
+                                                                                             "overall_main": {},
+                                                                                             "overall_grand": {}}
+    return render_template('verification_sheet.html', student=student, c10_marks=c10_marks, c12_marks=c12_marks,
+                           master_docs=MASTER_DOC_TYPES)
 
-# ==========================================
-# ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
-# ==========================================
-# ==========================================
-# ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
-# ==========================================
+
 # ==========================================
 # ADMISSIONS JOURNEY: REGISTER/PLAN COUNSELLING
 # ==========================================
@@ -1138,10 +1164,8 @@ def export_verification(id):
 @login_required
 def register_student_counselling(student_id):
     try:
-        # 🚨 THE FIX: Convert the string from the HTML form into a Python Integer!
         counselling_id = int(request.form.get('counselling_id'))
 
-        # 🛑 Check if the student is already registered for this process!
         existing_reg = StudentCounsellingRegistration.query.filter_by(
             student_id=student_id,
             counselling_id=counselling_id
@@ -1151,7 +1175,6 @@ def register_student_counselling(student_id):
             flash("This student is already registered for this counselling process!", "error")
             return redirect(url_for('view_student', id=student_id))
 
-        # Continue with normal registration if no duplicate is found
         app_no = request.form.get('application_number')
         reg_status = request.form.get('registration_status', 'Planned')
 
@@ -1176,6 +1199,7 @@ def register_student_counselling(student_id):
 
     return redirect(url_for('view_student', id=student_id))
 
+
 @app.route('/student/delete_counselling_reg/<int:reg_id>', methods=['POST'])
 @login_required
 def delete_counselling_reg(reg_id):
@@ -1198,6 +1222,7 @@ def delete_counselling_reg(reg_id):
         flash(f"Error removing participation: {str(e)}", "error")
 
     return redirect(url_for('view_student', id=student_id))
+
 
 @app.route('/student/edit_counselling_reg/<int:reg_id>', methods=['POST'])
 @login_required
@@ -1222,6 +1247,7 @@ def edit_counselling_reg(reg_id):
         flash(f"Error updating registration: {str(e)}", "error")
 
     return redirect(url_for('view_student', id=student_id))
+
 
 @app.route('/student/<int:student_id>/add_exam_result', methods=['POST'])
 @login_required
@@ -1283,6 +1309,7 @@ def edit_exam_result(result_id):
         flash(f"Error updating exam details: {str(e)}", "error")
     return redirect(url_for('view_student', id=student_id))
 
+
 @app.route('/student/delete_exam_result/<int:result_id>', methods=['POST'])
 @login_required
 def delete_exam_result(result_id):
@@ -1292,6 +1319,7 @@ def delete_exam_result(result_id):
     db.session.commit()
     flash("Exam result removed.", "success")
     return redirect(url_for('view_student', id=student_id))
+
 
 @app.route('/student/<int:student_id>/add_round_result', methods=['POST'])
 @login_required
@@ -1317,6 +1345,7 @@ def add_round_result(student_id):
 
     return redirect(url_for('view_student', id=student_id))
 
+
 @app.route('/colleges')
 @login_required
 def college_directory():
@@ -1331,10 +1360,8 @@ def college_directory():
     if course_filter: query = query.filter(College.course_id == course_filter)
     if type_filter: query = query.filter(College.college_type == type_filter)
 
-    # Sort the actual College list
     colleges = query.order_by(College.name.asc()).all()
 
-    # 🚨 Force Alphabetical Sorting for all Dropdowns on the College page
     states = State.query.order_by(State.name.asc()).all()
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
@@ -1344,6 +1371,7 @@ def college_directory():
                            universities=universities, courses=courses,
                            search_query=search_query, state_filter=state_filter,
                            course_filter=course_filter, type_filter=type_filter)
+
 
 @app.route('/colleges/add', methods=['POST'])
 @login_required
@@ -1387,7 +1415,6 @@ def tasks_page():
 
     all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
-    # Required for the dropdown when linking a task to a form
     upcoming_exam_forms = Form.query.filter(Form.end_date >= today, Form.form_type == 'Exam').order_by(
         Form.end_date.asc()).all()
 
@@ -1422,7 +1449,8 @@ def add_task():
     except Exception as e:
         db.session.rollback()
         flash(f"Error creating task: {str(e)}", "error")
-    return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
+    return redirect(url_for('tasks_page'))
+
 
 @app.route('/student/edit_round_result/<int:result_id>', methods=['POST'])
 @login_required
@@ -1439,6 +1467,7 @@ def edit_round_result(result_id):
         db.session.rollback()
         flash(f"Error updating allotment: {str(e)}", "error")
     return redirect(url_for('view_student', id=student_id))
+
 
 @app.route('/tasks/edit/<int:task_id>', methods=['POST'])
 @login_required
@@ -1467,7 +1496,9 @@ def edit_task(task_id):
     except Exception as e:
         db.session.rollback()
         flash(f"Error updating task: {str(e)}", "error")
-    return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
+    return redirect(url_for('tasks_page'))
+
+
 @app.route('/tasks/update/<int:task_id>', methods=['POST'])
 @login_required
 def update_task_status(task_id):
@@ -1477,7 +1508,7 @@ def update_task_status(task_id):
         task.status = new_status
         db.session.commit()
         flash(f"Task marked as {new_status}!", "success")
-    return redirect(url_for('tasks_page')) # 🚨 FIXED REDIRECT
+    return redirect(url_for('tasks_page'))
 
 
 @app.cli.command("init-db")
@@ -1488,23 +1519,15 @@ def init_db():
         db.session.commit()
         print("Database initialized! Default login is admin / admin123")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=5000)
-
 
 @app.route('/reports/application-matrix')
 @login_required
 def application_matrix():
-    # Toggle between JEE and NEET views to keep the grid relevant
     exam_type = request.args.get('exam_type', 'JEE')
 
-    # Fetch students for the selected exam group
     students = Student.query.filter_by(exam_type=exam_type).order_by(Student.full_name.asc()).all()
     student_ids = [s.id for s in students]
 
-    # ==========================================
-    # 1. EXAM MATRIX DATA (Grouped by Course)
-    # ==========================================
     exam_results = StudentExamResult.query.filter(StudentExamResult.student_id.in_(student_ids)).all()
     active_exam_ids = list(set([r.exam_id for r in exam_results]))
     active_exams = Exam.query.filter(Exam.id.in_(active_exam_ids)).order_by(Exam.name.asc()).all()
@@ -1521,12 +1544,8 @@ def application_matrix():
         else:
             for course in exam.courses:
                 exams_grouped.setdefault(course.name, []).append(exam)
-    # Sort the dictionary alphabetically by course name
     exams_grouped = dict(sorted(exams_grouped.items()))
 
-    # ==========================================
-    # 2. COUNSELLING MATRIX DATA (Grouped by Course)
-    # ==========================================
     couns_regs = StudentCounsellingRegistration.query.filter(
         StudentCounsellingRegistration.student_id.in_(student_ids)).all()
     active_couns_ids = list(set([r.counselling_id for r in couns_regs]))
@@ -1565,7 +1584,6 @@ def form_compliance():
     incomplete_exam_regs = []
     missing_exam_results = []
 
-    # 1. COUNSELLING REGISTRATION CHECK
     couns_regs = StudentCounsellingRegistration.query.all()
     for reg in couns_regs:
         fields = [
@@ -1585,10 +1603,8 @@ def form_compliance():
                 'missing_fields': missing
             })
 
-    # 2. EXAM FORM & RESULT CHECK
     exam_results = StudentExamResult.query.all()
     for res in exam_results:
-        # A. Registration Phase Check
         reg_fields = [
             ('Link', res.form_confirmation_link),
             ('App No', res.application_number),
@@ -1605,11 +1621,9 @@ def form_compliance():
                 'missing_fields': reg_missing
             })
 
-        # B. Result Phase Check (All empty AND end date passed)
         is_result_empty = (res.score is None and res.percentile is None and
                            res.all_india_rank is None and res.state_rank is None)
 
-        # Safely determine the end date (fallback to start date if end date isn't set)
         exam_end = res.exam.exam_end_date or res.exam.exam_date
 
         if is_result_empty and exam_end and exam_end < today:
@@ -1622,3 +1636,108 @@ def form_compliance():
                            incomplete_couns=incomplete_couns,
                            incomplete_exam_regs=incomplete_exam_regs,
                            missing_exam_results=missing_exam_results)
+
+
+@app.route('/finances')
+@login_required
+def customer_finances():
+    if not session.get('finance_auth'):
+        return render_template('finances.html', authenticated=False)
+
+    records = FinanceRecord.query.order_by(FinanceRecord.date.desc()).all()
+    students = Student.query.order_by(Student.full_name.asc()).all()
+    counsellors = Staff.query.order_by(Staff.username.asc()).all()
+
+    service_types = [
+        'NEET Enabler', 'NEET Govt. Only', 'NEET Private Only', 'NEET Complete',
+        'Ayush Complete', 'Ayush BAMS Only', 'Ayush BHMS Only', 'BDS Only',
+        'IISER', 'NISER', 'IISER + NISER', 'Others'
+    ]
+    payment_modes = ['Cash', 'UPI', 'Website', 'Debit Card', 'Credit Card']
+
+    return render_template('finances.html',
+                           authenticated=True,
+                           records=records,
+                           students=students,
+                           counsellors=counsellors,
+                           service_types=service_types,
+                           payment_modes=payment_modes)
+
+
+@app.route('/finances/login', methods=['POST'])
+@login_required
+def finance_login():
+    pin = request.form.get('finance_pin')
+    if pin == '2468':
+        session['finance_auth'] = True
+        flash("Finance Portal Unlocked.", "success")
+    else:
+        flash("Access Denied: Incorrect PIN.", "error")
+
+    return redirect(url_for('customer_finances'))
+
+
+@app.route('/finances/lock')
+@login_required
+def finance_lock():
+    session.pop('finance_auth', None)
+    flash("Finance Portal securely locked.", "info")
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/finances/add', methods=['POST'])
+@login_required
+def add_finance_record():
+    try:
+        date_str = request.form.get('date')
+        record_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else date.today()
+
+        def safe_float(val):
+            return float(val) if val and val.strip() else 0.0
+
+        total_fees = safe_float(request.form.get('total_fees'))
+        installment_1 = safe_float(request.form.get('installment_1'))
+        installment_2 = safe_float(request.form.get('installment_2'))
+
+        new_record = FinanceRecord(
+            date=record_date,
+            student_id=request.form.get('student_id'),
+            service_type=request.form.get('service_type'),
+            total_fees=total_fees,
+            installment_1=installment_1,
+            installment_2=installment_2,
+            mode_of_payment=request.form.get('mode_of_payment'),
+            beneficiary_name=request.form.get('beneficiary_name'),
+            comments=request.form.get('comments')
+        )
+
+        new_record.calculate_balance()
+
+        db.session.add(new_record)
+        db.session.commit()
+        flash("Finance record added successfully!", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error saving record: {str(e)}", "error")
+
+    return redirect(url_for('customer_finances'))
+
+
+@app.route('/finances/delete/<int:record_id>', methods=['POST'])
+@login_required
+def delete_finance_record(record_id):
+    record = FinanceRecord.query.get_or_404(record_id)
+    try:
+        db.session.delete(record)
+        db.session.commit()
+        flash("Finance record deleted successfully.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting record: {str(e)}", "error")
+
+    return redirect(url_for('customer_finances'))
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True, port=5000)

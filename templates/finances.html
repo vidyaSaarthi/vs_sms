@@ -1,0 +1,281 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+{% if not authenticated %}
+<!-- ==========================================
+     STATE 1: SECURITY LOCK SCREEN
+     ========================================== -->
+<div class="container-fluid pt-5 d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card shadow-lg border-0" style="max-width: 420px; width: 100%; border-radius: 20px;">
+        <div class="card-body p-5 text-center">
+            <div class="mb-4">
+                <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 80px; height: 80px;">
+                    <i class="fas fa-lock fa-2x"></i>
+                </div>
+                <h4 class="fw-bold" style="color: var(--brand-red);">Restricted Access</h4>
+                <p class="text-muted small">Enter the security PIN to access the Customer Finance portal.</p>
+            </div>
+            <form action="{{ url_for('finance_login') }}" method="POST">
+                <div class="mb-4">
+                    <input type="password" name="finance_pin" class="form-control form-control-lg text-center fw-bold text-danger border-danger shadow-sm" placeholder="• • • •" required autofocus style="letter-spacing: 8px; font-size: 1.8rem; background-color: #fff0f0;">
+                </div>
+                <button type="submit" class="btn text-white w-100 fw-bold btn-lg shadow-sm" style="background-color: var(--brand-red);">Unlock Portal</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- ==========================================
+     STATE 2: UNLOCKED FINANCE PORTAL
+     ========================================== -->
+<div class="container-fluid pt-3">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #333;"><i class="fas fa-file-invoice-dollar text-success me-2"></i>Customer Finances</h2>
+            <p class="text-muted mb-0">Track student payments, installments, and outstanding balances.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <!-- LOCK PORTAL BUTTON -->
+            <a href="{{ url_for('finance_lock') }}" class="btn btn-outline-danger fw-bold shadow-sm px-4 py-2 bg-white">
+                <i class="fas fa-lock me-1"></i> Lock Portal
+            </a>
+            <!-- ADD RECORD BUTTON -->
+            <button class="btn btn-success fw-bold shadow-sm px-4 py-2" data-bs-toggle="modal" data-bs-target="#addFinanceModal">
+                <i class="fas fa-plus me-1"></i> Add Record
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN TABLE -->
+    <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px; overflow: hidden;">
+        <div class="table-responsive" style="min-height: 400px;">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light sticky-top">
+                    <tr>
+                        <th class="ps-4 py-3">S.No</th>
+                        <th class="py-3">Date</th>
+                        <th class="py-3">Student Name</th>
+                        <th class="py-3">Type</th>
+                        <th class="py-3 text-end">Total Fees</th>
+                        <th class="py-3 text-end">Inst. 1</th>
+                        <th class="py-3 text-end">Inst. 2</th>
+                        <th class="py-3 text-end text-danger">Balance</th>
+                        <th class="py-3">Payment Info</th>
+                        <th class="text-end pe-4 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td class="ps-4 text-muted">{{ loop.index }}</td>
+                        <td class="fw-bold text-dark">{{ record.date.strftime('%d %b %Y') if record.date else '-' }}</td>
+                        <td>
+                            <strong class="text-primary">{{ record.student.full_name }}</strong><br>
+                            <small class="text-muted">{{ record.student.mobile_number }}</small>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ record.service_type }}</span></td>
+                        <td class="text-end fw-bold">₹{{ "{:,.2f}".format(record.total_fees) }}</td>
+                        <td class="text-end text-success">₹{{ "{:,.2f}".format(record.installment_1) }}</td>
+                        <td class="text-end text-success">₹{{ "{:,.2f}".format(record.installment_2) }}</td>
+                        <td class="text-end text-danger fw-bold" style="font-size: 1.1rem;">₹{{ "{:,.2f}".format(record.balance) }}</td>
+                        <td>
+                            <small class="d-block text-muted"><strong>Mode:</strong> {{ record.mode_of_payment }}</small>
+                            <small class="d-block text-muted"><strong>By:</strong> {{ record.beneficiary_name }}</small>
+                        </td>
+                        <td class="text-end pe-4">
+                            {% if record.comments %}
+                            <button type="button" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="popover" data-bs-trigger="focus" title="Comments" data-bs-content="{{ record.comments }}">
+                                <i class="fas fa-comment-dots"></i>
+                            </button>
+                            {% endif %}
+                            <form action="{{ url_for('delete_finance_record', record_id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Permanently delete this finance record?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <i class="fas fa-wallet fa-3x mb-3 text-secondary d-block"></i>
+                            <h5>No financial records found</h5>
+                            <p>Click 'Add Record' to create the first entry.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ADD RECORD MODAL -->
+<div class="modal fade" id="addFinanceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg border-0">
+            <form action="{{ url_for('add_finance_record') }}" method="POST" id="financeForm" novalidate>
+                <div class="modal-header text-white" style="background-color: var(--brand-red);">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>New Finance Record</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        
+                        <!-- Core Details -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
+                            <input type="date" name="date" id="financeDate" class="form-control" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Student Name <span class="text-danger">*</span></label>
+                            <select name="student_id" class="form-select" required>
+                                <option value="" disabled selected>Select a registered student...</option>
+                                {% for student in students %}
+                                    <option value="{{ student.id }}">{{ student.full_name }} ({{ student.mobile_number }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Service Type <span class="text-danger">*</span></label>
+                            <select name="service_type" class="form-select" required>
+                                <option value="" disabled selected>Select service type...</option>
+                                {% for st in service_types %}
+                                    <option value="{{ st }}">{{ st }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Financials (With Auto-Calculation) -->
+                        <div class="col-12 mt-4"><h6 class="border-bottom pb-2 fw-bold text-secondary">Financial Details</h6></div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-primary">Total Fees (₹) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" name="total_fees" id="totalFees" class="form-control fw-bold fin-calc" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-6"></div> <!-- Spacer -->
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-success">Installment 1 (₹)</label>
+                            <input type="number" step="0.01" name="installment_1" id="inst1" class="form-control fin-calc" placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-success">Installment 2 (₹)</label>
+                            <input type="number" step="0.01" name="installment_2" id="inst2" class="form-control fin-calc" placeholder="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-danger">Balance Due (₹)</label>
+                            <input type="text" id="balanceDue" class="form-control fw-bold text-danger border-danger" readonly placeholder="0.00" style="background-color: #fff0f0;">
+                        </div>
+
+                        <!-- Payment Meta -->
+                        <div class="col-12 mt-4"><h6 class="border-bottom pb-2 fw-bold text-secondary">Payment Meta</h6></div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Mode of Payment</label>
+                            <select name="mode_of_payment" class="form-select">
+                                <option value="">Select Mode...</option>
+                                {% for mode in payment_modes %}
+                                    <option value="{{ mode }}">{{ mode }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Beneficiary (Counselor) <span class="text-danger">*</span></label>
+                            <select name="beneficiary_name" class="form-select" required>
+                                <option value="" disabled selected>Select counselor...</option>
+                                {% for c in counsellors %}
+                                    <option value="{{ c.username }}">{{ c.username|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Comments / Notes</label>
+                            <textarea name="comments" class="form-control" rows="2" placeholder="Any additional context..."></textarea>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="submit" class="btn btn-success w-100 fw-bold">Save Finance Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Set default date to today
+    let today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('financeDate');
+    if (dateInput) dateInput.value = today;
+
+    // Initialize Popovers for comments
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+
+    // Auto-Calculate Balance Logic
+    const totalFees = document.getElementById('totalFees');
+    const inst1 = document.getElementById('inst1');
+    const inst2 = document.getElementById('inst2');
+    const balance = document.getElementById('balanceDue');
+
+    function calculateBalance() {
+        let t = parseFloat(totalFees?.value) || 0;
+        let i1 = parseFloat(inst1?.value) || 0;
+        let i2 = parseFloat(inst2?.value) || 0;
+        
+        let b = t - i1 - i2;
+        
+        if(balance) balance.value = b.toFixed(2);
+    }
+
+    // Attach listener to all calc fields
+    document.querySelectorAll('.fin-calc').forEach(input => {
+        input.addEventListener('input', calculateBalance);
+    });
+
+    // Client-Side Validation Shield
+    const form = document.getElementById('financeForm');
+    if(form) {
+        form.addEventListener('submit', function(e) {
+            let firstInvalid = null;
+            
+            Array.from(form.elements).forEach(input => {
+                if (input.hasAttribute('required') && !input.value.trim()) {
+                    input.style.border = "2px solid #cc0000";
+                    input.style.backgroundColor = "#fff0f0";
+                    if (!firstInvalid) firstInvalid = input;
+                } else {
+                    input.style.border = "";
+                    input.style.backgroundColor = "";
+                }
+            });
+
+            if (firstInvalid) {
+                e.preventDefault(); 
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+        });
+
+        // Remove red highlight dynamically
+        form.addEventListener("input", function(event) {
+            if (event.target && event.target.hasAttribute('required') && event.target.value.trim()) {
+                event.target.style.border = "";
+                event.target.style.backgroundColor = "";
+            }
+        });
+    }
+});
+</script>
+
+{% endif %}
+{% endblock %}
