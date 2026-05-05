@@ -2071,6 +2071,101 @@ def legacy_forms_tracker():
     """
     return html
 
+
+@app.route('/admin/missing-master-forms-audit')
+@login_required
+def missing_master_forms_audit():
+    # Security check
+    if current_user.username != 'admin':
+        return "Unauthorized", 403
+
+    # 1. Audit Exams
+    all_exams = Exam.query.order_by(Exam.name.asc()).all()
+    exams_without_forms = []
+
+    for exam in all_exams:
+        # Check if any form in the Forms directory is linked to this exam
+        linked_forms_count = Form.query.filter_by(exam_id=exam.id).count()
+        if linked_forms_count == 0:
+            exams_without_forms.append(exam)
+
+    # 2. Audit Counselling Processes
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+    couns_without_forms = []
+
+    for couns in all_counsellings:
+        # Check if any form in the Forms directory is linked to this counselling process
+        linked_forms_count = Form.query.filter_by(counselling_id=couns.id).count()
+        if linked_forms_count == 0:
+            couns_without_forms.append(couns)
+
+    # 3. Generate the HTML Report
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Missing Master Forms Audit</title>
+        <style>
+            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f8f9fa; color: #333; }}
+            .container {{ max-width: 1000px; margin: 0 auto; display: flex; gap: 30px; }}
+            .column {{ flex: 1; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
+            h2 {{ color: #1a202c; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-top: 0; }}
+            .badge-count {{ background: #ef4444; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.9rem; margin-left: 10px; }}
+            ul {{ list-style-type: none; padding: 0; margin-top: 20px; }}
+            li {{ padding: 15px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }}
+            li:last-child {{ border-bottom: none; }}
+            .btn {{ display: inline-block; padding: 6px 12px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }}
+            .btn:hover {{ background: #1d4ed8; }}
+            .empty-state {{ text-align: center; color: #10b981; padding: 30px 0; font-weight: bold; }}
+            .alert-info {{ background-color: #e0f2fe; color: #0369a1; padding: 15px; border-radius: 8px; font-weight: bold; margin-bottom: 30px; border-left: 5px solid #0284c7; text-align: center; }}
+        </style>
+    </head>
+    <body>
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <h1 style="color: #1a202c; text-align: center; margin-bottom: 10px;">📋 Forms Directory Audit</h1>
+            <div class="alert-info">
+                This dashboard identifies master processes that currently have <strong>Zero Master Forms</strong> assigned to them in the Forms Directory.
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- EXAMS COLUMN -->
+            <div class="column">
+                <h2>📝 Exams <span class="badge-count">{len(exams_without_forms)}</span></h2>
+                """
+
+    if exams_without_forms:
+        html += "<ul>"
+        for e in exams_without_forms:
+            html += f"<li><strong>{e.name}</strong> <a href='/admin/manage_forms' target='_blank' class='btn'>Add Form</a></li>"
+        html += "</ul>"
+    else:
+        html += "<div class='empty-state'>✅ All active exams have at least one master form created!</div>"
+
+    html += """
+            </div>
+
+            <!-- COUNSELLING COLUMN -->
+            <div class="column">
+                <h2>📁 Counselling <span class="badge-count">{len(couns_without_forms)}</span></h2>
+                """
+
+    if couns_without_forms:
+        html += "<ul>"
+        for c in couns_without_forms:
+            html += f"<li><strong>{c.name}</strong> <a href='/admin/manage_forms' target='_blank' class='btn'>Add Form</a></li>"
+        html += "</ul>"
+    else:
+        html += "<div class='empty-state'>✅ All active counselling processes have at least one master form created!</div>"
+
+    html += """
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return html
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
 
