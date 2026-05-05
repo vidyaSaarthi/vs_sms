@@ -254,11 +254,28 @@
                             <tbody>
                                 {% for res in student.exam_results %}
                                 <tr>
-                                    <td class="ps-4 fw-bold text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown' }}</td>
-                                    <td>
-                                        <!-- Look up the credentials from the new submissions table for this exam -->
-                                        {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
+                                    <!-- 🚨 Look up the milestone at the top of the row so we can use it in column 1 and 2 -->
+                                    {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
 
+                                    <td class="ps-4">
+                                        <strong class="text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown Exam' }}</strong><br>
+
+                                        <!-- 🚨 NEW: Display the Master Form Name right below the Exam Name -->
+                                        <div class="mt-1">
+                                            {% if exam_sub and exam_sub.form %}
+                                                <span class="badge bg-light text-secondary border shadow-sm" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-file-alt me-1"></i> {{ exam_sub.form.name }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-light text-muted border border-dashed" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-link me-1"></i> Legacy / Unlinked Form
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <!-- 🚨 SAAS CREDENTIALS VAULT -->
                                         <div class="bg-white border rounded p-2 shadow-sm" style="font-size: 0.85rem;">
                                             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
                                                 <span class="text-muted">App No:</span> <strong class="text-dark">{{ exam_sub.application_number if exam_sub else '-' }}</strong>
