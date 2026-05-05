@@ -12,7 +12,7 @@ from sqlalchemy import or_
 # Consolidated Imports (🚨 FinanceRecord added here)
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
     Counselling, Form, CounsellingRound, RoundSchedule, College, StudentCounsellingRegistration, StudentRoundResult, \
-    Course, StudentExamResult, Task, FormEvent, FinanceRecord
+    Course, StudentExamResult, Task, FormEvent, FinanceRecord, StudentFormSubmission
 
 app = Flask(__name__)
 
