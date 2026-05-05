@@ -1644,7 +1644,23 @@ def customer_finances():
     if not session.get('finance_auth'):
         return render_template('finances.html', authenticated=False)
 
-    records = FinanceRecord.query.order_by(FinanceRecord.date.desc()).all()
+    # 1. Capture which tab the user clicked
+    active_tab = request.args.get('tab', 'all')
+
+    # 2. Filter records based on the Student's Exam Type
+    query = FinanceRecord.query.join(Student)
+    if active_tab == 'jee':
+        query = query.filter(Student.exam_type == 'JEE')
+    elif active_tab == 'neet':
+        query = query.filter(Student.exam_type == 'NEET')
+
+    records = query.order_by(FinanceRecord.date.desc()).all()
+
+    # 3. Calculate badge counts for the tabs
+    all_count = FinanceRecord.query.count()
+    jee_count = FinanceRecord.query.join(Student).filter(Student.exam_type == 'JEE').count()
+    neet_count = FinanceRecord.query.join(Student).filter(Student.exam_type == 'NEET').count()
+
     students = Student.query.order_by(Student.full_name.asc()).all()
     counsellors = Staff.query.order_by(Staff.username.asc()).all()
 
@@ -1661,8 +1677,11 @@ def customer_finances():
                            students=students,
                            counsellors=counsellors,
                            service_types=service_types,
-                           payment_modes=payment_modes)
-
+                           payment_modes=payment_modes,
+                           active_tab=active_tab,
+                           all_count=all_count,
+                           jee_count=jee_count,
+                           neet_count=neet_count)
 
 @app.route('/finances/login', methods=['POST'])
 @login_required

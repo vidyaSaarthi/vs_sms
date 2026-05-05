@@ -38,16 +38,36 @@
             <p class="text-muted mb-0">Track student payments, installments, and outstanding balances.</p>
         </div>
         <div class="d-flex gap-2">
-            <!-- LOCK PORTAL BUTTON -->
             <a href="{{ url_for('finance_lock') }}" class="btn btn-outline-danger fw-bold shadow-sm px-4 py-2 bg-white">
                 <i class="fas fa-lock me-1"></i> Lock Portal
             </a>
-            <!-- ADD RECORD BUTTON -->
             <button class="btn btn-success fw-bold shadow-sm px-4 py-2" data-bs-toggle="modal" data-bs-target="#addFinanceModal">
                 <i class="fas fa-plus me-1"></i> Add Record
             </button>
         </div>
     </div>
+
+    <!-- 🚨 NEW: STUDENT TYPE TABS -->
+    <ul class="nav nav-pills mb-4 gap-2" style="font-weight: 700;">
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'all' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('customer_finances', tab='all') }}" style="border-radius: 10px;">
+                <i class="fas fa-globe me-1"></i> All Finances
+                <span class="badge ms-2 rounded-pill {% if active_tab == 'all' %}bg-white text-dark{% else %}bg-secondary{% endif %}">{{ all_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'jee' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('customer_finances', tab='jee') }}" style="border-radius: 10px; {% if active_tab == 'jee' %}background-color: var(--brand-blue); color: var(--vs-text-main);{% endif %}">
+                <i class="fas fa-cogs me-1"></i> JEE Finances
+                <span class="badge ms-2 rounded-pill {% if active_tab == 'jee' %}bg-white text-dark{% else %}bg-secondary{% endif %}">{{ jee_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'neet' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('customer_finances', tab='neet') }}" style="border-radius: 10px; {% if active_tab == 'neet' %}background-color: var(--brand-red); color: white;{% endif %}">
+                <i class="fas fa-stethoscope me-1"></i> NEET Finances
+                <span class="badge ms-2 rounded-pill {% if active_tab == 'neet' %}bg-white text-danger{% else %}bg-secondary{% endif %}">{{ neet_count }}</span>
+            </a>
+        </li>
+    </ul>
 
     <!-- MAIN TABLE -->
     <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px; overflow: hidden;">
@@ -57,8 +77,8 @@
                     <tr>
                         <th class="ps-4 py-3">S.No</th>
                         <th class="py-3">Date</th>
-                        <th class="py-3">Student Name</th>
-                        <th class="py-3">Type</th>
+                        <th class="py-3">Student Info</th>
+                        <th class="py-3">Service Type</th>
                         <th class="py-3 text-end">Total Fees</th>
                         <th class="py-3 text-end">Inst. 1</th>
                         <th class="py-3 text-end">Inst. 2</th>
@@ -74,7 +94,14 @@
                         <td class="fw-bold text-dark">{{ record.date.strftime('%d %b %Y') if record.date else '-' }}</td>
                         <td>
                             <strong class="text-primary">{{ record.student.full_name }}</strong><br>
-                            <small class="text-muted">{{ record.student.mobile_number }}</small>
+                            <!-- 🚨 NEW: Shows Student Type Badge automatically -->
+                            {% if record.student.exam_type == 'JEE' %}
+                                <span class="badge bg-primary shadow-sm mt-1" style="font-size: 0.65rem;"><i class="fas fa-cogs me-1"></i>JEE</span>
+                            {% elif record.student.exam_type == 'NEET' %}
+                                <span class="badge bg-danger shadow-sm mt-1" style="font-size: 0.65rem;"><i class="fas fa-stethoscope me-1"></i>NEET</span>
+                            {% else %}
+                                <span class="badge bg-secondary shadow-sm mt-1" style="font-size: 0.65rem;">{{ record.student.exam_type }}</span>
+                            {% endif %}
                         </td>
                         <td><span class="badge bg-light text-dark border">{{ record.service_type }}</span></td>
                         <td class="text-end fw-bold">₹{{ "{:,.2f}".format(record.total_fees) }}</td>
@@ -124,8 +151,7 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        
-                        <!-- Core Details -->
+
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
                             <input type="date" name="date" id="financeDate" class="form-control" required>
@@ -135,7 +161,7 @@
                             <select name="student_id" class="form-select" required>
                                 <option value="" disabled selected>Select a registered student...</option>
                                 {% for student in students %}
-                                    <option value="{{ student.id }}">{{ student.full_name }} ({{ student.mobile_number }})</option>
+                                    <option value="{{ student.id }}">{{ student.full_name }} ({{ student.exam_type }})</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -149,14 +175,13 @@
                             </select>
                         </div>
 
-                        <!-- Financials (With Auto-Calculation) -->
                         <div class="col-12 mt-4"><h6 class="border-bottom pb-2 fw-bold text-secondary">Financial Details</h6></div>
-                        
+
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-primary">Total Fees (₹) <span class="text-danger">*</span></label>
                             <input type="number" step="0.01" name="total_fees" id="totalFees" class="form-control fw-bold fin-calc" placeholder="0.00" required>
                         </div>
-                        <div class="col-md-6"></div> <!-- Spacer -->
+                        <div class="col-md-6"></div>
 
                         <div class="col-md-4">
                             <label class="form-label fw-bold text-success">Installment 1 (₹)</label>
@@ -171,9 +196,8 @@
                             <input type="text" id="balanceDue" class="form-control fw-bold text-danger border-danger" readonly placeholder="0.00" style="background-color: #fff0f0;">
                         </div>
 
-                        <!-- Payment Meta -->
                         <div class="col-12 mt-4"><h6 class="border-bottom pb-2 fw-bold text-secondary">Payment Meta</h6></div>
-                        
+
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Mode of Payment</label>
                             <select name="mode_of_payment" class="form-select">
@@ -209,19 +233,16 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    
-    // Set default date to today
+
     let today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('financeDate');
     if (dateInput) dateInput.value = today;
 
-    // Initialize Popovers for comments
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl)
     });
 
-    // Auto-Calculate Balance Logic
     const totalFees = document.getElementById('totalFees');
     const inst1 = document.getElementById('inst1');
     const inst2 = document.getElementById('inst2');
@@ -231,23 +252,21 @@ document.addEventListener("DOMContentLoaded", function() {
         let t = parseFloat(totalFees?.value) || 0;
         let i1 = parseFloat(inst1?.value) || 0;
         let i2 = parseFloat(inst2?.value) || 0;
-        
+
         let b = t - i1 - i2;
-        
+
         if(balance) balance.value = b.toFixed(2);
     }
 
-    // Attach listener to all calc fields
     document.querySelectorAll('.fin-calc').forEach(input => {
         input.addEventListener('input', calculateBalance);
     });
 
-    // Client-Side Validation Shield
     const form = document.getElementById('financeForm');
     if(form) {
         form.addEventListener('submit', function(e) {
             let firstInvalid = null;
-            
+
             Array.from(form.elements).forEach(input => {
                 if (input.hasAttribute('required') && !input.value.trim()) {
                     input.style.border = "2px solid #cc0000";
@@ -260,13 +279,12 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
             if (firstInvalid) {
-                e.preventDefault(); 
+                e.preventDefault();
                 firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 firstInvalid.focus();
             }
         });
 
-        // Remove red highlight dynamically
         form.addEventListener("input", function(event) {
             if (event.target && event.target.hasAttribute('required') && event.target.value.trim()) {
                 event.target.style.border = "";
