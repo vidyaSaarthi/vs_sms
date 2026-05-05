@@ -399,8 +399,37 @@
                             <input type="text" name="name" class="form-control" value="{{ form.name }}" required>
                         </div>
 
-                        <input type="hidden" name="form_type" value="{{ form.form_type }}">
-                        <input type="hidden" name="target_id" value="{{ form.exam_id if form.form_type == 'Exam' else form.counselling_id }}">
+                        <!-- 🚨 NEW: The interactive Process dropdowns replaced the hidden fields here -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Parent Process</label>
+                            <select name="parent_type" class="form-select" id="editParentType{{ form.id }}" onchange="toggleEditParentDropdowns({{ form.id }})">
+                                <option value="">No Parent (Orphaned)</option>
+                                <option value="counselling" {% if form.counselling_id %}selected{% endif %}>Counselling Journey</option>
+                                <option value="exam" {% if form.exam_id %}selected{% endif %}>Entrance Exam</option>
+                            </select>
+                        </div>
+
+                        <!-- Counselling Dropdown -->
+                        <div class="col-md-8" id="editCounsellingDiv{{ form.id }}" style="display: {% if form.counselling_id %}block{% else %}none{% endif %};">
+                            <label class="form-label fw-bold text-primary">Associated Counselling</label>
+                            <select name="counselling_id" class="form-select">
+                                <option value="">Choose...</option>
+                                {% for c in counsellings %}
+                                <option value="{{ c.id }}" {% if form.counselling_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Exam Dropdown -->
+                        <div class="col-md-8" id="editExamDiv{{ form.id }}" style="display: {% if form.exam_id %}block{% else %}none{% endif %};">
+                            <label class="form-label fw-bold text-success">Associated Exam</label>
+                            <select name="exam_id" class="form-select">
+                                <option value="">Choose...</option>
+                                {% for e in exams %}
+                                <option value="{{ e.id }}" {% if form.exam_id == e.id %}selected{% endif %}>{{ e.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-primary">Start Date</label>
@@ -411,7 +440,7 @@
                             <input type="date" name="end_date" class="form-control" value="{{ form.end_date.strftime('%Y-%m-%d') if form.end_date else '' }}">
                         </div>
 
-                        {% if form.form_type == 'Exam' %}
+                        {% if form.form_type == 'Exam' or form.exam_id %}
                         <h6 class="fw-bold mt-4 mb-2 text-dark border-bottom pb-2">Admit Card Tracking</h6>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-warning">Release Date</label>
@@ -525,6 +554,34 @@
         } else {
             div.style.display = 'none';
             admitDiv.style.display = 'none';
+        }
+    }
+
+    // 🚨 NEW: JS logic for the Edit Form Dropdowns
+    function toggleEditParentDropdowns(formId) {
+        const parentType = document.getElementById('editParentType' + formId).value;
+        const counsDiv = document.getElementById('editCounsellingDiv' + formId);
+        const examDiv = document.getElementById('editExamDiv' + formId);
+
+        if (parentType === 'counselling') {
+            counsDiv.style.display = 'block';
+            examDiv.style.display = 'none';
+            counsDiv.querySelector('select').required = true;
+            examDiv.querySelector('select').required = false;
+            examDiv.querySelector('select').value = "";
+        } else if (parentType === 'exam') {
+            counsDiv.style.display = 'none';
+            examDiv.style.display = 'block';
+            examDiv.querySelector('select').required = true;
+            counsDiv.querySelector('select').required = false;
+            counsDiv.querySelector('select').value = "";
+        } else {
+            counsDiv.style.display = 'none';
+            examDiv.style.display = 'none';
+            counsDiv.querySelector('select').required = false;
+            examDiv.querySelector('select').required = false;
+            counsDiv.querySelector('select').value = "";
+            examDiv.querySelector('select').value = "";
         }
     }
 </script>

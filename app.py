@@ -474,6 +474,42 @@ def add_form():
     return redirect(url_for('admissions_hub'))
 
 
+@app.route('/admin/edit_master_form/<int:form_id>', methods=['POST'])
+@login_required
+def edit_master_form(form_id):
+    # Security check
+    if current_user.username != 'admin':
+        return "Unauthorized", 403
+
+    form = Form.query.get_or_404(form_id)
+
+    try:
+        # Update the form name
+        form.name = request.form.get('name')
+
+        # Determine the parent type (Umbrella)
+        parent_type = request.form.get('parent_type')
+
+        if parent_type == 'counselling':
+            form.counselling_id = request.form.get('counselling_id')
+            form.exam_id = None
+        elif parent_type == 'exam':
+            form.exam_id = request.form.get('exam_id')
+            form.counselling_id = None
+        else:
+            # If they select 'None', it remains an orphan (not recommended, but possible)
+            form.counselling_id = None
+            form.exam_id = None
+
+        db.session.commit()
+        flash(f"Master Form '{form.name}' updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating form: {str(e)}", "error")
+
+    return redirect(
+        url_for('manage_forms'))  # Replace 'manage_forms' with the name of your Forms Directory route if different
+
 @app.route('/admissions/edit_form/<int:item_id>', methods=['POST'])
 @login_required
 def edit_form(item_id):
