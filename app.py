@@ -35,6 +35,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+
 # 🚀 AUTOMATIC CLOUD DATABASE BUILDER
 # 🚀 AUTOMATIC CLOUD DATABASE BUILDER & TEAM INJECTION
 with app.app_context():
@@ -60,6 +61,25 @@ with app.app_context():
             print(f"✅ Counselor account for {member} created!")
 
     db.session.commit()
+
+# ==========================================
+# 🚨 SECURITY: AUTO-LOCK FINANCE PORTAL
+# ==========================================
+@app.before_request
+def check_finance_security():
+    """
+    If the user navigates away from the finances portal,
+    automatically destroy the finance session token.
+    """
+    # Only run this if the user is actually logged in
+    if current_user.is_authenticated:
+        # Check if they have the finance token
+        if session.get('finance_auth'):
+            # If the current page they are requesting does NOT start with '/finances'
+            # (and is not serving static assets like CSS/JS)
+            if not request.path.startswith('/finances') and not request.path.startswith('/static'):
+                session.pop('finance_auth', None)
+                print(f"🔒 Finance Portal auto-locked because user navigated to {request.path}")
 
 
 def convert_to_embed_link(url):
