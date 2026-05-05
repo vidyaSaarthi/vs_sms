@@ -514,3 +514,26 @@ class FinanceRecord(db.Model):
         """Helper method to ensure balance is always calculated correctly"""
         self.balance = (self.total_fees or 0.0) - (self.installment_1 or 0.0) - (self.installment_2 or 0.0)
         return self.balance
+
+
+class StudentFormSubmission(db.Model):
+    __tablename__ = 'student_form_submissions'
+    id = db.Column(db.Integer, primary_key=True)
+
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+
+    # It can belong to either an Exam OR a Counselling process
+    counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=True)
+    exam_id = db.Column(db.Integer, db.ForeignKey('exams.id'), nullable=True)
+
+    # 🚨 FORGIVING FIELD: True for new forms, NULL for your existing legacy data!
+    form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=True)
+
+    # The migrated credential fields
+    application_number = db.Column(db.String(100))
+    login_username = db.Column(db.String(150))
+    login_password = db.Column(db.String(150))
+    registered_email = db.Column(db.String(150))
+    registered_mobile = db.Column(db.String(20))
+    form_confirmation_link = db.Column(db.String(500))
+    submission_date = db.Column(db.Date, default=date.today)

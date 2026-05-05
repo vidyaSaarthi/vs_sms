@@ -1777,6 +1777,57 @@ def delete_finance_record(record_id):
 
     return redirect(url_for('customer_finances'))
 
+@app.route('/admin/migrate-legacy-forms')
+@login_required
+def migrate_legacy_forms():
+    # Only let the admin do this
+    if current_user.username != 'admin':
+        return "Unauthorized", 403
+
+    migrated_count = 0
+
+    # 1. MIGRATE COUNSELLING DATA
+    legacy_couns = StudentCounsellingRegistration.query.all()
+    for reg in legacy_couns:
+        # If they actually filled out credentials, migrate them
+        if reg.application_number or reg.login_username or reg.form_confirmation_link:
+            new_sub = StudentFormSubmission(
+                student_id=reg.student_id,
+                counselling_id=reg.counselling_id,
+                form_id=None, # Legacy data has no form_id
+                application_number=reg.application_number,
+                login_username=reg.login_username,
+                login_password=reg.login_password,
+                registered_email=reg.registered_email,
+                registered_mobile=reg.registered_mobile,
+                form_confirmation_link=reg.form_confirmation_link,
+                submission_date=reg.registration_date
+            )
+            db.session.add(new_sub)
+            migrated_count += 1
+
+    # 2. MIGRATE EXAM DATA
+    legacy_exams = StudentExamResult.query.all()
+    for res in legacy_exams:
+        if res.application_number or res.login_username or res.form_confirmation_link:
+            new_sub = StudentFormSubmission(
+                student_id=res.student_id,
+                exam_id=res.exam_id,
+                form_id=None, # Legacy data has no form_id
+                application_number=res.application_number,
+                login_username=res.login_username,
+                login_password=res.login_password,
+                registered_email=res.registered_email,
+                registered_mobile=res.registered_mobile,
+                form_confirmation_link=res.form_confirmation_link
+            )
+            db.session.add(new_sub)
+            migrated_count += 1
+
+    db.session.commit()
+    return f"✅ Migration Complete! Safely transferred {migrated_count} legacy credential records to the new Milestones architecture."
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
+
