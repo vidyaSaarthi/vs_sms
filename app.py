@@ -510,6 +510,7 @@ def edit_master_form(form_id):
     return redirect(
         url_for('manage_forms'))  # Replace 'manage_forms' with the name of your Forms Directory route if different
 
+
 @app.route('/admissions/edit_form/<int:item_id>', methods=['POST'])
 @login_required
 def edit_form(item_id):
@@ -521,11 +522,28 @@ def edit_form(item_id):
         form.start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
         form.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
 
-        form.form_type = request.form.get('form_type')
-        target_id = request.form.get('target_id')
-        form.exam_id = target_id if form.form_type == 'Exam' else None
-        form.counselling_id = target_id if form.form_type == 'Counselling' else None
+        # ==========================================
+        # 🚨 THE NEW PARENT LINKING LOGIC
+        # ==========================================
+        parent_type = request.form.get('parent_type')
 
+        if parent_type == 'counselling':
+            form.form_type = 'Counselling'
+            form.counselling_id = request.form.get('counselling_id') or None
+            form.exam_id = None
+        elif parent_type == 'exam':
+            form.form_type = 'Exam'
+            form.exam_id = request.form.get('exam_id') or None
+            form.counselling_id = None
+        else:
+            # Orphaned forms (No Parent selected)
+            form.counselling_id = None
+            form.exam_id = None
+            if not form.form_type:
+                form.form_type = 'Exam'  # Fallback to prevent null database errors
+        # ==========================================
+
+        # Now handle Admit Cards based on the newly determined form_type
         if form.form_type == 'Exam':
             admit_date_str = request.form.get('admit_card_date')
             form.admit_card_date = datetime.strptime(admit_date_str, '%Y-%m-%d').date() if admit_date_str else None
@@ -546,7 +564,7 @@ def edit_form(item_id):
         form.prospectus_link = request.form.get('prospectus_link')
 
         db.session.commit()
-        flash("Form details updated!", "success")
+        flash("Form details updated successfully!", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error updating form: {str(e)}", "error")
