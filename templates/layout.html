@@ -54,9 +54,15 @@
             display: flex;
             flex-direction: column;
             border-right: 1px solid #e2e8f0;
-            transition: width 0.3s ease-in-out;
+            /* 🚨 Updated to slide off-screen instead of shrink */
+            transition: transform 0.3s ease-in-out;
             overflow-x: hidden;
             white-space: nowrap;
+        }
+
+        /* 🚨 Fully hides the sidebar off the left side of the screen */
+        .sidebar.collapsed {
+            transform: translateX(-100%);
         }
 
         /* Shrinks to icon size when toggled */
@@ -139,9 +145,9 @@
             transition: margin-left 0.3s ease-in-out;
         }
 
-        /* Keeps content aligned with the 76px shrunken sidebar */
+        /* 🚨 Expands the main content to take up the full screen */
         .main-wrapper.expanded {
-            margin-left: 76px;
+            margin-left: 0;
         }
 
         .topbar {
