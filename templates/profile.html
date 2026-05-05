@@ -3,6 +3,23 @@
 {% block content %}
 <div class="container-fluid pt-3">
 
+    <div class="container-fluid pt-3">
+
+    <!-- 🚨 NEW: NAVIGATION BREADCRUMBS -->
+    <div class="mb-3 d-flex gap-2">
+        <a href="/students?tab=jee" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm rounded-pill px-3" style="font-size: 0.85rem;">
+            <i class="fas fa-arrow-left me-1"></i> Back to JEE Students
+        </a>
+        <a href="/students?tab=neet" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm rounded-pill px-3" style="font-size: 0.85rem;">
+            <i class="fas fa-arrow-left me-1"></i> Back to NEET Students
+        </a>
+    </div>
+
+    <!-- TOP ACTION BAR -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-dark"><i class="fas fa-road text-primary me-2"></i>{{ student.full_name }} | Journey</h2>
+
+
     <!-- TOP ACTION BAR -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0 text-dark"><i class="fas fa-road text-primary me-2"></i>{{ student.full_name }} | Journey</h2>
