@@ -1858,6 +1858,32 @@ def delete_form_submission(sub_id):
     return redirect(url_for('view_student', id=student_id))
 
 
+@app.route('/student/edit_form_submission/<int:sub_id>', methods=['POST'])
+@login_required
+def edit_form_submission(sub_id):
+    sub = StudentFormSubmission.query.get_or_404(sub_id)
+    student_id = sub.student_id
+
+    try:
+        form_id_val = request.form.get('form_id')
+        sub.form_id = int(form_id_val) if form_id_val else None
+
+        sub.application_number = request.form.get('application_number')
+        sub.login_username = request.form.get('login_username')
+        sub.login_password = request.form.get('login_password')
+        sub.registered_email = request.form.get('registered_email')
+        sub.registered_mobile = request.form.get('registered_mobile')
+        sub.form_confirmation_link = request.form.get('form_confirmation_link')
+
+        db.session.commit()
+        flash("Form submission updated and linked successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating form submission: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id))
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
 
