@@ -1884,6 +1884,94 @@ def edit_form_submission(sub_id):
     return redirect(url_for('view_student', id=student_id))
 
 
+@app.route('/admin/view-legacy-data')
+@login_required
+def view_legacy_data():
+    # Security check
+    if current_user.username != 'admin':
+        return "Unauthorized", 403
+
+    students = Student.query.order_by(Student.full_name.asc()).all()
+
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Legacy Data Report</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background-color: #f8f9fa; color: #333; }
+            h2 { color: #1a202c; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+            th, td { padding: 15px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+            th { background-color: #f1f5f9; text-transform: uppercase; font-size: 0.85rem; color: #475569; }
+            tr:hover { background-color: #f8fafc; }
+            .has-creds { color: #0f5132; background-color: #d1e7dd; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+            .no-creds { color: #6c757d; font-size: 0.85rem; }
+            .creds-box { background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px; margin-top: 5px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+            ul { list-style-type: none; padding-left: 0; margin: 0; }
+            li { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+            li:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        </style>
+    </head>
+    <body>
+        <h2>🗄️ Legacy Database Report (Pre-Migration State)</h2>
+        <p>This report reads directly from the old <code>StudentCounsellingRegistration</code> and <code>StudentExamResult</code> tables.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Student Name</th>
+                    <th style="width: 40%;">Legacy Counselling Data</th>
+                    <th style="width: 40%;">Legacy Exam Data</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+
+    for student in students:
+        # Only show students who actually have legacy data
+        if not student.counselling_registrations and not student.exam_results:
+            continue
+
+        couns_html = "<ul>"
+        for reg in student.counselling_registrations:
+            has_creds = bool(reg.application_number or reg.login_username or reg.form_confirmation_link)
+            badge = "<span class='has-creds'>Has Credentials (Migrated)</span>" if has_creds else "<span class='no-creds'>Status Only (No Forms)</span>"
+
+            couns_html += f"<li><strong>{reg.counselling.name}</strong> {badge}"
+            if has_creds:
+                couns_html += f"<div class='creds-box'>App No: {reg.application_number or '-'}<br>User: {reg.login_username or '-'}<br>Pass: {reg.login_password or '-'}</div>"
+            couns_html += "</li>"
+        couns_html += "</ul>"
+
+        exam_html = "<ul>"
+        for res in student.exam_results:
+            has_creds = bool(res.application_number or res.login_username or res.form_confirmation_link)
+            badge = "<span class='has-creds'>Has Credentials (Migrated)</span>" if has_creds else "<span class='no-creds'>Scores Only (No Forms)</span>"
+            exam_name = res.exam.name if res.exam else "Unknown Exam"
+
+            exam_html += f"<li><strong>{exam_name}</strong> {badge}"
+            if has_creds:
+                exam_html += f"<div class='creds-box'>App No: {res.application_number or '-'}<br>User: {res.login_username or '-'}<br>Pass: {res.login_password or '-'}</div>"
+            exam_html += "</li>"
+        exam_html += "</ul>"
+
+        html += f"""
+            <tr>
+                <td><strong>{student.full_name}</strong></td>
+                <td>{couns_html if student.counselling_registrations else "<span style='color:#999'>No Counselling</span>"}</td>
+                <td>{exam_html if student.exam_results else "<span style='color:#999'>No Exams</span>"}</td>
+            </tr>
+        """
+
+    html += """
+            </tbody>
+        </table>
+    </body>
+    </html>
+    """
+    return html
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
 
