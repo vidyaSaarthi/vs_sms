@@ -252,6 +252,15 @@
             margin-bottom: 0.4rem;
         }
     </style>
+
+    <!-- ANTI-FLICKER BOUNCER (Must be in head) -->
+    <script>
+        // If we have a saved tab for this page, instantly make the tab area invisible BEFORE the browser draws it
+        if (sessionStorage.getItem('activeTab_' + window.location.pathname)) {
+            document.write('<style id="tab-cloak">.tab-content { visibility: hidden !important; opacity: 0 !important; }</style>');
+        }
+    </script>
+
 </head>
 <body>
 
@@ -460,51 +469,43 @@
     <!-- ==========================================
      PRO-LEVEL SMART TAB MEMORY (NO FLICKER)
      ========================================== -->
+<!-- ==========================================
+     GLOBAL SMART TAB MEMORY & SWAP
+     ========================================== -->
     <script>
-    (function() {
-        // 1. Get the memory key and saved tab ID immediately
+    document.addEventListener("DOMContentLoaded", function() {
         const pageKey = 'activeTab_' + window.location.pathname;
         const savedTabId = sessionStorage.getItem(pageKey);
 
-        // 2. Setup the click listener for when users manually click tabs
-        document.addEventListener("DOMContentLoaded", function() {
-            const tabElements = document.querySelectorAll('[data-bs-toggle="tab"], [data-bs-toggle="pill"]');
-            tabElements.forEach(tab => {
-                tab.addEventListener('shown.bs.tab', function (event) {
-                    const targetId = event.target.getAttribute('data-bs-target') || event.target.getAttribute('href');
-                    if (targetId) sessionStorage.setItem(pageKey, targetId);
-                });
+        // 1. Setup click listeners to save tabs whenever you click them
+        const tabElements = document.querySelectorAll('[data-bs-toggle="tab"], [data-bs-toggle="pill"]');
+        tabElements.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (event) {
+                const targetId = event.target.getAttribute('data-bs-target') || event.target.getAttribute('href');
+                if (targetId) sessionStorage.setItem(pageKey, targetId);
             });
         });
 
-        // 3. THE MAGIC: Pre-load the correct tab BEFORE the flicker happens
+        // 2. If we have a saved tab, swap the active classes around silently
         if (savedTabId) {
-            // Add a temporary style to hide the tab content area until we finish sorting it
-            document.write('<style id="temp-tab-hide">.tab-content { opacity: 0; }</style>');
+            const targetBtn = document.querySelector('[data-bs-target="' + savedTabId + '"], [href="' + savedTabId + '"]');
+            const targetPane = document.querySelector(savedTabId);
 
-            window.addEventListener('DOMContentLoaded', function() {
-                // Find the button and the pane that should be active
-                const targetBtn = document.querySelector('[data-bs-target="' + savedTabId + '"], [href="' + savedTabId + '"]');
-                const targetPane = document.querySelector(savedTabId);
+            if (targetBtn && targetPane) {
+                // Strip the 'active' class from whatever the backend tried to make default
+                document.querySelectorAll('.nav-link.active, .nav-item > .active').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-pane.show.active').forEach(el => el.classList.remove('show', 'active'));
 
-                if (targetBtn && targetPane) {
-                    // A. Strip 'active' class from ALL buttons and panes
-                    document.querySelectorAll('.nav-link.active, .nav-item > .active').forEach(el => el.classList.remove('active'));
-                    document.querySelectorAll('.tab-pane.active').forEach(el => {
-                        el.classList.remove('show', 'active');
-                    });
-
-                    // B. Hard-apply the 'active' class to ONLY our saved target
-                    targetBtn.classList.add('active');
-                    targetPane.classList.add('show', 'active');
-                }
-
-                // Remove the temporary hiding style so the page appears perfectly painted
-                const styleTag = document.getElementById('temp-tab-hide');
-                if (styleTag) styleTag.remove();
-            });
+                // Give the 'active' class to our saved tab
+                targetBtn.classList.add('active');
+                targetPane.classList.add('show', 'active');
+            }
         }
-    })();
+
+        // 3. Remove the invisibility cloak! The page will now appear instantly on the correct tab.
+        const cloak = document.getElementById('tab-cloak');
+        if (cloak) cloak.remove();
+    });
     </script>
 
 </body>
