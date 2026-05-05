@@ -6,32 +6,32 @@
         <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-secondary fw-bold">Cancel Edit</a>
     </div>
 
-    <form method="POST" id="studentForm">
+    <form method="POST" id="studentForm" novalidate>
 
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-light"><h5 class="mb-0 text-danger">1. Basic & Target Exams</h5></div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="mb-3">
-                        <label class="form-label"><strong>Counselor Name (Created By) *</strong></label>
+                        <label class="form-label"><strong>Counselor Name (Created By) <span class="text-danger">*</span></strong></label>
                         <select name="created_by" class="form-control" required>
                             <option value="Krishna" {% if student.created_by == 'Krishna' %}selected{% endif %}>Krishna</option>
                             <option value="Yashpreet" {% if student.created_by == 'Yashpreet' %}selected{% endif %}>Yashpreet</option>
                             <option value="Shubham" {% if student.created_by == 'Shubham' %}selected{% endif %}>Shubham</option>
-                            <option value="Vivekam" {% if student.created_by == 'Vivekam' %}selected{% endif %}>Vivekam</option>
+                            <option value="Vivek" {% if student.created_by == 'Vivek' %}selected{% endif %}>Vivek</option>
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label>Target Exam</label>
-                        <select name="exam_type" id="examTypeSelect" class="form-select border-danger" style="background-color: #fff0f0;">
+                        <label class="form-label fw-bold">Target Exam <span class="text-danger">*</span></label>
+                        <select name="exam_type" id="examTypeSelect" class="form-select border-danger" style="background-color: #fff0f0;" required>
                             <option value="NEET" {% if student.exam_type == 'NEET' %}selected{% endif %}>NEET (Medical)</option>
                             <option value="JEE" {% if student.exam_type == 'JEE' %}selected{% endif %}>JEE (Engineering)</option>
                         </select>
                     </div>
 
                     <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold">Academic Status *</label>
+                    <label class="form-label fw-bold">Academic Status <span class="text-danger">*</span></label>
                     <select name="academic_status" class="form-select" required>
                         <option value="Fresher" {% if student and student.academic_status == 'Fresher' %}selected{% endif %}>Fresher</option>
                         <option value="Dropper" {% if student and student.academic_status == 'Dropper' %}selected{% endif %}>Dropper</option>
@@ -49,7 +49,7 @@
                         <input type="text" name="other_forms_filled" class="form-control" value="{{ student.other_forms_filled or '' }}" placeholder="Type any other forms here...">
                     </div>
 
-                    <div class="col-md-4"><label>Full Name</label><input type="text" name="full_name" class="form-control" value="{{ student.full_name }}"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label><input type="text" name="full_name" class="form-control" value="{{ student.full_name }}" required></div>
                     <div class="col-md-4"><label>Date of Birth (mm/dd/yyyy)</label><input type="date" name="dob" class="form-control" value="{{ student.dob.strftime('%Y-%m-%d') if student.dob else '' }}"></div>
                     <div class="col-md-4"><label>Gender</label>
                         <select name="gender" class="form-select">
@@ -58,7 +58,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4"><label>Student's Aadhaar No. (12 Digits)</label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" value="{{ student.aadhaar_no }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Student's Aadhaar No. (12 Digits) <span class="text-danger">*</span></label><input type="text" name="aadhaar_no" id="aadhaar_no" class="form-control" value="{{ student.aadhaar_no }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="12" required></div>
                     <div class="col-md-4"><label>Blood Group</label>
                         <select name="blood_group" class="form-select">
                             <option value="">Select</option>
@@ -80,7 +80,7 @@
                     <div class="col-md-4"><label>Identification Mark</label><input type="text" name="identification_mark" class="form-control" value="{{ student.identification_mark or '' }}"></div>
                     <div class="col-md-4"><label>Nationality</label><input type="text" name="nationality" class="form-control" value="{{ student.nationality or 'Indian' }}"></div>
                     <div class="col-md-4"><label>Nativity (State)</label><input type="text" name="nativity" class="form-control" value="{{ student.nativity or '' }}"></div>
-                    <div class="col-md-4"><label>Primary Mobile (10 Digits)</label><input type="text" name="mobile_number" id="mobile_number" class="form-control" value="{{ student.mobile_number }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Primary Mobile (10 Digits) <span class="text-danger">*</span></label><input type="text" name="mobile_number" id="mobile_number" class="form-control" value="{{ student.mobile_number }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10" required></div>
 
                     <div class="col-md-4"><label>Alternative Mobile (10 Digits)</label><input type="text" name="alt_mobile_number" id="alt_mobile_number" class="form-control" value="{{ student.alt_mobile_number or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
                     <div class="col-md-4"><label>Emergency Mobile (10 Digits)</label><input type="text" name="emergency_mobile" id="emergency_mobile" class="form-control" value="{{ student.emergency_mobile or '' }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="10"></div>
@@ -569,8 +569,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     attachCalcListeners();
 
-    document.getElementById('studentForm').addEventListener('submit', function(e) {
+    // 🚨 NEW DATA SHIELD SCRIPT FOR EDIT PAGE 🚨
+    const form = document.getElementById('studentForm');
+    form.addEventListener('submit', function(e) {
         let invalidMarks = false;
+
+        // 1. Existing Marks Validation
         ['c10-main', 'c10_other', 'c10_add', 'c12-main', 'c12_other', 'c12_add'].forEach(prefix => {
             const obtInputs = document.querySelectorAll(`.${prefix}-obt`);
             const maxInputs = document.querySelectorAll(`.${prefix}-max`);
@@ -593,7 +597,48 @@ document.addEventListener("DOMContentLoaded", function() {
             alert("Validation Error: Obtained marks cannot be greater than Maximum marks in any subject!");
             return;
         }
+
+        // 2. REQUIRED FIELDS VALIDATION (The Data Shield)
+        let firstInvalid = null;
+
+        // Loop through every input inside the form
+        Array.from(form.elements).forEach(input => {
+            // Check if it is a required field AND if it is empty
+            if (input.hasAttribute('required') && !input.value.trim()) {
+                input.style.border = "2px solid #cc0000";
+                input.style.boxShadow = "0 0 5px rgba(204, 0, 0, 0.5)";
+                input.style.backgroundColor = "#fff0f0";
+
+                if (!firstInvalid) {
+                    firstInvalid = input;
+                }
+            } else {
+                // Remove red glow if they fixed it
+                input.style.border = "";
+                input.style.boxShadow = "";
+                input.style.backgroundColor = "";
+            }
+        });
+
+        if (firstInvalid) {
+            e.preventDefault(); // STOP THE FORM FROM SENDING TO PYTHON (Prevents Data Wipe)
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+
+            let fieldName = firstInvalid.previousElementSibling ? firstInvalid.previousElementSibling.innerText.replace('*', '').trim() : "A required field";
+            alert("Please fill in: " + fieldName);
+        }
     });
+
+    // Remove red highlight dynamically as they type
+    form.addEventListener("input", function(event) {
+        if (event.target && event.target.hasAttribute('required') && event.target.value.trim()) {
+            event.target.style.border = "";
+            event.target.style.boxShadow = "";
+            event.target.style.backgroundColor = "";
+        }
+    });
+
 });
 </script>
 {% endblock %}
