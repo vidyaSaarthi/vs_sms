@@ -396,12 +396,22 @@
                 <div class="modal-body p-4">
                     <div class="mb-4">
                         <label class="form-label fw-bold">Select Exam</label>
-                        <select name="exam_id" class="form-select" required>
+                        <select name="exam_id" class="form-select mb-3" required id="examSelect">
                             <option value="">Choose...</option>
                             {% for e in exams %}
                             <option value="{{ e.id }}">{{ e.name }}</option>
                             {% endfor %}
                         </select>
+
+                        <!-- 🚨 NEW: The Form Selection Dropdown -->
+                        <label class="form-label fw-bold">Link to Master Form</label>
+                        <select name="form_id" class="form-select" id="examFormSelect">
+                            <option value="">Select form (or leave unlinked)...</option>
+                            {% for form in master_forms if form.exam_id %}
+                            <option value="{{ form.id }}" data-exam-id="{{ form.exam_id }}" style="display: none;">{{ form.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted mt-1 d-block">Only forms matching the selected exam will appear.</small>
                     </div>
 
                     <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Results</h6>
@@ -456,6 +466,34 @@
         </div>
     </div>
 </div>
+
+<!-- 🚨 JavaScript to filter forms based on the selected exam -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const examSelect = document.getElementById('examSelect');
+    const formSelect = document.getElementById('examFormSelect');
+
+    if (examSelect && formSelect) {
+        examSelect.addEventListener('change', function() {
+            const selectedExamId = this.value;
+            const options = formSelect.querySelectorAll('option');
+
+            // Reset form selection
+            formSelect.value = '';
+
+            options.forEach(option => {
+                if (option.value === "") {
+                    option.style.display = 'block'; // Always show default option
+                } else if (option.getAttribute('data-exam-id') === selectedExamId) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 
 <!-- Add Round Result Modal -->
 <div class="modal fade" id="addRoundResultModal" tabindex="-1">
