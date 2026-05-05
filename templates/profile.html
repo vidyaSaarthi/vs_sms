@@ -828,34 +828,4 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
-
-<!-- 🚨 SMART TAB MEMORY SCRIPT 🚨 -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Find all the tab buttons on the page
-    const tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
-
-    // 2. Whenever a tab is clicked, save its target (e.g., "#exams") to browser memory
-    tabElements.forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function (event) {
-            const targetId = event.target.getAttribute('data-bs-target');
-            sessionStorage.setItem('activeJourneyTab', targetId);
-        });
-    });
-
-    // 3. When the page reloads, check if we have a saved tab in memory
-    const savedTabId = sessionStorage.getItem('activeJourneyTab');
-
-    if (savedTabId) {
-        // Find the button that matches the saved tab
-        const savedTabButton = document.querySelector('button[data-bs-target="' + savedTabId + '"]');
-        if (savedTabButton) {
-            // Tell Bootstrap to activate and show this tab instantly
-            const tabInstance = new bootstrap.Tab(savedTabButton);
-            tabInstance.show();
-        }
-    }
-});
-</script>
-
 {% endblock %}

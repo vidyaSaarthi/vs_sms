@@ -456,5 +456,43 @@
             }
         });
     </script>
+
+    <!-- ==========================================
+         GLOBAL SMART TAB MEMORY
+         Remembers the active tab across the entire system based on URL
+         ========================================== -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Create a unique memory key based on the current page URL (e.g., /tasks, /master-data)
+        const pageKey = 'activeTab_' + window.location.pathname;
+
+        // 2. Find ALL tab buttons on the page (supports both <button> and <a> tags)
+        const tabElements = document.querySelectorAll('[data-bs-toggle="tab"]');
+
+        // 3. Whenever ANY tab is clicked, save its target to this page's memory
+        tabElements.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (event) {
+                const targetId = event.target.getAttribute('data-bs-target') || event.target.getAttribute('href');
+                if (targetId) {
+                    sessionStorage.setItem(pageKey, targetId);
+                }
+            });
+        });
+
+        // 4. When the page reloads, check if we have a saved tab specifically for this URL
+        const savedTabId = sessionStorage.getItem(pageKey);
+
+        if (savedTabId) {
+            // Find the specific tab button
+            const savedTabButton = document.querySelector('[data-bs-target="' + savedTabId + '"], [href="' + savedTabId + '"]');
+            if (savedTabButton) {
+                // Tell Bootstrap to instantly activate it
+                const tabInstance = new bootstrap.Tab(savedTabButton);
+                tabInstance.show();
+            }
+        }
+    });
+    </script>
+
 </body>
 </html>
