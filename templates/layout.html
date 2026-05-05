@@ -413,7 +413,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- 🚨 RESTORED: Click to toggle script -->
+    <!-- 🚨 SMART TOGGLE: Remembers state across page loads -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const sidebar = document.getElementById("appSidebar");
@@ -421,10 +421,29 @@
             const toggleBtn = document.getElementById("sidebarToggle");
 
             if (sidebar && mainWrapper && toggleBtn) {
-                // When hamburger is clicked, toggle the CSS classes to expand/collapse
+
+                // 1. Check local storage on page load
+                const sidebarState = localStorage.getItem('sidebarState');
+
+                if (sidebarState === 'collapsed') {
+                    sidebar.classList.add('collapsed');
+                    mainWrapper.classList.add('expanded');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    mainWrapper.classList.remove('expanded');
+                }
+
+                // 2. Toggle classes and save preference when clicked
                 toggleBtn.addEventListener('click', function() {
                     sidebar.classList.toggle('collapsed');
                     mainWrapper.classList.toggle('expanded');
+
+                    // Save the new state
+                    if (sidebar.classList.contains('collapsed')) {
+                        localStorage.setItem('sidebarState', 'collapsed');
+                    } else {
+                        localStorage.setItem('sidebarState', 'open');
+                    }
                 });
             }
         });
