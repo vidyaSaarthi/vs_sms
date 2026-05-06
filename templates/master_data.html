@@ -505,7 +505,7 @@
                                             <small class="text-muted" style="font-size: 0.75rem;">
                                                 <i class="far fa-calendar-alt me-1"></i>
                                                 {% if act.start_date and act.end_date %}
-                                                    {{ act.start_date.strftime('%d %b') }} - {{ act.end_date.strftime('%d %b, %I:%M %p') }}
+                                                    {{ act.start_date.strftime('%d %b, %I:%M %p') }} - {{ act.end_date.strftime('%d %b, %I:%M %p') }}
                                                 {% elif act.end_date %}
                                                     Deadline: {{ act.end_date.strftime('%d %b, %I:%M %p') }}
                                                 {% else %}
@@ -513,9 +513,34 @@
                                                 {% endif %}
                                             </small>
                                         </div>
-                                        <form action="{{ url_for('delete_counselling_activity', activity_id=act.id) }}" method="POST" onsubmit="return confirm('Remove global activity?');">
-                                            <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-times"></i></button>
-                                        </form>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-sm text-primary border-0 p-1" data-bs-toggle="modal" data-bs-target="#editGlobalActModal{{ act.id }}"><i class="fas fa-edit"></i></button>
+                                            <form action="{{ url_for('delete_counselling_activity', activity_id=act.id) }}" method="POST" onsubmit="return confirm('Remove global activity?');">
+                                                <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-times"></i></button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="editGlobalActModal{{ act.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-sm">
+                                        <div class="modal-content shadow-sm border-0">
+                                            <form action="{{ url_for('edit_counselling_activity', activity_id=act.id) }}" method="POST">
+                                                <div class="modal-header bg-warning py-2">
+                                                    <h6 class="modal-title fw-bold text-dark">Edit Global Activity</h6>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body p-3">
+                                                    <input type="text" name="activity_name" class="form-control form-control-sm mb-2" value="{{ act.activity_name }}" required>
+                                                    <label class="small fw-bold text-muted">Start Date & Time</label>
+                                                    <input type="datetime-local" name="start_date" class="form-control form-control-sm mb-2" value="{{ act.start_date.strftime('%Y-%m-%dT%H:%M') if act.start_date else '' }}">
+                                                    <label class="small fw-bold text-muted">End Date & Time</label>
+                                                    <input type="datetime-local" name="end_date" class="form-control form-control-sm mb-2" value="{{ act.end_date.strftime('%Y-%m-%dT%H:%M') if act.end_date else '' }}">
+                                                    <input type="url" name="activity_link" class="form-control form-control-sm mb-2" placeholder="Specific Link (Optional)" value="{{ act.activity_link or '' }}">
+                                                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark">Save Updates</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                                 {% endfor %}
@@ -586,16 +611,45 @@
                                                             <br>
                                                             <span class="text-muted"><i class="far fa-clock me-1"></i>
                                                                 {% if ract.start_date and ract.end_date %}
-                                                                    {{ ract.start_date.strftime('%d %b') }} to {{ ract.end_date.strftime('%d %b') }}
+                                                                    {{ ract.start_date.strftime('%d %b, %I:%M %p') }} to {{ ract.end_date.strftime('%d %b, %I:%M %p') }}
                                                                 {% elif ract.end_date %}
-                                                                    Due {{ ract.end_date.strftime('%d %b') }}
+                                                                    Due {{ ract.end_date.strftime('%d %b, %I:%M %p') }}
                                                                 {% endif %}
                                                             </span>
                                                         </div>
-                                                        <form action="{{ url_for('delete_round_activity', activity_id=ract.id) }}" method="POST" onsubmit="return confirm('Delete activity?');">
-                                                            <button type="submit" class="btn btn-sm text-danger p-0"><i class="fas fa-trash-alt"></i></button>
-                                                        </form>
+                                                        <div class="d-flex gap-1">
+                                                            <button type="button" class="btn btn-sm text-primary p-0 border-0 me-2" data-bs-toggle="modal" data-bs-target="#editRoundActModal{{ ract.id }}"><i class="fas fa-edit"></i></button>
+                                                            <form action="{{ url_for('delete_round_activity', activity_id=ract.id) }}" method="POST" onsubmit="return confirm('Delete activity?');">
+                                                                <button type="submit" class="btn btn-sm text-danger p-0 border-0"><i class="fas fa-trash-alt"></i></button>
+                                                            </form>
+                                                        </div>
                                                     </li>
+
+                                                    <div class="modal fade" id="editRoundActModal{{ ract.id }}" tabindex="-1">
+                                                        <div class="modal-dialog modal-sm">
+                                                            <div class="modal-content shadow-sm border-0">
+                                                                <form action="{{ url_for('edit_round_activity', activity_id=ract.id) }}" method="POST">
+                                                                    <div class="modal-header bg-warning py-2">
+                                                                        <h6 class="modal-title fw-bold text-dark">Edit Round Activity</h6>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                    </div>
+                                                                    <div class="modal-body p-3">
+                                                                        <input type="text" name="activity_name" class="form-control form-control-sm mb-2" value="{{ ract.activity_name }}" required>
+                                                                        <label class="small fw-bold text-muted">Start Date & Time</label>
+                                                                        <input type="datetime-local" name="start_date" class="form-control form-control-sm mb-2" value="{{ ract.start_date.strftime('%Y-%m-%dT%H:%M') if ract.start_date else '' }}">
+                                                                        <label class="small fw-bold text-muted">End Date & Time</label>
+                                                                        <input type="datetime-local" name="end_date" class="form-control form-control-sm mb-2" value="{{ ract.end_date.strftime('%Y-%m-%dT%H:%M') if ract.end_date else '' }}">
+
+                                                                        <div class="form-check mb-2 mt-2">
+                                                                            <input class="form-check-input" type="checkbox" name="is_actionable" id="editActCheck{{ ract.id }}" {% if ract.is_actionable %}checked{% endif %}>
+                                                                            <label class="form-check-label small fw-bold" for="editActCheck{{ ract.id }}">Action Required by Counselor</label>
+                                                                        </div>
+                                                                        <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark">Save Updates</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     {% else %}
                                                     <li class="list-group-item bg-transparent px-0 py-2 text-muted small">No schedule added.</li>
                                                     {% endfor %}

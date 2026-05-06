@@ -2316,6 +2316,48 @@ def add_round_activity(round_id):
         flash(f"Error adding round activity: {str(e)}", "error")
     return redirect(url_for('master_data', tab='master-couns-tab'))
 
+
+@app.route('/admissions/edit_counselling_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def edit_counselling_activity(activity_id):
+    activity = CounsellingActivity.query.get_or_404(activity_id)
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        activity.activity_name = request.form.get('activity_name')
+        activity.start_date = datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None
+        activity.end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None
+        activity.activity_link = request.form.get('activity_link')
+
+        db.session.commit()
+        flash("Global activity updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating activity: {str(e)}", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
+
+@app.route('/admissions/edit_round_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def edit_round_activity(activity_id):
+    activity = RoundActivity.query.get_or_404(activity_id)
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        activity.activity_name = request.form.get('activity_name')
+        activity.start_date = datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None
+        activity.end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None
+        activity.is_actionable = request.form.get('is_actionable') == 'on'
+
+        db.session.commit()
+        flash("Round activity updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating round activity: {str(e)}", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
 @app.route('/admissions/delete_round_activity/<int:activity_id>', methods=['POST'])
 @login_required
 def delete_round_activity(activity_id):
