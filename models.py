@@ -358,22 +358,13 @@ class CounsellingRound(db.Model):
     __tablename__ = 'counselling_rounds'
     id = db.Column(db.Integer, primary_key=True)
     counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=False)
+
     round_number = db.Column(db.String(50), nullable=False)
     rules = db.Column(db.Text, nullable=True)
-    seat_matrix_link = db.Column(db.String(500), nullable=True)
-    cutoffs_link = db.Column(db.String(500), nullable=True)
-    result_link = db.Column(db.String(500), nullable=True)
 
-    schedules = db.relationship('RoundSchedule', backref='round', lazy=True, cascade="all, delete-orphan")
+    # Note: The hardcoded links and old schedule relationship have been removed!
+    # The new RoundActivity and RoundArtifact tables automatically connect here via their backrefs.
 
-
-class RoundSchedule(db.Model):
-    __tablename__ = 'round_schedules'
-    id = db.Column(db.Integer, primary_key=True)
-    round_id = db.Column(db.Integer, db.ForeignKey('counselling_rounds.id'), nullable=False)
-    activity_name = db.Column(db.String(150), nullable=False)
-    start_date = db.Column(db.DateTime, nullable=True)
-    end_date = db.Column(db.DateTime, nullable=True)
 
 
 # ==========================================
@@ -544,3 +535,79 @@ class StudentFormSubmission(db.Model):
     # 🚨 NEW: Bridges to get the Umbrella Names for the tracker
     counselling = db.relationship('Counselling', backref='form_submissions')
     exam = db.relationship('Exam', backref='form_submissions')
+
+# ==========================================
+# LEVEL 1: THE UMBRELLA & GLOBAL TIMELINE
+# ==========================================
+
+class CounsellingActivity(db.Model):
+    """
+    Global timeline events for the entire counselling process
+    (e.g., 'Registration Opens', 'Document Verification Window')
+    """
+    __tablename__ = 'counselling_activities'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # 🚨 FIXED: Points to 'counselling.id' (singular)
+    counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id', ondelete='CASCADE'), nullable=False)
+
+    activity_name = db.Column(db.String(255), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+
+    activity_link = db.Column(db.String(500), nullable=True)
+
+    counselling = db.relationship('Counselling',
+                                  backref=db.backref('global_activities', lazy=True, cascade="all, delete-orphan"))
+
+    def __repr__(self):
+        return f"<CounsellingActivity {self.activity_name}>"
+
+
+# ==========================================
+# LEVEL 2: THE ROUND ECOSYSTEM
+# ==========================================
+
+class RoundActivity(db.Model):
+    """
+    Specific timeline events within a single round
+    (e.g., 'Choice Filling', 'Seat Allocation Result')
+    """
+    __tablename__ = 'round_activities'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # 🚨 FIXED: Points to 'counselling_rounds.id'
+    round_id = db.Column(db.Integer, db.ForeignKey('counselling_rounds.id', ondelete='CASCADE'), nullable=False)
+
+    activity_name = db.Column(db.String(255), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    is_actionable = db.Column(db.Boolean, default=False)
+
+    # 🚨 FIXED: Points to 'CounsellingRound'
+    round = db.relationship('CounsellingRound', backref=db.backref('activities', lazy=True, cascade="all, delete-orphan"))
+
+    def __repr__(self):
+        return f"<RoundActivity {self.activity_name}>"
+
+
+class RoundArtifact(db.Model):
+    """
+    Flexible document storage for a round
+    (e.g., 'Seat Matrix PDF', 'Cutoff Ranks')
+    """
+    __tablename__ = 'round_artifacts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    # 🚨 FIXED: Points to 'counselling_rounds.id'
+    round_id = db.Column(db.Integer, db.ForeignKey('counselling_rounds.id', ondelete='CASCADE'), nullable=False)
+
+    document_name = db.Column(db.String(255), nullable=False)
+    document_link = db.Column(db.String(1000), nullable=False)
+    artifact_type = db.Column(db.String(50), nullable=True)
+
+    # 🚨 FIXED: Points to 'CounsellingRound'
+    round = db.relationship('CounsellingRound', backref=db.backref('artifacts', lazy=True, cascade="all, delete-orphan"))
+
+    def __repr__(self):
+        return f"<RoundArtifact {self.document_name}>"
