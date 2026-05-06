@@ -12,7 +12,8 @@ from sqlalchemy import or_
 # Consolidated Imports (🚨 FinanceRecord added here)
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
     Counselling, Form, CounsellingRound, College, StudentCounsellingRegistration, StudentRoundResult, \
-    Course, StudentExamResult, Task, FormEvent, FinanceRecord, StudentFormSubmission, CounsellingActivity, RoundActivity, RoundArtifact
+    Course, StudentExamResult, Task, FormEvent, FinanceRecord, StudentFormSubmission, CounsellingActivity, RoundActivity, RoundArtifact, \
+    StudentActivityStatus
 
 app = Flask(__name__)
 
@@ -2345,6 +2346,43 @@ def delete_round_artifact(artifact_id):
         db.session.rollback()
         flash("Error removing artifact.", "error")
     return redirect(url_for('master_data', tab='master-couns-tab'))
+
+@app.route('/student/<int:student_id>/toggle_activity', methods=['POST'])
+@login_required
+def toggle_student_activity(student_id):
+    activity_type = request.form.get('activity_type') # 'global' or 'round'
+    activity_id = request.form.get('activity_id')
+    is_completed = request.form.get('is_completed') == 'on' # Checkbox returns 'on'
+
+    try:
+        # Check if a status record already exists
+        query = StudentActivityStatus.query.filter_by(student_id=student_id)
+        if activity_type == 'global':
+            status = query.filter_by(global_activity_id=activity_id).first()
+        else:
+            status = query.filter_by(round_activity_id=activity_id).first()
+
+        # If it exists, update it. If not, create it.
+        if status:
+            status.is_completed = is_completed
+            status.completion_date = datetime.utcnow() if is_completed else None
+        else:
+            new_status = StudentActivityStatus(
+                student_id=student_id,
+                global_activity_id=activity_id if activity_type == 'global' else None,
+                round_activity_id=activity_id if activity_type == 'round' else None,
+                is_completed=is_completed,
+                completion_date=datetime.utcnow() if is_completed else None
+            )
+            db.session.add(new_status)
+
+        db.session.commit()
+        flash("Progress saved successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating progress: {str(e)}", "error")
+
+    return redirect(url_for('view_student', id=student_id, tab='couns'))
 
 
 if __name__ == '__main__':

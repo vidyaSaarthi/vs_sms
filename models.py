@@ -207,6 +207,30 @@ class StudentExamResult(db.Model):
 
     exam = db.relationship('Exam')
 
+
+class StudentActivityStatus(db.Model):
+    """
+    Tracks whether a specific student has completed a specific actionable activity.
+    """
+    __tablename__ = 'student_activity_status'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id', ondelete='CASCADE'), nullable=False)
+
+    # It can link to EITHER a global activity or a round activity
+    global_activity_id = db.Column(db.Integer, db.ForeignKey('counselling_activities.id', ondelete='CASCADE'),
+                                   nullable=True)
+    round_activity_id = db.Column(db.Integer, db.ForeignKey('round_activities.id', ondelete='CASCADE'), nullable=True)
+
+    is_completed = db.Column(db.Boolean, default=False)
+    completion_date = db.Column(db.DateTime, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+
+    # Relationships to pull the activity details easily
+    student = db.relationship('Student',
+                              backref=db.backref('activity_statuses', lazy=True, cascade="all, delete-orphan"))
+    global_activity = db.relationship('CounsellingActivity')
+    round_activity = db.relationship('RoundActivity')
+
 class Document(db.Model):
     __tablename__ = 'documents'
     id = db.Column(db.Integer, primary_key=True)
