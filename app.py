@@ -608,21 +608,36 @@ def delete_form_record(item_id):
 @login_required
 def add_counselling_round(counselling_id):
     try:
+        # 1. Create the base Round
         new_round = CounsellingRound(
             counselling_id=counselling_id,
             round_number=request.form.get('round_number'),
-            rules=request.form.get('rules'),
-            seat_matrix_link=request.form.get('seat_matrix_link'),
-            cutoffs_link=request.form.get('cutoffs_link'),
-            result_link=request.form.get('result_link')
+            rules=request.form.get('rules')
         )
         db.session.add(new_round)
+        db.session.flush()  # Flushes so we can get the new_round.id immediately!
+
+        # 2. Check if they provided any initial links, and save them as flexible Artifacts
+        seat_link = request.form.get('seat_matrix_link')
+        if seat_link and seat_link.strip():
+            db.session.add(RoundArtifact(round_id=new_round.id, document_name="Seat Matrix", document_link=seat_link))
+
+        cutoffs_link = request.form.get('cutoffs_link')
+        if cutoffs_link and cutoffs_link.strip():
+            db.session.add(RoundArtifact(round_id=new_round.id, document_name="Cutoffs", document_link=cutoffs_link))
+
+        result_link = request.form.get('result_link')
+        if result_link and result_link.strip():
+            db.session.add(
+                RoundArtifact(round_id=new_round.id, document_name="Official Result", document_link=result_link))
+
         db.session.commit()
         flash(f"Round '{new_round.round_number}' added successfully!", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error adding round: {str(e)}", "error")
-    return redirect(url_for('master_data'))
+
+    return redirect(url_for('master_data', tab='master-couns-tab'))
 
 
 @app.route('/admissions/delete_round/<int:round_id>', methods=['POST'])
