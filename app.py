@@ -2351,7 +2351,7 @@ def delete_round_artifact(artifact_id):
 @login_required
 def toggle_student_activity(student_id):
     activity_type = request.form.get('activity_type') # 'global' or 'round'
-    activity_id = request.form.get('activity_id')
+    activity_id = int(request.form.get('activity_id'))
     is_completed = request.form.get('is_completed') == 'on' # Checkbox returns 'on'
 
     try:
