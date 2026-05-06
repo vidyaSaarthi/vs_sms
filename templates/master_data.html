@@ -505,9 +505,9 @@
                                             <small class="text-muted" style="font-size: 0.75rem;">
                                                 <i class="far fa-calendar-alt me-1"></i>
                                                 {% if act.start_date and act.end_date %}
-                                                    {{ act.start_date.strftime('%d %b') }} - {{ act.end_date.strftime('%d %b') }}
+                                                    {{ act.start_date.strftime('%d %b') }} - {{ act.end_date.strftime('%d %b, %I:%M %p') }}
                                                 {% elif act.end_date %}
-                                                    Deadline: {{ act.end_date.strftime('%d %b') }}
+                                                    Deadline: {{ act.end_date.strftime('%d %b, %I:%M %p') }}
                                                 {% else %}
                                                     No Dates Set
                                                 {% endif %}
@@ -531,8 +531,8 @@
                                 <form action="{{ url_for('add_counselling_activity', counselling_id=c.id) }}" method="POST">
                                     <input type="text" name="activity_name" class="form-control form-control-sm mb-2" placeholder="e.g. Master Registration" required>
                                     <div class="row g-1 mb-2">
-                                        <div class="col-6"><input type="date" name="start_date" class="form-control form-control-sm" title="Start Date"></div>
-                                        <div class="col-6"><input type="date" name="end_date" class="form-control form-control-sm" title="End Date"></div>
+                                        <div class="col-6"><input type="datetime-local" name="start_date" class="form-control form-control-sm" title="Start Date & Time"></div>
+                                        <div class="col-6"><input type="datetime-local" name="end_date" class="form-control form-control-sm" title="End Date & Time"></div>
                                     </div>
                                     <input type="url" name="activity_link" class="form-control form-control-sm mb-2" placeholder="Specific Link (Optional)">
                                     <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Add Event</button>
@@ -608,8 +608,8 @@
                                                         <form action="{{ url_for('add_round_activity', round_id=r.id) }}" method="POST">
                                                             <input type="text" name="activity_name" class="form-control form-control-sm mb-2" placeholder="e.g. Choice Filling" required>
                                                             <div class="row g-1 mb-2">
-                                                                <div class="col-6"><input type="date" name="start_date" class="form-control form-control-sm"></div>
-                                                                <div class="col-6"><input type="date" name="end_date" class="form-control form-control-sm"></div>
+                                                                <div class="col-6"><input type="datetime-local" name="start_date" class="form-control form-control-sm"></div>
+                                                                <div class="col-6"><input type="datetime-local" name="end_date" class="form-control form-control-sm"></div>
                                                             </div>
                                                             <div class="form-check mb-2">
                                                                 <input class="form-check-input" type="checkbox" name="is_actionable" id="actCheck{{ r.id }}">

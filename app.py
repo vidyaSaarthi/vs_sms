@@ -735,11 +735,25 @@ def dashboard():
         or_(FormEvent.end_date >= today, FormEvent.end_date == None)
     ).order_by(FormEvent.end_date.asc()).all()
 
+    # Fetch upcoming Actionable Round Activities
+    upcoming_round_deadlines = RoundActivity.query.filter(
+        RoundActivity.is_actionable == True,
+        RoundActivity.end_date >= datetime.utcnow()
+    ).order_by(RoundActivity.end_date.asc()).limit(10).all()
+
+    # Fetch upcoming Global Activities
+    upcoming_global_deadlines = CounsellingActivity.query.filter(
+        CounsellingActivity.end_date >= datetime.utcnow()
+    ).order_by(CounsellingActivity.end_date.asc()).limit(5).all()
+
+
     return render_template('dashboard.html',
                            master_exams=master_exams_sorted,
                            upcoming_exam_forms=upcoming_exam_forms,
                            counselling_grouped=counselling_grouped,
-                           upcoming_activities=upcoming_activities)
+                           upcoming_activities=upcoming_activities,
+                           upcoming_round_deadlines=upcoming_round_deadlines,  # 🚨 Added
+                           upcoming_global_deadlines=upcoming_global_deadlines)  # 🚨 Added
 
 
 # ==========================================
@@ -2251,8 +2265,9 @@ def add_counselling_activity(counselling_id):
         new_activity = CounsellingActivity(
             counselling_id=counselling_id,
             activity_name=request.form.get('activity_name'),
-            start_date=datetime.strptime(start_str, '%Y-%m-%d').date() if start_str else None,
-            end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else None,
+            # 🚨 FIX: Parse exact time using %Y-%m-%dT%H:%M
+            start_date=datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None,
             activity_link=request.form.get('activity_link')
         )
         db.session.add(new_activity)
@@ -2288,8 +2303,9 @@ def add_round_activity(round_id):
         new_activity = RoundActivity(
             round_id=round_id,
             activity_name=request.form.get('activity_name'),
-            start_date=datetime.strptime(start_str, '%Y-%m-%d').date() if start_str else None,
-            end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else None,
+            # 🚨 FIX: Parse exact time using %Y-%m-%dT%H:%M
+            start_date=datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None,
             is_actionable=request.form.get('is_actionable') == 'on'
         )
         db.session.add(new_activity)
@@ -2299,7 +2315,6 @@ def add_round_activity(round_id):
         db.session.rollback()
         flash(f"Error adding round activity: {str(e)}", "error")
     return redirect(url_for('master_data', tab='master-couns-tab'))
-
 
 @app.route('/admissions/delete_round_activity/<int:activity_id>', methods=['POST'])
 @login_required

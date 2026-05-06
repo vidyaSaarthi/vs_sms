@@ -156,8 +156,8 @@
                                                 <strong class="text-dark d-block" style="font-size: 0.95rem; {% if status and status.is_completed %}text-decoration: line-through; color: #9ca3af !important;{% endif %}">{{ act.activity_name }}</strong>
                                                 <small class="text-muted" style="font-size: 0.75rem;">
                                                     <i class="far fa-calendar-alt me-1"></i>
-                                                    {% if act.start_date and act.end_date %} {{ act.start_date.strftime('%d %b') }} - {{ act.end_date.strftime('%d %b') }}
-                                                    {% elif act.end_date %} Deadline: {{ act.end_date.strftime('%d %b') }}
+                                                    {% if act.start_date and act.end_date %} {{ act.start_date.strftime('%d %b') }} - {{ act.end_date.strftime('%d %b, %I:%M %p') }}
+                                                    {% elif act.end_date %} Deadline: {{ act.end_date.strftime('%d %b, %I:%M %p') }}
                                                     {% else %} Open {% endif %}
                                                 </small>
                                             </div>
@@ -200,7 +200,7 @@
                                                                 </form>
                                                                 <div>
                                                                     <strong class="text-dark d-block" style="font-size: 0.85rem; {% if status and status.is_completed %}text-decoration: line-through; color: #9ca3af !important;{% endif %}">{{ act.activity_name }}</strong>
-                                                                    <small class="text-muted" style="font-size: 0.75rem;">Deadline: {{ act.end_date.strftime('%d %b') if act.end_date else 'TBA' }}</small>
+                                                                    <small class="text-muted" style="font-size: 0.75rem;">Deadline: {{ act.end_date.strftime('%d %b, %I:%M %p') if act.end_date else 'TBA' }}</small>
                                                                 </div>
                                                             </div>
                                                         </div>
