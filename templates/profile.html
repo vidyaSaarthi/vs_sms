@@ -114,131 +114,159 @@
                 <div class="tab-pane fade show active p-4" id="couns" role="tabpanel">
 
                     {% for reg in student.counselling_registrations %}
-                    <div class="card border mb-4 shadow-sm" style="border-radius: 10px;">
-                        <!-- Umbrella Header -->
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
+                    <div class="card border border-primary mb-4 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+
+                        <div class="card-header d-flex justify-content-between align-items-center py-3" style="background-color: #f1f5f9; border-bottom: 2px solid #3b82f6;">
                             <div>
-                                <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-folder-open me-2 text-muted"></i>{{ reg.counselling.name }}</h5>
-                                <span class="badge mt-2 {% if reg.registration_status == 'Planned' %}bg-secondary{% elif reg.registration_status == 'Registered' %}bg-success{% else %}bg-warning text-dark{% endif %}">Status: {{ reg.registration_status }}</span>
+                                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-project-diagram text-primary me-2"></i>{{ reg.counselling.name }}</h5>
+                                <span class="badge mt-2 {% if reg.registration_status == 'Planned' %}bg-secondary{% elif reg.registration_status == 'Active' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                    Journey Status: {{ reg.registration_status }}
+                                </span>
                             </div>
                             <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCounsellingRegModal{{ reg.id }}"><i class="fas fa-edit me-1"></i> Edit Status</button>
-                                <form action="{{ url_for('delete_counselling_reg', reg_id=reg.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this entire journey and all its forms?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+                                <button type="button" class="btn btn-sm btn-white border fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#logFormModal{{ reg.counselling_id }}">
+                                    <i class="fas fa-key text-primary me-1"></i> View/Edit Credentials
+                                </button>
+                                <button type="button" class="btn btn-sm btn-white border fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#editCounsellingRegModal{{ reg.id }}">
+                                    <i class="fas fa-edit me-1"></i> Edit Status
+                                </button>
+                                <form action="{{ url_for('delete_counselling_reg', reg_id=reg.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this entire journey from the student?');">
+                                    <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-sm"><i class="fas fa-trash-alt"></i></button>
                                 </form>
                             </div>
                         </div>
 
-                        <!-- Milestones (Forms) Body -->
                         <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                {% set milestones = student.form_submissions | selectattr("counselling_id", "equalto", reg.counselling_id) | list %}
-
-                                {% for sub in milestones %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                                    <div class="w-25 pe-3 border-end">
-                                        <h6 class="fw-bold mb-1 text-dark">{{ sub.form.name if sub.form else 'Legacy Form Submission' }}</h6>
-                                        <small class="text-muted"><i class="fas fa-calendar-check me-1"></i>{{ sub.submission_date.strftime('%b %d, %Y') if sub.submission_date else 'Unknown' }}</small>
-                                    </div>
-                                    <div class="w-50 px-3">
-                                        <div class="row g-1" style="font-size: 0.85rem;">
-                                            <div class="col-6"><span class="text-muted">App No:</span> <strong class="text-dark">{{ sub.application_number or '-' }}</strong></div>
-                                            <div class="col-6"><span class="text-muted">User:</span> <strong class="text-primary">{{ sub.login_username or '-' }}</strong></div>
-                                            <div class="col-6"><span class="text-muted">Pass:</span> <strong class="text-danger">{{ sub.login_password or '-' }}</strong></div>
-                                            <div class="col-6">
-                                                {% if sub.form_confirmation_link %}
-                                                    <a href="{{ sub.form_confirmation_link }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm"><i class="fas fa-external-link-alt me-1"></i>Open Form</a>
-                                                {% else %}
-                                                    <span class="text-muted">No Link</span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="w-25 text-end ps-3 border-start">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFormSubmissionModal{{ sub.id }}" title="Edit Form"><i class="fas fa-edit"></i></button>
-                                            <form action="{{ url_for('delete_form_submission', sub_id=sub.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Remove this specific form submission?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+                            {% if reg.counselling.global_activities %}
+                            <div class="bg-white p-3 border-bottom">
+                                <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 1px;"><i class="fas fa-globe me-2"></i>Global Phase</h6>
+                                <div class="list-group list-group-flush">
+                                    {% for act in reg.counselling.global_activities %}
+                                    {% set status = student.activity_statuses | selectattr('global_activity_id', 'equalto', act.id) | first %}
+                                    <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0">
+                                        <div class="d-flex align-items-center">
+                                            <form action="{{ url_for('toggle_student_activity', student_id=student.id) }}" method="POST" class="m-0 me-3">
+                                                <input type="hidden" name="activity_type" value="global">
+                                                <input type="hidden" name="activity_id" value="{{ act.id }}">
+                                                <div class="form-check form-switch fs-5 m-0">
+                                                    <input class="form-check-input" type="checkbox" name="is_completed" onchange="this.form.submit()" {% if status and status.is_completed %}checked{% endif %}>
+                                                </div>
                                             </form>
+                                            <div>
+                                                <strong class="text-dark d-block" style="font-size: 0.95rem; {% if status and status.is_completed %}text-decoration: line-through; color: #9ca3af !important;{% endif %}">{{ act.activity_name }}</strong>
+                                                <small class="text-muted" style="font-size: 0.75rem;">
+                                                    <i class="far fa-calendar-alt me-1"></i>
+                                                    {% if act.start_date and act.end_date %} {{ act.start_date.strftime('%d %b') }} - {{ act.end_date.strftime('%d %b') }}
+                                                    {% elif act.end_date %} Deadline: {{ act.end_date.strftime('%d %b') }}
+                                                    {% else %} Open {% endif %}
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
-                                </li>
-                                {% else %}
-                                <li class="list-group-item p-4 text-center text-muted">
-                                    <i class="fas fa-file-invoice fs-4 mb-2 opacity-50"></i><br>
-                                    No specific forms logged for this journey yet.
-                                </li>
-                                {% endfor %}
-                            </ul>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if reg.counselling.rounds %}
+                            <div class="bg-light p-3">
+                                <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 1px;"><i class="fas fa-layer-group me-2"></i>Rounds Timeline</h6>
+
+                                <div class="accordion" id="studentRounds{{ reg.id }}">
+                                    {% for r in reg.counselling.rounds %}
+                                    <div class="accordion-item border-0 mb-2 shadow-sm rounded">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed fw-bold py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#sRound{{ r.id }}" style="font-size: 0.9rem;">
+                                                <i class="fas fa-angle-right me-2 text-primary"></i> {{ r.round_number }}
+                                            </button>
+                                        </h2>
+                                        <div id="sRound{{ r.id }}" class="accordion-collapse collapse" data-bs-parent="#studentRounds{{ reg.id }}">
+                                            <div class="accordion-body bg-white p-3 border-top">
+
+                                                {% set action_items = r.activities | selectattr("is_actionable", "equalto", True) | list %}
+                                                {% if action_items %}
+                                                    <h6 class="fw-bold text-dark mb-2" style="font-size: 0.8rem;">Required Actions</h6>
+                                                    <div class="list-group list-group-flush mb-3">
+                                                        {% for act in action_items %}
+                                                        {% set status = student.activity_statuses | selectattr('round_activity_id', 'equalto', act.id) | first %}
+                                                        <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0">
+                                                            <div class="d-flex align-items-center">
+                                                                <form action="{{ url_for('toggle_student_activity', student_id=student.id) }}" method="POST" class="m-0 me-3">
+                                                                    <input type="hidden" name="activity_type" value="round">
+                                                                    <input type="hidden" name="activity_id" value="{{ act.id }}">
+                                                                    <div class="form-check m-0 fs-5">
+                                                                        <input class="form-check-input shadow-sm border-secondary" type="checkbox" name="is_completed" onchange="this.form.submit()" {% if status and status.is_completed %}checked{% endif %}>
+                                                                    </div>
+                                                                </form>
+                                                                <div>
+                                                                    <strong class="text-dark d-block" style="font-size: 0.85rem; {% if status and status.is_completed %}text-decoration: line-through; color: #9ca3af !important;{% endif %}">{{ act.activity_name }}</strong>
+                                                                    <small class="text-muted" style="font-size: 0.75rem;">Deadline: {{ act.end_date.strftime('%d %b') if act.end_date else 'TBA' }}</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+
+                                                <div class="p-2 bg-light rounded border border-dashed text-muted" style="font-size: 0.8rem;">
+                                                    <strong class="d-block text-dark mb-1">Round Artifacts & Info</strong>
+                                                    {% for art in r.artifacts %}
+                                                        <a href="{{ art.document_link }}" target="_blank" class="badge bg-white border text-primary text-decoration-none me-1 mb-1 shadow-sm"><i class="fas fa-link me-1"></i>{{ art.document_name }}</a>
+                                                    {% else %}
+                                                        <span class="fst-italic">No artifacts attached.</span>
+                                                    {% endfor %}
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Add Milestone Footer -->
-                        <div class="card-footer bg-white text-end py-3">
-                            <button class="btn btn-sm btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#logFormModal{{ reg.counselling_id }}">
-                                <i class="fas fa-plus me-1"></i> Log Form Submission
-                            </button>
-                        </div>
-                    </div>
+                        <div class="modal fade" id="logFormModal{{ reg.counselling_id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content border-0 shadow">
+                                    <form action="{{ url_for('log_form_submission') }}" method="POST">
+                                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                                        <input type="hidden" name="counselling_id" value="{{ reg.counselling_id }}">
 
-                    <!-- 🚨 MODAL: Log Form specifically for THIS Umbrella -->
-                    <div class="modal fade" id="logFormModal{{ reg.counselling_id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content border-0 shadow">
-                                <form action="{{ url_for('log_form_submission') }}" method="POST">
-                                    <input type="hidden" name="student_id" value="{{ student.id }}">
-                                    <input type="hidden" name="counselling_id" value="{{ reg.counselling_id }}">
+                                        {% set existing_sub = student.form_submissions | selectattr("counselling_id", "equalto", reg.counselling_id) | first %}
 
-                                    <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title fw-bold">Log Form for {{ reg.counselling.name }}</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body p-4">
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold">Which form was submitted?</label>
-                                            <select name="form_id" class="form-select" required>
-                                                <option value="">Select form...</option>
-                                                {% for form in master_forms if form.counselling_id == reg.counselling_id %}
-                                                <option value="{{ form.id }}">{{ form.name }}</option>
-                                                {% endfor %}
-                                            </select>
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title fw-bold"><i class="fas fa-key text-warning me-2"></i>Portal Credentials: {{ reg.counselling.name }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
-
-                                        <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Portal Credentials Used</h6>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold text-primary">Form Confirmation Link</label>
-                                            <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://...">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Application Number</label>
-                                            <input type="text" name="application_number" class="form-control">
-                                        </div>
-                                        <div class="row g-2 mb-3">
-                                            <div class="col-6">
-                                                <label class="form-label fw-bold">Login Username</label>
-                                                <input type="text" name="login_username" class="form-control">
+                                        <div class="modal-body p-4">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Application / Registration No.</label>
+                                                <input type="text" name="application_number" class="form-control fw-bold text-primary" value="{{ existing_sub.application_number if existing_sub else '' }}">
                                             </div>
-                                            <div class="col-6">
-                                                <label class="form-label fw-bold text-danger">Login Password</label>
-                                                <input type="text" name="login_password" class="form-control">
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-6">
+                                                    <label class="form-label fw-bold">Login Username</label>
+                                                    <input type="text" name="login_username" class="form-control" value="{{ existing_sub.login_username if existing_sub else '' }}">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label fw-bold text-danger">Login Password</label>
+                                                    <input type="text" name="login_password" class="form-control" value="{{ existing_sub.login_password if existing_sub else '' }}">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold text-primary">Confirmation Document / Portal Link</label>
+                                                <input type="text" name="form_confirmation_link" class="form-control" placeholder="https://..." value="{{ existing_sub.form_confirmation_link if existing_sub else '' }}">
                                             </div>
                                         </div>
-                                        <div class="row g-2">
-                                            <div class="col-6">
-                                                <label class="form-label fw-bold">Reg. Email</label>
-                                                <input type="email" name="registered_email" class="form-control" value="{{ student.email_address }}">
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label fw-bold">Reg. Mobile</label>
-                                                <input type="text" name="registered_mobile" class="form-control" value="{{ student.mobile_number }}">
-                                            </div>
+                                        <div class="modal-footer bg-light">
+                                            <button type="submit" class="btn btn-dark fw-bold w-100">Save Credentials</button>
                                         </div>
-                                    </div>
-                                    <div class="modal-footer bg-light">
-                                        <button type="submit" class="btn btn-primary fw-bold w-100">Save Submission</button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                     {% else %}
                         <div class="text-center py-5 text-muted w-100">
