@@ -1875,7 +1875,7 @@ def customer_finances():
 @login_required
 def finance_login():
     pin = request.form.get('finance_pin')
-    if pin == '2468':
+    if pin == '1122':
         session['finance_auth'] = True
         flash("Finance Portal Unlocked.", "success")
     else:
