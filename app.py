@@ -1685,75 +1685,83 @@ def application_matrix():
 @app.route('/reports/workflow-tracker')
 @login_required
 def workflow_tracker():
-    # 1. Get the currently selected counselling process (if any)
     counselling_id = request.args.get('counselling_id')
-
-    # 2. Fetch all active counselling processes for the dropdown menu
     all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
     report_data = None
     selected_couns = None
     students = []
+    global_pending_alerts = []  # 🚨 NEW: List to hold cross-process alerts
 
+    # IF A SPECIFIC PROCESS IS SELECTED: Show the full Matrix
     if counselling_id and counselling_id.isdigit():
         selected_couns = Counselling.query.get_or_404(int(counselling_id))
-
-        # 3. Find all students registered for this specific process
         registrations = StudentCounsellingRegistration.query.filter_by(counselling_id=selected_couns.id).all()
         students = [reg.student for reg in registrations]
 
-        # 4. Build the Master Activity Timeline (Columns for our grid)
-        # We want Global activities first, then Round activities in order
         timeline_columns = []
-
         for g_act in selected_couns.global_activities:
-            timeline_columns.append({
-                'id': g_act.id,
-                'type': 'global',
-                'name': g_act.activity_name,
-                'due': g_act.end_date
-            })
+            timeline_columns.append(
+                {'id': g_act.id, 'type': 'global', 'name': g_act.activity_name, 'due': g_act.end_date})
 
-        # We only care about ACTIONABLE round activities for tracking
         for round in selected_couns.rounds:
             actionable_acts = [act for act in round.activities if act.is_actionable]
             for r_act in actionable_acts:
-                timeline_columns.append({
-                    'id': r_act.id,
-                    'type': 'round',
-                    'name': f"R{round.round_number}: {r_act.activity_name}",
-                    'due': r_act.end_date
-                })
+                timeline_columns.append(
+                    {'id': r_act.id, 'type': 'round', 'name': f"{round.round_number}: {r_act.activity_name}",
+                     'due': r_act.end_date})
 
-        # 5. Build the matrix: { student_id: { column_key: is_completed } }
         matrix = {}
         for student in students:
             matrix[student.id] = {}
             for col in timeline_columns:
-                # Create a unique key for the dictionary based on type and ID
                 col_key = f"{col['type']}_{col['id']}"
-
-                # Check if this student has a status record for this activity
-                status = None
                 if col['type'] == 'global':
                     status = StudentActivityStatus.query.filter_by(student_id=student.id,
                                                                    global_activity_id=col['id']).first()
                 else:
                     status = StudentActivityStatus.query.filter_by(student_id=student.id,
                                                                    round_activity_id=col['id']).first()
-
                 matrix[student.id][col_key] = status.is_completed if status else False
 
-        report_data = {
-            'columns': timeline_columns,
-            'matrix': matrix
-        }
+        report_data = {'columns': timeline_columns, 'matrix': matrix}
+
+    # 🚨 NEW LOGIC: IF NO PROCESS SELECTED, SCAN EVERYTHING FOR PENDING TASKS
+    else:
+        # Get ALL actionable round activities
+        all_actionable_acts = RoundActivity.query.filter_by(is_actionable=True).all()
+
+        for act in all_actionable_acts:
+            # Find all students registered for this activity's parent counselling process
+            couns_id = act.round.counselling_id
+            regs = StudentCounsellingRegistration.query.filter(
+                StudentCounsellingRegistration.counselling_id == couns_id,
+                StudentCounsellingRegistration.registration_status != 'Exited'  # Don't track dropped students
+            ).all()
+
+            for reg in regs:
+                # Check if this student has completed this specific action
+                status = StudentActivityStatus.query.filter_by(student_id=reg.student_id,
+                                                               round_activity_id=act.id).first()
+                if not status or not status.is_completed:
+                    global_pending_alerts.append({
+                        'student': reg.student,
+                        'counselling': act.round.counselling,
+                        'round': act.round,
+                        'activity': act,
+                        'due': act.end_date
+                    })
+
+        # Sort the alerts so the most urgent (earliest deadlines) are at the top!
+        # Treat "None" deadlines as far in the future so they sit at the bottom.
+        global_pending_alerts.sort(key=lambda x: x['due'] if x['due'] else datetime.max)
 
     return render_template('workflow_tracker.html',
                            all_counsellings=all_counsellings,
                            selected_couns=selected_couns,
                            students=students,
-                           report_data=report_data)
+                           report_data=report_data,
+                           global_pending_alerts=global_pending_alerts)  # 🚨 Pass to template
 
 @app.route('/reports/form-compliance')
 @login_required
