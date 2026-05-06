@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid pt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #2c3e50;"><i class="fas fa-tasks text-primary me-2"></i>Counselling Tracker</h2>
+            <p class="text-muted mb-0">Track real-time progress of all students across a specific counselling timeline.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('master_data', tab='master-couns-tab') }}" class="btn btn-outline-secondary fw-bold shadow-sm">
+                <i class="fas fa-cog me-2"></i>Configure Master Timelines
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; background: linear-gradient(to right, #f8f9fa, #ffffff);">
+        <div class="card-body p-4">
+            <form action="{{ url_for('workflow_tracker') }}" method="GET" class="d-flex gap-3 align-items-end">
+                <div class="flex-grow-1" style="max-width: 500px;">
+                    <label class="form-label fw-bold text-dark mb-2">Select Counselling Process to Audit:</label>
+                    <select name="counselling_id" class="form-select form-select-lg border-primary shadow-sm" onchange="this.form.submit()">
+                        <option value="">-- Choose a Process --</option>
+                        {% for c in all_counsellings %}
+                            <option value="{{ c.id }}" {% if selected_couns and selected_couns.id == c.id %}selected{% endif %}>
+                                {{ c.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_couns %}
+        {% if students %}
+            <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-users text-warning me-2"></i>{{ selected_couns.name }} Cohort ({{ students|length }} Students)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle mb-0" style="min-width: 1000px;">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th class="ps-4 py-3 bg-light" style="width: 250px; z-index: 2;">Student Name</th>
+                                    
+                                    {% for col in report_data.columns %}
+                                        <th class="text-center bg-light py-3" style="min-width: 180px;">
+                                            {% if col.type == 'global' %}
+                                                <span class="badge bg-primary mb-1">Global Phase</span><br>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark mb-1">Action Required</span><br>
+                                            {% endif %}
+                                            <strong class="text-dark d-block" style="font-size: 0.9rem;">{{ col.name }}</strong>
+                                            
+                                            <small class="text-danger fw-bold" style="font-size: 0.75rem;">
+                                                {% if col.due %}
+                                                    Due: {{ col.due.strftime('%d %b, %I:%M %p') }}
+                                                {% else %}
+                                                    No Deadline Set
+                                                {% endif %}
+                                            </small>
+                                        </th>
+                                    {% endfor %}
+                                    <th class="bg-light"></th> </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td class="ps-4 py-3 bg-white sticky-start fw-bold" style="border-right: 2px solid #dee2e6;">
+                                        <a href="{{ url_for('view_student', id=student.id, tab='couns') }}" target="_blank" class="text-decoration-none text-dark d-flex align-items-center">
+                                            <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                                {{ student.full_name[0] }}
+                                            </div>
+                                            {{ student.full_name }}
+                                        </a>
+                                        <div class="small text-muted mt-1 ms-5"><i class="fas fa-phone-alt me-1"></i>{{ student.mobile_number or 'No Mobile' }}</div>
+                                    </td>
+                                    
+                                    {% for col in report_data.columns %}
+                                        {% set col_key = col.type + '_' + col.id|string %}
+                                        {% set is_done = report_data.matrix[student.id][col_key] %}
+                                        
+                                        <td class="text-center align-middle" style="{% if is_done %}background-color: #f0fdf4;{% else %}background-color: #fff1f2;{% endif %}">
+                                            {% if is_done %}
+                                                <i class="fas fa-check-circle text-success fs-4 mb-1"></i><br>
+                                                <span class="badge bg-success">Completed</span>
+                                            {% else %}
+                                                <i class="fas fa-times-circle text-danger fs-4 mb-1 opacity-50"></i><br>
+                                                <span class="badge bg-danger">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                    <td></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted bg-white rounded border border-dashed shadow-sm">
+                <i class="fas fa-users-slash fs-1 mb-3 text-secondary opacity-50"></i>
+                <h4 class="fw-bold text-dark">No Students Found</h4>
+                <p class="mb-0">There are currently no students registered for "{{ selected_couns.name }}".</p>
+                <a href="{{ url_for('student_pipeline') }}" class="btn btn-outline-primary mt-3 fw-bold">Go to Student Pipeline</a>
+            </div>
+        {% endif %}
+        
+    {% else %}
+        <div class="text-center py-5 text-muted bg-white rounded border border-dashed shadow-sm">
+            <i class="fas fa-chart-line fs-1 mb-3 text-primary opacity-50"></i>
+            <h4 class="fw-bold text-dark">Select a Workflow to Begin</h4>
+            <p class="mb-0">Choose a counselling process from the dropdown above to audit your cohort's progress.</p>
+        </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .sticky-start {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background-color: #fff;
+    }
+</style>
+{% endblock %}

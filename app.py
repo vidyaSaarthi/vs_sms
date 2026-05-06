@@ -1682,6 +1682,79 @@ def application_matrix():
                            exam_type=exam_type)
 
 
+@app.route('/reports/workflow-tracker')
+@login_required
+def workflow_tracker():
+    # 1. Get the currently selected counselling process (if any)
+    counselling_id = request.args.get('counselling_id')
+
+    # 2. Fetch all active counselling processes for the dropdown menu
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
+    report_data = None
+    selected_couns = None
+    students = []
+
+    if counselling_id and counselling_id.isdigit():
+        selected_couns = Counselling.query.get_or_404(int(counselling_id))
+
+        # 3. Find all students registered for this specific process
+        registrations = StudentCounsellingRegistration.query.filter_by(counselling_id=selected_couns.id).all()
+        students = [reg.student for reg in registrations]
+
+        # 4. Build the Master Activity Timeline (Columns for our grid)
+        # We want Global activities first, then Round activities in order
+        timeline_columns = []
+
+        for g_act in selected_couns.global_activities:
+            timeline_columns.append({
+                'id': g_act.id,
+                'type': 'global',
+                'name': g_act.activity_name,
+                'due': g_act.end_date
+            })
+
+        # We only care about ACTIONABLE round activities for tracking
+        for round in selected_couns.rounds:
+            actionable_acts = [act for act in round.activities if act.is_actionable]
+            for r_act in actionable_acts:
+                timeline_columns.append({
+                    'id': r_act.id,
+                    'type': 'round',
+                    'name': f"R{round.round_number}: {r_act.activity_name}",
+                    'due': r_act.end_date
+                })
+
+        # 5. Build the matrix: { student_id: { column_key: is_completed } }
+        matrix = {}
+        for student in students:
+            matrix[student.id] = {}
+            for col in timeline_columns:
+                # Create a unique key for the dictionary based on type and ID
+                col_key = f"{col['type']}_{col['id']}"
+
+                # Check if this student has a status record for this activity
+                status = None
+                if col['type'] == 'global':
+                    status = StudentActivityStatus.query.filter_by(student_id=student.id,
+                                                                   global_activity_id=col['id']).first()
+                else:
+                    status = StudentActivityStatus.query.filter_by(student_id=student.id,
+                                                                   round_activity_id=col['id']).first()
+
+                matrix[student.id][col_key] = status.is_completed if status else False
+
+        report_data = {
+            'columns': timeline_columns,
+            'matrix': matrix
+        }
+
+    return render_template('workflow_tracker.html',
+                           all_counsellings=all_counsellings,
+                           selected_couns=selected_couns,
+                           students=students,
+                           report_data=report_data)
+
 @app.route('/reports/form-compliance')
 @login_required
 def form_compliance():
