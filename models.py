@@ -373,6 +373,9 @@ class FormEvent(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # 🚨 ADD THIS EXACT LINE:
+    form = db.relationship('Form', backref=db.backref('events', lazy=True, cascade="all, delete-orphan"))
+
 
 # ==========================================
 # 4. ROUNDS & SCHEDULES
