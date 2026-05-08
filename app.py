@@ -1226,6 +1226,55 @@ def delete_student(id):
         return redirect(url_for('view_student', id=student.id))
 
 
+@app.route('/student/<int:student_id>/toggle_activity', methods=['POST'])
+@login_required
+def toggle_student_activity(student_id):
+    student = Student.query.get_or_404(student_id)
+
+    # Grab the hidden inputs from the form we just submitted
+    activity_type = request.form.get('activity_type')
+    activity_id = request.form.get('activity_id')
+
+    if not activity_type or not activity_id:
+        flash("Invalid activity data.", "danger")
+        return redirect(url_for('view_student', id=student_id, tab='couns'))
+
+    # 1. Check if a status record already exists for this student and activity
+    status = None
+    if activity_type == 'global':
+        status = StudentActivityStatus.query.filter_by(
+            student_id=student.id,
+            global_activity_id=activity_id
+        ).first()
+    elif activity_type == 'round':
+        status = StudentActivityStatus.query.filter_by(
+            student_id=student.id,
+            round_activity_id=activity_id
+        ).first()
+
+    # 2. Toggle the status
+    if status:
+        # If it exists, flip it (True becomes False, False becomes True)
+        status.is_completed = not status.is_completed
+    else:
+        # If it doesn't exist yet, create it and mark it as completed
+        status = StudentActivityStatus(student_id=student.id, is_completed=True)
+        if activity_type == 'global':
+            status.global_activity_id = activity_id
+        elif activity_type == 'round':
+            status.round_activity_id = activity_id
+        db.session.add(status)
+
+    # 3. Save to database
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Error updating activity status.", "danger")
+
+    # 4. Redirect right back to the profile page, keeping the Counselling tab open
+    return redirect(url_for('view_student', id=student_id, tab='couns'))
+
 @app.route('/student/<int:id>')
 @login_required
 def view_student(id):
