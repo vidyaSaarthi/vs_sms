@@ -669,6 +669,13 @@ def add_form_event(form_id):
             end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else None,
             event_link=request.form.get('event_link')
         )
+        db.session.add(new_event)
+        db.session.commit()
+        flash("Event added to form successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding event: {str(e)}", "error")
+    return redirect(url_for('admissions_hub'))
 
 
 @app.route('/admissions/delete_event/<int:event_id>', methods=['POST'])
