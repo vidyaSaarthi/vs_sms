@@ -31,9 +31,25 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div class="d-print-none d-flex justify-content-end gap-2 mb-4">
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary fw-bold">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
+            <div class="mb-4 d-print-none">
+                {% if student.exam_type == 'JEE' %}
+                    <a href="/students?tab=jee" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm rounded-pill px-3" style="font-size: 0.85rem;">
+                        <i class="fas fa-arrow-left me-1"></i> JEE Students
+                    </a>
+                {% elif student.exam_type == 'NEET' %}
+                    <a href="/students?tab=neet" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm rounded-pill px-3" style="font-size: 0.85rem;">
+                        <i class="fas fa-arrow-left me-1"></i> NEET Students
+                    </a>
+                {% else %}
+                    <a href="/students" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm rounded-pill px-3" style="font-size: 0.85rem;">
+                        <i class="fas fa-arrow-left me-1"></i> All Students
+                    </a>
+                {% endif %}
+
+                <a href="{{ url_for('view_student', id=student.id) }}" class="btn btn-sm bg-light border text-primary fw-bold shadow-sm rounded-pill px-3 ms-2" style="font-size: 0.85rem;">
+                    <i class="fas fa-user-circle me-1"></i> Return to Profile
+                </a>
+            </div>
 
             <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-warning fw-bold shadow-sm" style="color: #333;">
                 <i class="fas fa-edit me-2"></i>Edit Profile
