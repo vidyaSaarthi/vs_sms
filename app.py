@@ -1233,7 +1233,14 @@ def toggle_student_activity(student_id):
 
     # Grab the hidden inputs from the form we just submitted
     activity_type = request.form.get('activity_type')
-    activity_id = request.form.get('activity_id')
+    activity_id_str = request.form.get('activity_id')
+
+    if not activity_type or not activity_id_str:
+        flash("Invalid activity data.", "danger")
+        return redirect(url_for('view_student', id=student_id, tab='couns'))
+
+    # 🚨 Convert the string to an integer!
+    activity_id = int(activity_id_str)
 
     if not activity_type or not activity_id:
         flash("Invalid activity data.", "danger")
