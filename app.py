@@ -1397,26 +1397,44 @@ def edit_counselling_reg(reg_id):
 @login_required
 def add_exam_result(student_id):
     try:
+        exam_id = request.form.get('exam_id')
+        form_id_val = request.form.get('form_id')
+        app_no = request.form.get('application_number')
+        user = request.form.get('login_username')
+        pw = request.form.get('login_password')
+        link = request.form.get('form_confirmation_link')
+
+        # 1. Create the Exam Result (Scores/Ranks)
         result = StudentExamResult(
             student_id=student_id,
-            exam_id=request.form.get('exam_id'),
-            application_number=request.form.get('application_number'),
-            login_username=request.form.get('login_username'),
-            login_password=request.form.get('login_password'),
-            registered_email=request.form.get('registered_email'),
-            registered_mobile=request.form.get('registered_mobile'),
-            form_confirmation_link=request.form.get('form_confirmation_link'),
+            exam_id=exam_id,
             score=float(request.form.get('score')) if request.form.get('score') else None,
             percentile=float(request.form.get('percentile')) if request.form.get('percentile') else None,
             all_india_rank=int(request.form.get('all_india_rank')) if request.form.get('all_india_rank') else None,
             state_rank=int(request.form.get('state_rank')) if request.form.get('state_rank') else None
         )
         db.session.add(result)
+
+        # 2. 🚨 NEW: Create the Associated Form Submission (Credentials Milestone)
+        # We only create this if the user actually typed in credentials or linked a master form
+        if form_id_val or app_no or user or pw or link:
+            new_sub = StudentFormSubmission(
+                student_id=student_id,
+                exam_id=int(exam_id) if exam_id else None,
+                form_id=int(form_id_val) if form_id_val else None,
+                application_number=app_no,
+                login_username=user,
+                login_password=pw,
+                form_confirmation_link=link
+            )
+            db.session.add(new_sub)
+
         db.session.commit()
         flash("Exam Form & Result added successfully!", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error saving exam data: {str(e)}", "error")
+
     return redirect(url_for('view_student', id=student_id))
 
 
