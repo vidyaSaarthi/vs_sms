@@ -49,6 +49,13 @@ with app.app_context():
     except Exception:
         db.session.rollback()  # If the column already exists, silently ignore and continue
 
+    try:
+        db.session.execute(text('ALTER TABLE student_round_results ADD COLUMN offer_letter_link VARCHAR(500)'))
+        db.session.commit()
+        print("✅ Added multiple Offer Letter support to Round Results.")
+    except Exception:
+        db.session.rollback()
+
     # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
         db.session.add(Staff(username='admin', password_hash=generate_password_hash('admin123'), role='admin'))
@@ -1513,6 +1520,9 @@ def delete_exam_result(result_id):
 @login_required
 def add_round_result(student_id):
     try:
+        raw_link = request.form.get('offer_letter_link')
+        embed_link = convert_to_embed_link(raw_link.strip()) if raw_link and raw_link.strip() else None
+
         result = StudentRoundResult(
             student_id=student_id,
             round_id=request.form.get('round_id'),
@@ -1522,7 +1532,8 @@ def add_round_result(student_id):
             allotted_category=request.form.get('allotted_category'),
             post_allotment_action=request.form.get('post_allotment_action'),
             seat_acceptance_fee_paid=request.form.get('seat_acceptance_fee_paid') == 'yes',
-            reporting_status=request.form.get('reporting_status')
+            reporting_status=request.form.get('reporting_status'),
+            offer_letter_link=embed_link # 🚨 Saves the link
         )
         db.session.add(result)
         db.session.commit()
@@ -1530,7 +1541,6 @@ def add_round_result(student_id):
     except Exception as e:
         db.session.rollback()
         flash(f"Error saving round result: {str(e)}", "error")
-
     return redirect(url_for('view_student', id=student_id))
 
 
@@ -1649,6 +1659,10 @@ def edit_round_result(result_id):
         result.round_id = request.form.get('round_id')
         result.allotted_institute = request.form.get('allotted_institute')
         result.post_allotment_action = request.form.get('post_allotment_action')
+
+        raw_link = request.form.get('offer_letter_link')
+        result.offer_letter_link = convert_to_embed_link(raw_link.strip()) if raw_link and raw_link.strip() else None
+
         db.session.commit()
         flash("Round allotment updated successfully!", "success")
     except Exception as e:

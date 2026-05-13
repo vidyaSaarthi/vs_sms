@@ -502,6 +502,8 @@ class StudentRoundResult(db.Model):
     seat_acceptance_fee_paid = db.Column(db.Boolean, default=False)
     reporting_status = db.Column(db.String(100), default='Not Reported')
 
+    offer_letter_link = db.Column(db.String(500), nullable=True)
+
     round = db.relationship('CounsellingRound', backref='student_results', lazy=True)
 
     def __repr__(self):

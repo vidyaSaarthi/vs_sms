@@ -363,6 +363,17 @@
                                 <tr>
                                     <td class="ps-4"><span class="badge bg-dark">Round {{ res.round.round_number }}</span><br><small class="text-muted fw-bold">{{ res.round.counselling.name }}</small></td>
                                     <td class="fw-bold text-success">{{ res.allotted_institute or 'No Allotment' }}<br><small class="text-muted fw-normal">{{ res.allotted_branch or '' }}</small></td>
+                                    <td class="fw-bold text-success">
+                                        {{ res.allotted_institute or 'No Allotment' }}<br>
+                                        <small class="text-muted fw-normal">{{ res.allotted_branch or '' }}</small>
+
+                                        {% if res.offer_letter_link %}
+                                        <div class="mt-1">
+                                            <a href="{{ res.offer_letter_link }}" target="_blank" class="badge bg-primary text-white text-decoration-none shadow-sm"><i class="fas fa-envelope-open-text me-1"></i>View Offer Letter</a>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+
                                     <td><span class="badge bg-primary">{{ res.post_allotment_action or 'Pending' }}</span></td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
@@ -567,6 +578,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label class="form-label fw-bold">Allotted Institute</label>
                         <input type="text" name="allotted_institute" class="form-control text-success fw-bold">
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Offer Letter Link (Google Drive / URL)</label>
+                        <input type="url" name="offer_letter_link" class="form-control" placeholder="https://...">
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Post-Allotment Decision</label>
                         <select name="post_allotment_action" class="form-select">
@@ -799,6 +816,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label class="form-label fw-bold">Allotted Institute</label>
                         <input type="text" name="allotted_institute" class="form-control text-success fw-bold" value="{{ res.allotted_institute or '' }}">
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-primary">Offer Letter Link (Google Drive / URL)</label>
+                        <input type="url" name="offer_letter_link" class="form-control" placeholder="https://..." value="{{ res.offer_letter_link or '' }}">
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Post-Allotment Decision</label>
                         <select name="post_allotment_action" class="form-select">
