@@ -18,6 +18,63 @@ class Staff(db.Model, UserMixin):
     role = db.Column(db.String(20), default='counselor')
     is_active = db.Column(db.Boolean, default=True)
 
+# ==========================================
+# 2. MASTER DATA (States, Universities, Exams, Courses)
+# ==========================================
+
+class State(db.Model):
+    __tablename__ = 'states'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+
+    categories = db.relationship('StateCategory', backref='state', lazy=True, cascade="all, delete-orphan")
+
+
+class StateCategory(db.Model):
+    __tablename__ = 'state_categories'
+    id = db.Column(db.Integer, primary_key=True)
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=False)
+    category_name = db.Column(db.String(100), nullable=False)
+    category_description = db.Column(db.Text, nullable=True)
+
+
+class University(db.Model):
+    __tablename__ = 'universities'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False, unique=True)
+
+    categories = db.relationship('UniversityCategory', backref='university', lazy=True, cascade="all, delete-orphan")
+
+
+class UniversityCategory(db.Model):
+    __tablename__ = 'university_categories'
+    id = db.Column(db.Integer, primary_key=True)
+    university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=False)
+    category_name = db.Column(db.String(100), nullable=False)
+    category_description = db.Column(db.Text, nullable=True)
+
+
+# The Many-to-Many Bridge Table
+exam_courses = db.Table('exam_courses',
+                        db.Column('exam_id', db.Integer, db.ForeignKey('exams.id'), primary_key=True),
+                        db.Column('course_id', db.Integer, db.ForeignKey('courses.id'), primary_key=True)
+                        )
+
+counselling_courses = db.Table('counselling_courses',
+    db.Column('counselling_id', db.Integer, db.ForeignKey('counselling.id'), primary_key=True),
+    db.Column('course_id', db.Integer, db.ForeignKey('courses.id'), primary_key=True)
+)
+
+class Exam(db.Model):
+    __tablename__ = 'exams'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    exam_date = db.Column(db.Date, nullable=True)
+    exam_end_date = db.Column(db.Date, nullable=True)  # 🚨 NEW: The End Date
+
+    # Relationship to Courses
+    courses = db.relationship('Course', secondary=exam_courses, backref=db.backref('exams', lazy=True))
+
 
 class Student(db.Model):
     __tablename__ = 'students'
@@ -262,62 +319,7 @@ class Document(db.Model):
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ==========================================
-# 2. MASTER DATA (States, Universities, Exams, Courses)
-# ==========================================
 
-class State(db.Model):
-    __tablename__ = 'states'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-
-    categories = db.relationship('StateCategory', backref='state', lazy=True, cascade="all, delete-orphan")
-
-
-class StateCategory(db.Model):
-    __tablename__ = 'state_categories'
-    id = db.Column(db.Integer, primary_key=True)
-    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=False)
-    category_name = db.Column(db.String(100), nullable=False)
-    category_description = db.Column(db.Text, nullable=True)
-
-
-class University(db.Model):
-    __tablename__ = 'universities'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False, unique=True)
-
-    categories = db.relationship('UniversityCategory', backref='university', lazy=True, cascade="all, delete-orphan")
-
-
-class UniversityCategory(db.Model):
-    __tablename__ = 'university_categories'
-    id = db.Column(db.Integer, primary_key=True)
-    university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=False)
-    category_name = db.Column(db.String(100), nullable=False)
-    category_description = db.Column(db.Text, nullable=True)
-
-
-# The Many-to-Many Bridge Table
-exam_courses = db.Table('exam_courses',
-                        db.Column('exam_id', db.Integer, db.ForeignKey('exams.id'), primary_key=True),
-                        db.Column('course_id', db.Integer, db.ForeignKey('courses.id'), primary_key=True)
-                        )
-
-counselling_courses = db.Table('counselling_courses',
-    db.Column('counselling_id', db.Integer, db.ForeignKey('counselling.id'), primary_key=True),
-    db.Column('course_id', db.Integer, db.ForeignKey('courses.id'), primary_key=True)
-)
-
-class Exam(db.Model):
-    __tablename__ = 'exams'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
-    exam_date = db.Column(db.Date, nullable=True)
-    exam_end_date = db.Column(db.Date, nullable=True)  # 🚨 NEW: The End Date
-
-    # Relationship to Courses
-    courses = db.relationship('Course', secondary=exam_courses, backref=db.backref('exams', lazy=True))
 
 
 # ==========================================
