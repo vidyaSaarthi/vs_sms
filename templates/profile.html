@@ -361,7 +361,7 @@
                             <tbody>
                                 {% for res in student.round_results %}
                                 <tr>
-                                    <td class="ps-4"><span class="badge bg-dark">Round {{ res.round.round_number }}</span><br><small class="text-muted fw-bold">{{ res.round.counselling.name }}</small></td>
+                                    <td class="ps-4"><span class="badge bg-dark">{{ res.round.round_number }}</span><br><small class="text-muted fw-bold">{{ res.round.counselling.name }}</small></td>
                                     <td class="fw-bold text-success">{{ res.allotted_institute or 'No Allotment' }}<br><small class="text-muted fw-normal">{{ res.allotted_branch or '' }}</small></td>
                                     <td class="fw-bold text-success">
                                         {{ res.allotted_institute or 'No Allotment' }}<br>
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% for reg in student.counselling_registrations %}
                                 <optgroup label="{{ reg.counselling.name }}">
                                 {% for r in reg.counselling.rounds %}
-                                    <option value="{{ r.id }}">Round {{ r.round_number }}</option>
+                                    <option value="{{ r.id }}">{{ r.round_number }}</option>
                                 {% endfor %}
                                 </optgroup>
                             {% endfor %}
@@ -812,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% for reg in student.counselling_registrations %}
                                 <optgroup label="{{ reg.counselling.name }}">
                                 {% for r in reg.counselling.rounds %}
-                                    <option value="{{ r.id }}" {% if res.round_id == r.id %}selected{% endif %}>Round {{ r.round_number }}</option>
+                                    <option value="{{ r.id }}" {% if res.round_id == r.id %}selected{% endif %}>{{ r.round_number }}</option>
                                 {% endfor %}
                                 </optgroup>
                             {% endfor %}
