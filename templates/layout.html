@@ -289,38 +289,38 @@
             <div class="sidebar-menu">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' or request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if request.path == '/' or request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
                             <i class="fas fa-chart-pie"></i> Deadlines
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'tasks_page' %}active text-danger{% endif %}" href="{{ url_for('tasks_page') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if request.endpoint == 'tasks_page' %}active text-danger{% endif %}" href="{{ url_for('tasks_page') }}">
                             <i class="fas fa-clipboard-list"></i> Task Management
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link {% if '/reports/form-compliance' in request.path %}active{% endif %}" href="{{ url_for('form_compliance') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/reports/form-compliance' in request.path %}active{% endif %}" href="{{ url_for('form_compliance') }}">
                             <i class="fas fa-shield-alt text-success"></i> Form Compliance
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link {% if '/reports/application-matrix' in request.path %}active{% endif %}" href="{{ url_for('application_matrix') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/reports/application-matrix' in request.path %}active{% endif %}" href="{{ url_for('application_matrix') }}">
                             <i class="fas fa-th text-danger"></i> Application Matrix
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a href="{{ url_for('workflow_tracker') }}" class="nav-link">
+                        <a href="{{ url_for('workflow_tracker') }}" class="nav-link nav-link text-dark fw-bold shadow-sm">
                             <i class="fas fa-tasks me-2"></i>Counselling Tracker
                         </a>
                     </li>
 
 
                     <li class="nav-item">
-                        <a class="nav-link {% if '/student' in request.path %}active{% endif %}" href="{{ url_for('student_pipeline') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/student' in request.path %}active{% endif %}" href="{{ url_for('student_pipeline') }}">
                             <i class="fas fa-users"></i> Students
                         </a>
                     </li>
@@ -333,7 +333,7 @@
 
                     <!-- 🚨 ADDED FINANCES LINK HERE -->
                     <li class="nav-item">
-                        <a class="nav-link {% if '/finances' in request.path %}active{% endif %}" href="{{ url_for('customer_finances') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/finances' in request.path %}active{% endif %}" href="{{ url_for('customer_finances') }}">
                             <i class="fas fa-file-invoice-dollar text-success"></i> Finances
                         </a>
                     </li>
@@ -343,17 +343,17 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link {% if '/admissions' in request.path %}active{% endif %}" href="{{ url_for('admissions_hub') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/admissions' in request.path %}active{% endif %}" href="{{ url_for('admissions_hub') }}">
                             <i class="fas fa-file-signature"></i> Forms Directory
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if '/colleges' in request.path %}active{% endif %}" href="{{ url_for('college_directory') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/colleges' in request.path %}active{% endif %}" href="{{ url_for('college_directory') }}">
                             <i class="fas fa-university"></i> College Directory
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if '/settings/master' in request.path %}active{% endif %}" href="{{ url_for('master_data') }}">
+                        <a class="nav-link nav-link text-dark fw-bold shadow-sm {% if '/settings/master' in request.path %}active{% endif %}" href="{{ url_for('master_data') }}">
                             <i class="fas fa-database"></i> Master Data
                         </a>
                     </li>
