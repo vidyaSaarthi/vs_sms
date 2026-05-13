@@ -381,7 +381,7 @@ class Form(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # 🚨 NEW RELATIONSHIP: One Form has Many Events
-    events = db.relationship('FormEvent', backref='parent_form', lazy=True, cascade="all, delete-orphan")
+    events = db.relationship('FormEvent', backref='form', lazy=True, cascade="all, delete-orphan")
 
 
 # 🚨 NEW TABLE
@@ -398,7 +398,7 @@ class FormEvent(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # 🚨 ADD THIS EXACT LINE:
-    form = db.relationship('Form')
+    # form = db.relationship('Form')
 
 
 # ==========================================

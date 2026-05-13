@@ -579,6 +579,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <input type="text" name="allotted_institute" class="form-control text-success fw-bold">
                     </div>
 
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Stream / Branch</label>
+                        <input type="text" name="allotted_branch" class="form-control fw-bold" placeholder="e.g., Computer Science">
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold text-primary">Offer Letter Link (Google Drive / URL)</label>
                         <input type="url" name="offer_letter_link" class="form-control" placeholder="https://...">
@@ -816,6 +822,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label class="form-label fw-bold">Allotted Institute</label>
                         <input type="text" name="allotted_institute" class="form-control text-success fw-bold" value="{{ res.allotted_institute or '' }}">
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Stream / Branch</label>
+                        <input type="text" name="allotted_branch" class="form-control fw-bold" value="{{ res.allotted_branch or '' }}">
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold text-primary">Offer Letter Link (Google Drive / URL)</label>
                         <input type="url" name="offer_letter_link" class="form-control" placeholder="https://..." value="{{ res.offer_letter_link or '' }}">
