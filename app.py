@@ -43,7 +43,7 @@ with app.app_context():
     db.create_all()
 
     try:
-        db.session.execute(text('ALTER TABLE finance_record ADD COLUMN unregistered_name VARCHAR(255)'))
+        db.session.execute(text('ALTER TABLE finance_records ADD COLUMN unregistered_name VARCHAR(255)'))
         db.session.commit()
         print("✅ Added free-text student name support to finances.")
     except Exception:
@@ -2009,7 +2009,7 @@ def customer_finances():
 @login_required
 def finance_login():
     pin = request.form.get('finance_pin')
-    if pin == '1122':
+    if pin == 'vs@9060':
         session['finance_auth'] = True
         flash("Finance Portal Unlocked.", "success")
     else:

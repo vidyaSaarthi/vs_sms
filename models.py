@@ -242,6 +242,7 @@ class Student(db.Model):
             return "success"
 
 class FinanceRecord(db.Model):
+    __tablename__ = 'finance_records'  # 🚨 Added this line to link to the old data!
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
 
