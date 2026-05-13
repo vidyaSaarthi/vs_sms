@@ -325,6 +325,12 @@
                         </a>
                     </li>
 
+                    <li class="nav-item mb-2">
+                        <a href="{{ url_for('all_allotments') }}" class="nav-link text-white fw-bold shadow-sm" style="transition: 0.2s;">
+                            <i class="fas fa-award me-2" style="width: 20px;"></i>Allotments
+                        </a>
+                    </li>
+
                     <!-- 🚨 ADDED FINANCES LINK HERE -->
                     <li class="nav-item">
                         <a class="nav-link {% if '/finances' in request.path %}active{% endif %}" href="{{ url_for('customer_finances') }}">

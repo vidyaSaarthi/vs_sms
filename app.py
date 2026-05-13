@@ -1544,6 +1544,21 @@ def add_round_result(student_id):
     return redirect(url_for('view_student', id=student_id))
 
 
+# ==========================================
+# GLOBAL SEAT ALLOTMENTS LEDGER
+# ==========================================
+@app.route('/allotments')
+@login_required
+def all_allotments():
+    # Fetch all round results where allotted_institute is NOT null and NOT empty
+    allotments = StudentRoundResult.query.join(Student).filter(
+        StudentRoundResult.allotted_institute != None,
+        StudentRoundResult.allotted_institute != ''
+    ).order_by(StudentRoundResult.id.desc()).all()
+
+    return render_template('allotments.html', allotments=allotments)
+
+
 @app.route('/colleges')
 @login_required
 def college_directory():

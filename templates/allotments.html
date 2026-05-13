@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid pt-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #cc0000; text-shadow: 1px 1px 2px rgba(204,0,0,0.1);">
+                <i class="fas fa-award me-2"></i>Global Seat Allotments
+            </h2>
+            <p class="text-muted mb-0 fw-bold">Overview of all successful college seat allotments across all students.</p>
+        </div>
+        <div>
+            <span class="badge shadow-sm fs-6" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580;">
+                <i class="fas fa-trophy me-1"></i> Total Allotments: {{ allotments|length }}
+            </span>
+        </div>
+    </div>
+    
+    <div class="card shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
+        <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr style="background-color: #ccdfed;">
+                        <th class="ps-4 py-3" style="color: #111;">Student Name</th>
+                        <th class="py-3" style="color: #111;">Counselling Process</th>
+                        <th class="py-3" style="color: #111;">Allotted College</th>
+                        <th class="py-3" style="color: #111;">Stream / Branch</th>
+                        <th class="py-3 text-center" style="color: #111;">Offer Letter</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in allotments %}
+                    <tr>
+                        <td class="ps-4 py-3 fw-bold">
+                            <a href="{{ url_for('view_student', id=res.student_id) }}" class="text-decoration-none text-dark d-block">
+                                {{ res.student.full_name }}
+                            </a>
+                            <small class="text-muted" style="font-size: 0.75rem;">{{ res.student.exam_type }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark shadow-sm">Round {{ res.round.round_number }}</span><br>
+                            <small class="text-muted fw-bold">{{ res.round.counselling.name }}</small>
+                        </td>
+                        <td class="fw-bold" style="color: #198754;">
+                            <i class="fas fa-university me-1 opacity-50"></i>{{ res.allotted_institute }}
+                        </td>
+                        <td class="fw-bold text-secondary">
+                            {{ res.allotted_branch or '-' }}
+                        </td>
+                        <td class="text-center">
+                            {% if res.offer_letter_link %}
+                                <a href="{{ res.offer_letter_link }}" target="_blank" class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: #cc0000;">
+                                    <i class="fas fa-envelope-open-text me-1"></i> View Offer
+                                </a>
+                            {% else %}
+                                <span class="badge bg-light text-muted border border-dashed"><i class="fas fa-clock me-1"></i>Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fas fa-folder-open fs-1 mb-3 opacity-25"></i>
+                            <h5 class="fw-bold">No Allotments Recorded Yet</h5>
+                            <p class="mb-0">Once a counselor saves an allotted institute on a student's profile, it will appear here.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
