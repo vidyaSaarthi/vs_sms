@@ -103,7 +103,7 @@
                         <td class="text-end fw-bold">₹{{ "{:,.2f}".format(record.total_fees) }}</td>
                         <td class="text-end text-success">₹{{ "{:,.2f}".format(record.installment_1) }}</td>
                         <td class="text-end text-success">₹{{ "{:,.2f}".format(record.installment_2) }}</td>
-                        <td class="text-end text-danger fw-bold" style="font-size: 1.1rem;">₹{{ "{:,.2f}".format(record.balance) }}</td>
+                        <td class="text-end text-danger fw-bold" style="font-size: 1.1rem;">₹{{ "{:,.2f}".format(record.balance_amount) }}</td>
                         <td>
                             <small class="d-block text-muted"><strong>Mode:</strong> {{ record.mode_of_payment }}</small>
                             <small class="d-block text-muted"><strong>By:</strong> {{ record.beneficiary_name }}</small>
