@@ -246,7 +246,7 @@ class FinanceRecord(db.Model):
     date = db.Column(db.Date, nullable=False)
 
     # 🚨 Update this to be nullable
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=True)
 
     # 🚨 ADD THIS NEW LINE: To hold names of students not in the system
     unregistered_name = db.Column(db.String(255), nullable=True)
