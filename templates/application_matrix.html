@@ -3,7 +3,6 @@
 {% block content %}
 <div class="container-fluid pt-4 pb-5">
     
-    <!-- Header & Filter Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0" style="color: #cc0000; text-shadow: 1px 1px 2px rgba(204,0,0,0.1);">
@@ -18,7 +17,6 @@
         </div>
     </div>
 
-    <!-- Outer Tab Navigation (Exams vs Counselling) -->
     <ul class="nav nav-tabs mb-4 border-bottom-0" id="matrixTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important;">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold px-4 py-3 shadow-sm border-bottom-0" id="exams-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" style="border-top: 3px solid var(--brand-blue); color: #333;">
@@ -32,8 +30,46 @@
         </li>
     </ul>
 
-    <!-- Viral CSS for Sticky Tables & Pills -->
     <style>
+
+        /* 🚨 NEW: DENSE MATRIX STYLING */
+        .table-dense th,
+        .table-dense td {
+            padding: 0.25rem 0.5rem !important; /* Drastically reduce padding */
+            font-size: 0.8rem !important;      /* Slightly smaller text */
+            vertical-align: middle !important;
+            white-space: nowrap !important;    /* Prevent text from wrapping to multiple lines */
+        }
+
+        /* Keep the student name column a bit wider so names don't get cut off */
+        .table-dense td:first-child,
+        .table-dense th:first-child {
+            min-width: 150px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Adds '...' if the name is super long */
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa; /* Keeps it visible when scrolling horizontally */
+            z-index: 2;
+        }
+
+        /* Make the status badges smaller */
+        .badge-compact {
+            font-size: 0.65rem !important;
+            padding: 0.2em 0.4em !important;
+        }
+
+        /* Rotate the header text slightly so columns can be thinner */
+        .rotate-header {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            height: 120px; /* Adjust based on your longest exam name */
+            text-align: left;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+        }
+
         /* Modern Course Pills */
         .course-pill.active {
             background-color: #ffffff !important;
@@ -95,14 +131,10 @@
     </style>
 
     <div class="tab-content">
-        <!-- ==========================================
-             TAB 1: EXAM MATRIX (Grouped by Course)
-             ========================================== -->
         <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
             <div class="card border-0 shadow-lg" style="border-radius: 15px; background-color: #f8f9fa;">
 
                 {% if exams_grouped %}
-                <!-- Dynamic Course Sub-Tabs for Exams -->
                 <div class="p-3 border-bottom">
                     <ul class="nav nav-pills gap-2" id="examCourseTabs" role="tablist">
                         {% for course_name, exams in exams_grouped.items() %}
@@ -115,17 +147,20 @@
                     </ul>
                 </div>
 
-                <!-- Content Panes for Exam Courses -->
                 <div class="tab-content" id="examCourseTabsContent">
                     {% for course_name, exams in exams_grouped.items() %}
                     <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="exam-course-{{ loop.index }}" role="tabpanel">
                         <div class="matrix-table-wrapper">
-                            <table class="table table-bordered matrix-table mb-0 align-middle">
+                            <table class="table matrix-table table-bordered table-hover table-dense table-sm mb-0">
                                 <thead>
                                     <tr>
                                         <th class="ps-4 py-3 text-start" style="min-width: 250px;">Student Name</th>
                                         {% for exam in exams %}
-                                            <th class="py-3" style="min-width: 150px;">{{ exam.name }}</th>
+                                        <th class="text-center align-bottom">
+                                            <div class="rotate-header">
+                                                {{ exam.name }}
+                                            </div>
+                                        </th>
                                         {% endfor %}
                                     </tr>
                                 </thead>
@@ -137,9 +172,9 @@
                                             <td class="text-center py-3">
                                                 {% set status = exam_matrix[student.id].get(exam.id) %}
                                                 {% if status == 'Filled' %}
-                                                    <span class="badge badge-filled fw-bold fs-6"><i class="fas fa-check-circle me-1"></i>Filled</span>
+                                                    <span class="badge badge-filled badge-compact"><i class="fas fa-check-circle me-1"></i>Filled</span>
                                                 {% elif status == 'Pending' %}
-                                                    <span class="badge badge-pending fw-bold fs-6"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
+                                                    <span class="badge badge-pending badge-compact"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
                                                 {% else %}
                                                     <span class="text-muted" style="opacity: 0.3;">-</span>
                                                 {% endif %}
@@ -164,14 +199,10 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             TAB 2: COUNSELLING MATRIX (Grouped by Course)
-             ========================================== -->
         <div class="tab-pane fade" id="tab-couns" role="tabpanel">
             <div class="card border-0 shadow-lg" style="border-radius: 15px; background-color: #f8f9fa;">
 
                 {% if couns_grouped %}
-                <!-- Dynamic Course Sub-Tabs for Counselling -->
                 <div class="p-3 border-bottom">
                     <ul class="nav nav-pills gap-2" id="counsCourseTabs" role="tablist">
                         {% for course_name, counsellings in couns_grouped.items() %}
@@ -184,17 +215,20 @@
                     </ul>
                 </div>
 
-                <!-- Content Panes for Counselling Courses -->
                 <div class="tab-content" id="counsCourseTabsContent">
                     {% for course_name, counsellings in couns_grouped.items() %}
                     <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="couns-course-{{ loop.index }}" role="tabpanel">
                         <div class="matrix-table-wrapper">
-                            <table class="table table-bordered matrix-table mb-0 align-middle">
+                            <table class="table matrix-table table-bordered table-hover table-dense table-sm mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="ps-4 py-3 text-start" style="min-width: 250px;">Student Name</th>
+                                        <th class="ps-4 py-3 text-start align-bottom" style="min-width: 250px;">Student Name</th>
                                         {% for c in counsellings %}
-                                            <th class="py-3" style="min-width: 150px;">{{ c.name }}</th>
+                                            <th class="text-center align-bottom">
+                                                <div class="rotate-header">
+                                                    {{ c.name }}
+                                                </div>
+                                            </th>
                                         {% endfor %}
                                     </tr>
                                 </thead>
@@ -206,9 +240,9 @@
                                             <td class="text-center py-3">
                                                 {% set status = couns_matrix[student.id].get(c.id) %}
                                                 {% if status == 'Filled' %}
-                                                    <span class="badge badge-filled fw-bold fs-6"><i class="fas fa-check-circle me-1"></i>Filled</span>
+                                                    <span class="badge badge-filled badge-compact"><i class="fas fa-check-circle me-1"></i>Filled</span>
                                                 {% elif status == 'Pending' %}
-                                                    <span class="badge badge-pending fw-bold fs-6"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
+                                                    <span class="badge badge-pending badge-compact"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
                                                 {% else %}
                                                     <span class="text-muted" style="opacity: 0.3;">-</span>
                                                 {% endif %}
