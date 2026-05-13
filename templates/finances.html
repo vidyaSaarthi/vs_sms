@@ -3,9 +3,6 @@
 {% block content %}
 
 {% if not authenticated %}
-<!-- ==========================================
-     STATE 1: SECURITY LOCK SCREEN
-     ========================================== -->
 <div class="container-fluid pt-5 d-flex justify-content-center align-items-center" style="min-height: 70vh;">
     <div class="card shadow-lg border-0" style="max-width: 420px; width: 100%; border-radius: 20px;">
         <div class="card-body p-5 text-center">
@@ -27,11 +24,7 @@
 </div>
 
 {% else %}
-<!-- ==========================================
-     STATE 2: UNLOCKED FINANCE PORTAL
-     ========================================== -->
 <div class="container-fluid pt-3">
-    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0" style="color: #333;"><i class="fas fa-file-invoice-dollar text-success me-2"></i>Customer Finances</h2>
@@ -47,7 +40,6 @@
         </div>
     </div>
 
-    <!-- 🚨 NEW: STUDENT TYPE TABS -->
     <ul class="nav nav-pills mb-4 gap-2" style="font-weight: 700;">
         <li class="nav-item">
             <a class="nav-link {% if active_tab == 'all' %}active shadow-sm{% else %}bg-white text-muted border{% endif %}" href="{{ url_for('customer_finances', tab='all') }}" style="border-radius: 10px;">
@@ -69,7 +61,6 @@
         </li>
     </ul>
 
-    <!-- MAIN TABLE -->
     <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px; overflow: hidden;">
         <div class="table-responsive" style="min-height: 400px;">
             <table class="table table-hover align-middle mb-0">
@@ -108,12 +99,17 @@
                             <small class="d-block text-muted"><strong>Mode:</strong> {{ record.mode_of_payment }}</small>
                             <small class="d-block text-muted"><strong>By:</strong> {{ record.beneficiary_name }}</small>
                         </td>
-                        <td class="text-end pe-4">
+                        <td class="text-end pe-4 text-nowrap">
                             {% if record.comments %}
                             <button type="button" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="popover" data-bs-trigger="focus" title="Comments" data-bs-content="{{ record.comments }}">
                                 <i class="fas fa-comment-dots"></i>
                             </button>
                             {% endif %}
+
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editFinanceModal{{ record.id }}" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+
                             <form action="{{ url_for('delete_finance_record', record_id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Permanently delete this finance record?');">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                                     <i class="fas fa-trash"></i>
@@ -136,7 +132,6 @@
     </div>
 </div>
 
-<!-- ADD RECORD MODAL -->
 <div class="modal fade" id="addFinanceModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content shadow-lg border-0">
@@ -227,6 +222,95 @@
     </div>
 </div>
 
+{% for record in records %}
+<div class="modal fade" id="editFinanceModal{{ record.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content shadow-lg border-0">
+            <form action="{{ url_for('edit_finance_record', record_id=record.id) }}" method="POST" novalidate>
+                <div class="modal-header text-white" style="background-color: var(--brand-blue, #1e3a8a);">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Finance Record</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
+                            <input type="date" name="date" class="form-control" value="{{ record.date.strftime('%Y-%m-%d') if record.date else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Student Name</label>
+                            <input list="studentOptions{{ record.id }}" name="student_name" class="form-control fw-bold text-primary" value="{{ record.student.full_name if record.student else record.unregistered_name }}" required autocomplete="off">
+                            <datalist id="studentOptions{{ record.id }}">
+                                {% for s in students %}
+                                <option value="{{ s.full_name }}">
+                                {% endfor %}
+                            </datalist>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Service Type <span class="text-danger">*</span></label>
+                            <select name="service_type" class="form-select" required>
+                                {% for st in service_types %}
+                                    <option value="{{ st }}" {% if record.service_type == st %}selected{% endif %}>{{ st }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 mt-4"><h6 class="border-bottom pb-2 fw-bold text-secondary">Financial Details</h6></div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-primary">Total Fees (₹) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" name="total_fees" class="form-control fw-bold fin-calc-edit" data-target="balanceDue{{ record.id }}" placeholder="0.00" value="{{ record.total_fees }}" required>
+                        </div>
+                        <div class="col-md-6"></div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-success">Installment 1 (₹)</label>
+                            <input type="number" step="0.01" name="installment_1" class="form-control fin-calc-edit" data-target="balanceDue{{ record.id }}" placeholder="0.00" value="{{ record.installment_1 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-success">Installment 2 (₹)</label>
+                            <input type="number" step="0.01" name="installment_2" class="form-control fin-calc-edit" data-target="balanceDue{{ record.id }}" placeholder="0.00" value="{{ record.installment_2 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-danger">Balance Due (₹)</label>
+                            <input type="text" id="balanceDue{{ record.id }}" class="form-control fw-bold text-danger border-danger" readonly placeholder="0.00" value="{{ record.balance_amount }}" style="background-color: #fff0f0;">
+                        </div>
+
+                        <div class="col-12 mt-4"><h6 class="border-bottom pb-2 fw-bold text-secondary">Payment Meta</h6></div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Mode of Payment</label>
+                            <select name="mode_of_payment" class="form-select">
+                                <option value="">Select Mode...</option>
+                                {% for mode in payment_modes %}
+                                    <option value="{{ mode }}" {% if record.mode_of_payment == mode %}selected{% endif %}>{{ mode }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Beneficiary (Counselor) <span class="text-danger">*</span></label>
+                            <select name="beneficiary_name" class="form-select" required>
+                                {% for c in counsellors %}
+                                    <option value="{{ c.username }}" {% if record.beneficiary_name == c.username %}selected{% endif %}>{{ c.username|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Comments / Notes</label>
+                            <textarea name="comments" class="form-control" rows="2">{{ record.comments }}</textarea>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">Save Updates</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -256,6 +340,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.querySelectorAll('.fin-calc').forEach(input => {
         input.addEventListener('input', calculateBalance);
+    });
+
+    // 🚨 Dynamic math for Edit Modals (Moved safely inside the script block)
+    document.querySelectorAll('.fin-calc-edit').forEach(input => {
+        input.addEventListener('input', function() {
+            let container = this.closest('.row');
+            let t = parseFloat(container.querySelector('[name="total_fees"]').value) || 0;
+            let i1 = parseFloat(container.querySelector('[name="installment_1"]').value) || 0;
+            let i2 = parseFloat(container.querySelector('[name="installment_2"]').value) || 0;
+            let targetId = this.getAttribute('data-target');
+            let balanceField = document.getElementById(targetId);
+            if (balanceField) balanceField.value = (t - i1 - i2).toFixed(2);
+        });
     });
 
     const form = document.getElementById('financeForm');

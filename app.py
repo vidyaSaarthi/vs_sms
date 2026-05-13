@@ -2082,6 +2082,43 @@ def add_finance_record():
 
     return redirect(url_for('customer_finances'))
 
+@app.route('/finances/edit/<int:record_id>', methods=['POST'])
+@login_required
+def edit_finance_record(record_id):
+    record = FinanceRecord.query.get_or_404(record_id)
+    try:
+        date_str = request.form.get('date')
+        record.date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else record.date
+
+        def safe_float(val):
+            return float(val) if val and val.strip() else 0.0
+
+        record.total_fees = safe_float(request.form.get('total_fees'))
+        record.installment_1 = safe_float(request.form.get('installment_1'))
+        record.installment_2 = safe_float(request.form.get('installment_2'))
+
+        # Smartly process the free-text student name, just like the Add route
+        student_input = request.form.get('student_name')
+        matched_student = Student.query.filter(
+            Student.full_name.ilike(student_input)).first() if student_input else None
+
+        record.student_id = matched_student.id if matched_student else None
+        record.unregistered_name = student_input if not matched_student else None
+
+        record.service_type = request.form.get('service_type')
+        record.mode_of_payment = request.form.get('mode_of_payment')
+        record.beneficiary_name = request.form.get('beneficiary_name')
+        record.comments = request.form.get('comments')
+
+        record.calculate_balance()
+        db.session.commit()
+        flash("Finance record updated successfully!", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating record: {str(e)}", "error")
+
+    return redirect(url_for('customer_finances'))
 
 @app.route('/finances/delete/<int:record_id>', methods=['POST'])
 @login_required
