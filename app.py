@@ -7,7 +7,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 
 # Consolidated Imports (🚨 FinanceRecord added here)
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
@@ -41,6 +41,13 @@ login_manager.login_view = 'login'
 # 🚀 AUTOMATIC CLOUD DATABASE BUILDER & TEAM INJECTION
 with app.app_context():
     db.create_all()
+
+    try:
+        db.session.execute(text('ALTER TABLE finance_record ADD COLUMN unregistered_name VARCHAR(255)'))
+        db.session.commit()
+        print("✅ Added free-text student name support to finances.")
+    except Exception:
+        db.session.rollback()  # If the column already exists, silently ignore and continue
 
     # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
@@ -1709,14 +1716,20 @@ def application_matrix():
     students = Student.query.filter_by(exam_type=exam_type).order_by(Student.full_name.asc()).all()
     student_ids = [s.id for s in students]
 
+    # 1. EXAM MATRIX LOGIC (Updated to check Form Submissions)
     exam_results = StudentExamResult.query.filter(StudentExamResult.student_id.in_(student_ids)).all()
     active_exam_ids = list(set([r.exam_id for r in exam_results]))
     active_exams = Exam.query.filter(Exam.id.in_(active_exam_ids)).order_by(Exam.name.asc()).all()
 
     exam_matrix = {s.id: {} for s in students}
     for r in exam_results:
-        has_app_no = bool(r.application_number and r.application_number.strip())
-        exam_matrix[r.student_id][r.exam_id] = 'Filled' if has_app_no else 'Pending'
+        # 🚨 NEW LOGIC: Check if a Form Submission exists for this student and exam!
+        milestone = StudentFormSubmission.query.filter_by(student_id=r.student_id, exam_id=r.exam_id).first()
+        # If the milestone exists AND has an application number or username, mark it Filled.
+        if milestone and (milestone.application_number or milestone.login_username):
+            exam_matrix[r.student_id][r.exam_id] = 'Filled'
+        else:
+            exam_matrix[r.student_id][r.exam_id] = 'Pending'
 
     exams_grouped = {}
     for exam in active_exams:
@@ -1727,6 +1740,7 @@ def application_matrix():
                 exams_grouped.setdefault(course.name, []).append(exam)
     exams_grouped = dict(sorted(exams_grouped.items()))
 
+    # 2. COUNSELLING MATRIX LOGIC (Updated to check Form Submissions)
     couns_regs = StudentCounsellingRegistration.query.filter(
         StudentCounsellingRegistration.student_id.in_(student_ids)).all()
     active_couns_ids = list(set([r.counselling_id for r in couns_regs]))
@@ -1735,8 +1749,13 @@ def application_matrix():
 
     couns_matrix = {s.id: {} for s in students}
     for r in couns_regs:
-        has_app_no = bool(r.application_number and r.application_number.strip())
-        couns_matrix[r.student_id][r.counselling_id] = 'Filled' if has_app_no else 'Pending'
+        # 🚨 NEW LOGIC: Check if a Form Submission exists for this student and counselling umbrella!
+        milestone = StudentFormSubmission.query.filter_by(student_id=r.student_id, counselling_id=r.counselling_id).first()
+        # If the milestone exists AND has an application number or username, mark it Filled.
+        if milestone and (milestone.application_number or milestone.login_username):
+            couns_matrix[r.student_id][r.counselling_id] = 'Filled'
+        else:
+            couns_matrix[r.student_id][r.counselling_id] = 'Pending'
 
     couns_grouped = {}
     for c in active_counsellings:
@@ -1754,7 +1773,6 @@ def application_matrix():
                            couns_grouped=couns_grouped,
                            couns_matrix=couns_matrix,
                            exam_type=exam_type)
-
 
 @app.route('/reports/workflow-tracker')
 @login_required
@@ -1906,11 +1924,10 @@ def customer_finances():
     if not session.get('finance_auth'):
         return render_template('finances.html', authenticated=False)
 
-    # 1. Capture which tab the user clicked
     active_tab = request.args.get('tab', 'all')
 
-    # 2. Filter records based on the Student's Exam Type
-    query = FinanceRecord.query.join(Student)
+    # 🚨 CHANGED: Use outerjoin so unregistered students are not hidden!
+    query = FinanceRecord.query.outerjoin(Student)
     if active_tab == 'jee':
         query = query.filter(Student.exam_type == 'JEE')
     elif active_tab == 'neet':
@@ -1918,7 +1935,6 @@ def customer_finances():
 
     records = query.order_by(FinanceRecord.date.desc()).all()
 
-    # 3. Calculate badge counts for the tabs
     all_count = FinanceRecord.query.count()
     jee_count = FinanceRecord.query.join(Student).filter(Student.exam_type == 'JEE').count()
     neet_count = FinanceRecord.query.join(Student).filter(Student.exam_type == 'NEET').count()
@@ -1980,9 +1996,20 @@ def add_finance_record():
         installment_1 = safe_float(request.form.get('installment_1'))
         installment_2 = safe_float(request.form.get('installment_2'))
 
+        # 🚨 NEW: Smartly process the free-text student name
+        student_input = request.form.get('student_name')
+
+        # See if the typed name perfectly matches an existing student
+        matched_student = Student.query.filter(
+            Student.full_name.ilike(student_input)).first() if student_input else None
+
+        student_id_val = matched_student.id if matched_student else None
+        unregistered_name_val = student_input if not matched_student else None
+
         new_record = FinanceRecord(
             date=record_date,
-            student_id=request.form.get('student_id'),
+            student_id=student_id_val,
+            unregistered_name=unregistered_name_val,
             service_type=request.form.get('service_type'),
             total_fees=total_fees,
             installment_1=installment_1,

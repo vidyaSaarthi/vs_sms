@@ -92,15 +92,11 @@
                     <tr>
                         <td class="ps-4 text-muted">{{ loop.index }}</td>
                         <td class="fw-bold text-dark">{{ record.date.strftime('%d %b %Y') if record.date else '-' }}</td>
-                        <td>
-                            <strong class="text-primary">{{ record.student.full_name }}</strong><br>
-                            <!-- 🚨 NEW: Shows Student Type Badge automatically -->
-                            {% if record.student.exam_type == 'JEE' %}
-                                <span class="badge bg-primary shadow-sm mt-1" style="font-size: 0.65rem;"><i class="fas fa-cogs me-1"></i>JEE</span>
-                            {% elif record.student.exam_type == 'NEET' %}
-                                <span class="badge bg-danger shadow-sm mt-1" style="font-size: 0.65rem;"><i class="fas fa-stethoscope me-1"></i>NEET</span>
+                        <td class="fw-bold text-dark">
+                            {% if record.student %}
+                                {{ record.student.full_name }}
                             {% else %}
-                                <span class="badge bg-secondary shadow-sm mt-1" style="font-size: 0.65rem;">{{ record.student.exam_type }}</span>
+                                {{ record.unregistered_name }} <span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">Unregistered</span>
                             {% endif %}
                         </td>
                         <td><span class="badge bg-light text-dark border">{{ record.service_type }}</span></td>
@@ -156,14 +152,14 @@
                             <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
                             <input type="date" name="date" id="financeDate" class="form-control" required>
                         </div>
-                        <div class="col-md-8">
-                            <label class="form-label fw-bold">Student Name <span class="text-danger">*</span></label>
-                            <select name="student_id" class="form-select" required>
-                                <option value="" disabled selected>Select a registered student...</option>
-                                {% for student in students %}
-                                    <option value="{{ student.id }}">{{ student.full_name }} ({{ student.exam_type }})</option>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Student Name</label>
+                            <input list="studentOptions" name="student_name" class="form-control fw-bold text-primary" placeholder="Type new name or pick existing..." required autocomplete="off">
+                            <datalist id="studentOptions">
+                                {% for s in students %}
+                                <option value="{{ s.full_name }}">
                                 {% endfor %}
-                            </select>
+                            </datalist>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label fw-bold">Service Type <span class="text-danger">*</span></label>
