@@ -43,11 +43,18 @@ with app.app_context():
     db.create_all()
 
     try:
-        db.session.execute(text('ALTER TABLE finance_records ADD COLUMN unregistered_name VARCHAR(255)'))
+        # Add the unregistered name column
+        db.session.execute(text('ALTER TABLE finance_records ADD COLUMN IF NOT EXISTS unregistered_name VARCHAR(255)'))
+
+        # Add the missing balance amount column
+        db.session.execute(
+            text('ALTER TABLE finance_records ADD COLUMN IF NOT EXISTS balance_amount FLOAT DEFAULT 0.0'))
+
         db.session.commit()
-        print("✅ Added free-text student name support to finances.")
-    except Exception:
-        db.session.rollback()  # If the column already exists, silently ignore and continue
+        print("✅ Added new columns to historical finances table.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"⚠️ Finance migration skipped or already applied: {e}")
 
     try:
         db.session.execute(text('ALTER TABLE student_round_results ADD COLUMN offer_letter_link VARCHAR(500)'))
