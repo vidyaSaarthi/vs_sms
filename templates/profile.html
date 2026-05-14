@@ -3,7 +3,6 @@
 {% block content %}
 <div class="container-fluid pt-3">
 
-    <!-- 🚨 NEW: NAVIGATION BREADCRUMBS -->
     <div class="mb-3 d-flex gap-2">
         <a href="/students?tab=jee" class="btn btn-sm bg-white border text-secondary fw-bold shadow-sm rounded-pill px-3" style="font-size: 0.85rem;">
             <i class="fas fa-arrow-left me-1"></i> JEE Students
@@ -13,7 +12,6 @@
         </a>
     </div>
 
-    <!-- TOP ACTION BAR -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0 text-dark"><i class="fas fa-road text-primary me-2"></i>{{ student.full_name }} | Journey</h2>
 
@@ -34,17 +32,12 @@
                 </span>
             {% endif %}
 
-<!--            <a href="{{ url_for('edit_student', id=student.id) }}" class="btn btn-sm fw-bold shadow-sm py-2" style="background-color: var(&#45;&#45;brand-yellow); color: #333;">-->
-<!--                <i class="fas fa-edit me-1"></i> Edit Data-->
-<!--            </a>-->
-
-            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm py-2" data-bs-toggle="modal" data-bs-target="#deleteStudentModal">
+<button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm py-2" data-bs-toggle="modal" data-bs-target="#deleteStudentModal">
                 <i class="fas fa-trash-alt me-1"></i> Delete
             </button>
         </div>
     </div>
 
-    <!-- 🚨 DATA HEALTH WIDGET 🚨 -->
     <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; border-left: 5px solid var(--bs-{{ student.completion_color }}) !important;">
         <div class="card-body p-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center w-75">
@@ -75,9 +68,6 @@
         </div>
     </div>
 
-    <!-- ==========================================
-         ADMISSIONS JOURNEY TRACKER
-         ========================================== -->
     <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px;">
         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold"><i class="fas fa-road text-warning me-2"></i>Admissions Journey</h5>
@@ -95,8 +85,7 @@
             </div>
         </div>
         <div class="card-body p-0">
-           <!-- TABS FOR THE JOURNEY -->
-            <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="journeyTabs" role="tablist">
+           <ul class="nav nav-tabs px-3 pt-3 border-bottom-0" id="journeyTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-bold" id="couns-tab" data-bs-toggle="tab" data-bs-target="#couns" type="button" role="tab">Counselling Journeys</button>
                 </li>
@@ -110,7 +99,6 @@
 
             <div class="tab-content" id="journeyTabsContent">
 
-                <!-- 1. COUNSELLING JOURNEYS (NEW UMBRELLA ARCHITECTURE) -->
                 <div class="tab-pane fade show active p-4" id="couns" role="tabpanel">
 
                     {% for reg in student.counselling_registrations %}
@@ -267,7 +255,6 @@
                     {% endfor %}
                 </div>
 
-                <!-- 2. EXAM FORMS & SCORES -->
                 <div class="tab-pane fade" id="exams" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
@@ -282,13 +269,18 @@
                             <tbody>
                                 {% for res in student.exam_results %}
                                 <tr>
-                                    <!-- 🚨 Look up the milestone at the top of the row so we can use it in column 1 and 2 -->
                                     {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
 
                                     <td class="ps-4">
-                                        <strong class="text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown Exam' }}</strong><br>
+                                        <strong class="text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown Exam' }}</strong>
 
-                                        <!-- 🚨 NEW: Display the Master Form Name right below the Exam Name -->
+                                        {% if res.comments %}
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 ms-1" data-bs-toggle="popover" data-bs-trigger="focus" title="Counselor Notes" data-bs-content="{{ res.comments }}">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        {% endif %}
+                                        <br>
+
                                         <div class="mt-1">
                                             {% if exam_sub and exam_sub.form %}
                                                 <span class="badge bg-light text-secondary border shadow-sm" style="font-size: 0.75rem;">
@@ -303,7 +295,6 @@
                                     </td>
 
                                     <td>
-                                        <!-- 🚨 SAAS CREDENTIALS VAULT -->
                                         <div class="bg-white border rounded p-2 shadow-sm" style="font-size: 0.85rem;">
                                             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
                                                 <span class="text-muted">App No:</span> <strong class="text-dark">{{ exam_sub.application_number if exam_sub else '-' }}</strong>
@@ -346,7 +337,6 @@
                     </div>
                 </div>
 
-                <!-- 3. ROUND ALLOTMENTS -->
                 <div class="tab-pane fade" id="rounds" role="tabpanel">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
@@ -397,11 +387,6 @@
 
 </div>
 
-<!-- ==========================================
-     GLOBAL ADD MODALS
-     ========================================== -->
-
-<!-- Register Counselling UMBRELLA Modal -->
 <div class="modal fade" id="registerCounsellingModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
@@ -440,7 +425,6 @@
     </div>
 </div>
 
-<!-- Add Exam Result Modal -->
 <div class="modal fade" id="addExamResultModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
@@ -459,7 +443,6 @@
                             {% endfor %}
                         </select>
 
-                        <!-- 🚨 NEW: The Form Selection Dropdown -->
                         <label class="form-label fw-bold">Link to Master Form</label>
                         <select name="form_id" class="form-select" id="examFormSelect">
                             <option value="">Select form (or leave unlinked)...</option>
@@ -514,6 +497,11 @@
                             <input type="text" name="login_password" class="form-control form-control-sm">
                         </div>
                     </div>
+
+                    <h6 class="fw-bold text-muted border-bottom pb-2 mb-3 mt-4">Counselor Notes / Decision</h6>
+                    <div class="mb-3">
+                        <textarea name="comments" class="form-control" rows="2" placeholder="e.g., Dropping this exam due to low rank, or planning to sit in counselling..."></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-dark fw-bold w-100">Save Exam Data</button>
@@ -523,7 +511,6 @@
     </div>
 </div>
 
-<!-- 🚨 JavaScript to filter forms based on the selected exam -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const examSelect = document.getElementById('examSelect');
@@ -551,7 +538,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Add Round Result Modal -->
 <div class="modal fade" id="addRoundResultModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
@@ -608,11 +594,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- ==========================================
-     🚨 EDIT MODALS FOR INDIVIDUAL ROWS
-     ========================================== -->
-
-<!-- Edit Counselling UMBRELLA Modals -->
 {% for reg in student.counselling_registrations %}
 <div class="modal fade" id="editCounsellingRegModal{{ reg.id }}" tabindex="-1">
     <div class="modal-dialog modal-sm">
@@ -639,7 +620,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 {% endfor %}
 
-<!-- Edit Milestone Form Submission Modals -->
 {% for sub in student.form_submissions %}
 <div class="modal fade" id="editFormSubmissionModal{{ sub.id }}" tabindex="-1">
     <div class="modal-dialog">
@@ -706,14 +686,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 {% endfor %}
 
-<!-- Edit Exam Form/Score Modals -->
 {% for res in student.exam_results %}
 <div class="modal fade" id="editExamResultModal{{ res.id }}" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('edit_exam_result', result_id=res.id) }}" method="POST">
 
-                <!-- 🚨 Find the associated milestone to pre-fill the data -->
                 {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
                 <input type="hidden" name="submission_id" value="{{ exam_sub.id if exam_sub else '' }}">
 
@@ -785,6 +763,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             <input type="text" name="login_password" class="form-control form-control-sm" value="{{ exam_sub.login_password if exam_sub else '' }}">
                         </div>
                     </div>
+
+                    <h6 class="fw-bold text-muted border-bottom pb-2 mb-3 mt-4">Counselor Notes / Decision</h6>
+                    <div class="mb-3">
+                        <textarea name="comments" class="form-control" rows="2" placeholder="e.g., Dropping this exam due to low rank, or planning to sit in counselling...">{{ res.comments or '' }}</textarea>
+                    </div>
+
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-dark fw-bold w-100">Save Updates</button>
@@ -795,7 +779,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 {% endfor %}
 
-<!-- Edit Round Result Modals -->
 {% for res in student.round_results %}
 <div class="modal fade" id="editRoundResultModal{{ res.id }}" tabindex="-1">
     <div class="modal-dialog">
@@ -853,7 +836,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 {% endfor %}
 
-<!-- DELETE STUDENT SECURITY MODAL -->
 <div class="modal fade" id="deleteStudentModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
@@ -946,4 +928,14 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 {% endfor %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+});
+</script>
+
 {% endblock %}

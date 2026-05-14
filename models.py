@@ -285,6 +285,9 @@ class StudentExamResult(db.Model):
     all_india_rank = db.Column(db.Integer, nullable=True)
     state_rank = db.Column(db.Integer, nullable=True)
 
+    # 🚨 NEW: The Counselor Comments Field
+    comments = db.Column(db.Text, nullable=True)
+
     exam = db.relationship('Exam')
 
 

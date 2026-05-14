@@ -63,6 +63,13 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
+    try:
+        db.session.execute(text('ALTER TABLE student_exam_results ADD COLUMN comments TEXT'))
+        db.session.commit()
+        print("✅ Added comments support to Exam Results.")
+    except Exception:
+        db.session.rollback()
+
     # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
         db.session.add(Staff(username='admin', password_hash=generate_password_hash('admin123'), role='admin'))
@@ -1432,12 +1439,12 @@ def add_exam_result(student_id):
             score=float(request.form.get('score')) if request.form.get('score') else None,
             percentile=float(request.form.get('percentile')) if request.form.get('percentile') else None,
             all_india_rank=int(request.form.get('all_india_rank')) if request.form.get('all_india_rank') else None,
-            state_rank=int(request.form.get('state_rank')) if request.form.get('state_rank') else None
+            state_rank=int(request.form.get('state_rank')) if request.form.get('state_rank') else None,
+            comments=request.form.get('comments') # 🚨 Saves the new comments
         )
         db.session.add(result)
 
-        # 2. 🚨 NEW: Create the Associated Form Submission (Credentials Milestone)
-        # We only create this if the user actually typed in credentials or linked a master form
+        # 2. Create the Associated Form Submission (Credentials Milestone)
         if form_id_val or app_no or user or pw or link:
             new_sub = StudentFormSubmission(
                 student_id=student_id,
@@ -1465,12 +1472,13 @@ def edit_exam_result(result_id):
     res = StudentExamResult.query.get_or_404(result_id)
     student_id = res.student_id
     try:
-        # 1. Update the Exam Scores
+        # 1. Update the Exam Scores & Comments
         res.exam_id = request.form.get('exam_id')
         res.score = request.form.get('score') or None
         res.percentile = request.form.get('percentile') or None
         res.all_india_rank = request.form.get('all_india_rank') or None
         res.state_rank = request.form.get('state_rank') or None
+        res.comments = request.form.get('comments') # 🚨 Updates the comments
 
         # 2. Update the Associated Form Submission & Credentials
         submission_id = request.form.get('submission_id')
@@ -1481,7 +1489,6 @@ def edit_exam_result(result_id):
         link = request.form.get('form_confirmation_link')
 
         if submission_id:
-            # If a milestone already exists for this exam, update it
             sub = StudentFormSubmission.query.get(submission_id)
             if sub:
                 sub.form_id = int(form_id_val) if form_id_val else None
@@ -1490,7 +1497,6 @@ def edit_exam_result(result_id):
                 sub.login_password = pw
                 sub.form_confirmation_link = link
         else:
-            # If they didn't have credentials before, but added them now, create the milestone
             if form_id_val or app_no or user or pw or link:
                 new_sub = StudentFormSubmission(
                     student_id=student_id,
