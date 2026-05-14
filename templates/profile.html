@@ -295,6 +295,23 @@
                                     </td>
 
                                     <td>
+                                        <td class="ps-4">
+                                        <strong class="text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown Exam' }}</strong><br>
+
+                                        <div class="mt-1">
+                                            {% if exam_sub and exam_sub.form %}
+                                                <span class="badge bg-light text-secondary border shadow-sm" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-file-alt me-1"></i> {{ exam_sub.form.name }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-light text-muted border border-dashed" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-link me-1"></i> Legacy / Unlinked Form
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <td>
                                         <div class="bg-white border rounded p-2 shadow-sm" style="font-size: 0.85rem;">
                                             <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
                                                 <span class="text-muted">App No:</span> <strong class="text-dark">{{ exam_sub.application_number if exam_sub else '-' }}</strong>
@@ -319,6 +336,13 @@
                                         <span class="text-danger fw-bold">AIR: {{ res.all_india_rank or 'Pending' }}</span><br>
                                         <small class="text-muted">State: {{ res.state_rank or '-' }}</small><br>
                                         <small class="text-primary fw-bold">{{ res.score or '-' }} Score | {{ res.percentile or '-' }} %ile</small>
+
+                                        {% if res.comments %}
+                                        <div class="mt-2 p-2 rounded shadow-sm bg-white border" style="font-size: 0.8rem; border-left: 3px solid #0dcaf0 !important;">
+                                            <strong class="text-dark d-block mb-1" style="font-size: 0.7rem;"><i class="fas fa-sticky-note text-info me-1"></i>Counselor Note:</strong>
+                                            <span class="text-secondary fst-italic">{{ res.comments }}</span>
+                                        </div>
+                                        {% endif %}
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
