@@ -272,30 +272,6 @@
                                     {% set exam_sub = student.form_submissions | selectattr("exam_id", "equalto", res.exam_id) | first %}
 
                                     <td class="ps-4">
-                                        <strong class="text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown Exam' }}</strong>
-
-                                        {% if res.comments %}
-                                        <button type="button" class="btn btn-sm btn-link text-info p-0 ms-1" data-bs-toggle="popover" data-bs-trigger="focus" title="Counselor Notes" data-bs-content="{{ res.comments }}">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                        {% endif %}
-                                        <br>
-
-                                        <div class="mt-1">
-                                            {% if exam_sub and exam_sub.form %}
-                                                <span class="badge bg-light text-secondary border shadow-sm" style="font-size: 0.75rem;">
-                                                    <i class="fas fa-file-alt me-1"></i> {{ exam_sub.form.name }}
-                                                </span>
-                                            {% else %}
-                                                <span class="badge bg-light text-muted border border-dashed" style="font-size: 0.75rem;">
-                                                    <i class="fas fa-link me-1"></i> Legacy / Unlinked Form
-                                                </span>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        <td class="ps-4">
                                         <strong class="text-dark fs-6">{{ res.exam.name if res.exam else 'Unknown Exam' }}</strong><br>
 
                                         <div class="mt-1">
@@ -332,6 +308,7 @@
                                             </div>
                                         </div>
                                     </td>
+
                                     <td>
                                         <span class="text-danger fw-bold">AIR: {{ res.all_india_rank or 'Pending' }}</span><br>
                                         <small class="text-muted">State: {{ res.state_rank or '-' }}</small><br>
@@ -344,6 +321,7 @@
                                         </div>
                                         {% endif %}
                                     </td>
+
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
                                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editExamResultModal{{ res.id }}" title="Edit Scores"><i class="fas fa-edit"></i></button>
