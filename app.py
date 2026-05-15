@@ -2236,21 +2236,6 @@ def delete_form_submission(sub_id):
         flash("Error removing submission.", "error")
     return redirect(url_for('view_student', id=student_id))
 
-@app.route('/student/delete_form_submission/<int:sub_id>', methods=['POST'])
-@login_required
-def delete_form_submission(sub_id):
-    sub = StudentFormSubmission.query.get_or_404(sub_id)
-    student_id = sub.student_id
-    try:
-        db.session.delete(sub)
-        db.session.commit()
-        flash("Form submission removed.", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash("Error removing submission.", "error")
-    return redirect(url_for('view_student', id=student_id))
-
-
 @app.route('/student/edit_form_submission/<int:sub_id>', methods=['POST'])
 @login_required
 def edit_form_submission(sub_id):
