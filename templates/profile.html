@@ -679,10 +679,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-primary fw-bold w-100">Save Updates</button>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="submit" form="deleteForm{{ sub.id }}" class="btn btn-outline-danger fw-bold" onclick="return confirm('Are you sure you want to delete these portal credentials?');">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                    <button type="submit" class="btn btn-primary fw-bold flex-grow-1 ms-2">Save Updates</button>
                 </div>
             </form>
+
+            <form id="deleteForm{{ sub.id }}" action="{{ url_for('delete_form_submission', sub_id=sub.id) }}" method="POST" style="display: none;"></form>
         </div>
     </div>
 </div>
