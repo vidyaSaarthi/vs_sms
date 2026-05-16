@@ -132,7 +132,7 @@
                                                 {% for round_name in sorted_rounds %}
                                                     <td>
                                                         {% if cutoff.parsed_data.get(round_name) %}
-                                                            {{ cutoff.parsed_data.get(round_name)|float|int if cutoff.parsed_data.get(round_name)|replace('.0', '')|is_number else cutoff.parsed_data.get(round_name) | replace('.0', '') }}
+                                                            {{ cutoff.parsed_data.get(round_name) | replace('.0', '') }}
                                                         {% else %}
                                                             -
                                                         {% endif %}
