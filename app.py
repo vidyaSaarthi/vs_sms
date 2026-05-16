@@ -1425,55 +1425,6 @@ def college_database():
                            state_filter=state_filter)
 
 
-from sqlalchemy import or_  # Make sure you have 'or_' imported at the top!
-
-
-@app.route('/college-database', methods=['GET'])
-@login_required
-def college_database():
-    search_query = request.args.get('search', '').strip()
-    state_filter = request.args.get('state', '').strip()
-
-    # Base query
-    query = College.query
-
-    if search_query:
-        # Search by name, true name, city, or district
-        query = query.filter(
-            or_(
-                College.name.ilike(f'%{search_query}%'),
-                College.true_college_name.ilike(f'%{search_query}%'),
-                College.city.ilike(f'%{search_query}%'),
-                College.district.ilike(f'%{search_query}%')
-            )
-        )
-
-    if state_filter:
-        query = query.join(State).filter(State.name == state_filter)
-
-    # Get a list of all states for the dropdown filter
-    all_states = State.query.order_by(State.name).all()
-
-    # If the user searched, return results. Otherwise, return an empty list to keep the page clean initially.
-    colleges = query.order_by(College.state_rank.asc()).all() if (search_query or state_filter) else []
-
-    # For Cutoffs, we need to parse the JSON string back into a Python dictionary
-    import json
-    for college in colleges:
-        for cutoff in college.cutoffs:
-            if cutoff.cutoff_data:
-                try:
-                    cutoff.parsed_data = json.loads(cutoff.cutoff_data)
-                except:
-                    cutoff.parsed_data = {}
-            else:
-                cutoff.parsed_data = {}
-
-    return render_template('college_database.html',
-                           colleges=colleges,
-                           all_states=all_states,
-                           search_query=search_query,
-                           state_filter=state_filter)
 @app.route('/student/<int:id>/export')
 @login_required
 def export_verification(id):

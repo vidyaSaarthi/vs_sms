@@ -462,7 +462,7 @@ class College(db.Model):
     university_name = db.Column(db.Text, nullable=True)
 
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
-    course = db.relationship('Course', overlaps="colleges")
+    course = db.relationship('Course', overlaps="colleges,course_ref")
 
     state_rank = db.Column(db.Text, nullable=True)  # Now TEXT
     aiq_rank = db.Column(db.Text, nullable=True)  # Now TEXT
