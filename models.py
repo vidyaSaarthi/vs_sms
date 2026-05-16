@@ -442,48 +442,42 @@ class College(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # Base Info (Excel 1)
-    name = db.Column(db.String(255), nullable=False)  # Cleaned College Name
-    true_college_name = db.Column(db.String(255), nullable=True)  # Used for joining Cutoffs
-    college_code = db.Column(db.String(100), nullable=True)
-    college_type = db.Column(db.String(100), nullable=True)
-    established_year = db.Column(db.Integer, nullable=True)
+    # All Data is now TEXT to prevent Excel ingestion crashes
+    name = db.Column(db.Text, nullable=False)
+    true_college_name = db.Column(db.Text, nullable=True)
+    college_code = db.Column(db.Text, nullable=True)
+    college_type = db.Column(db.Text, nullable=True)
+    established_year = db.Column(db.Text, nullable=True)  # Now TEXT
 
-    # Geography
     state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
     state = db.relationship('State', backref=db.backref('colleges', lazy=True))
-    district = db.Column(db.String(100), nullable=True)
-    city = db.Column(db.String(100), nullable=True)
+    district = db.Column(db.Text, nullable=True)
+    city = db.Column(db.Text, nullable=True)
     complete_address = db.Column(db.Text, nullable=True)
-    nearby_airport = db.Column(db.String(255), nullable=True)
-    nearby_train_station = db.Column(db.String(255), nullable=True)
+    nearby_airport = db.Column(db.Text, nullable=True)
+    nearby_train_station = db.Column(db.Text, nullable=True)
 
-    # Affiliation
     university_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=True)
     university = db.relationship('University', backref=db.backref('colleges', lazy=True))
-    university_name = db.Column(db.String(255), nullable=True)  # Text fallback
+    university_name = db.Column(db.Text, nullable=True)
 
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
-    # 🚨 FIX: Removed the backref to prevent collision with existing Course models
     course = db.relationship('Course', overlaps="colleges")
 
-    # Ranks & Money
-    state_rank = db.Column(db.Integer, nullable=True)
-    aiq_rank = db.Column(db.Integer, nullable=True)
-    fees = db.Column(db.String(255), nullable=True)
-    service_bond = db.Column(db.String(255), nullable=True)
-    discontinued_bond = db.Column(db.String(255), nullable=True)
+    state_rank = db.Column(db.Text, nullable=True)  # Now TEXT
+    aiq_rank = db.Column(db.Text, nullable=True)  # Now TEXT
+    fees = db.Column(db.Text, nullable=True)
+    service_bond = db.Column(db.Text, nullable=True)
+    discontinued_bond = db.Column(db.Text, nullable=True)
     hidden_fees_warning = db.Column(db.Text, nullable=True)
     seat_distribution = db.Column(db.Text, nullable=True)
 
-    # Ratings (Out of 10)
-    overall_rating = db.Column(db.Float, nullable=True)
-    academics_rating = db.Column(db.Float, nullable=True)
-    clinical_exposure_rating = db.Column(db.Float, nullable=True)
-    hostel_mess_rating = db.Column(db.Float, nullable=True)
-    campus_life_rating = db.Column(db.Float, nullable=True)
+    overall_rating = db.Column(db.Text, nullable=True)  # Now TEXT
+    academics_rating = db.Column(db.Text, nullable=True)  # Now TEXT
+    clinical_exposure_rating = db.Column(db.Text, nullable=True)  # Now TEXT
+    hostel_mess_rating = db.Column(db.Text, nullable=True)  # Now TEXT
+    campus_life_rating = db.Column(db.Text, nullable=True)  # Now TEXT
 
-    # Summaries & Environment
     academics_summary = db.Column(db.Text, nullable=True)
     faculty_mentorship_summary = db.Column(db.Text, nullable=True)
     patient_flow_hospital_summary = db.Column(db.Text, nullable=True)
@@ -492,20 +486,17 @@ class College(db.Model):
     campus_life_summary = db.Column(db.Text, nullable=True)
     pg_prospects_summary = db.Column(db.Text, nullable=True)
 
-    # Rules & Flags
     strictness_discipline = db.Column(db.Text, nullable=True)
     gender_rules = db.Column(db.Text, nullable=True)
     top_3_strengths = db.Column(db.Text, nullable=True)
     top_3_red_flags = db.Column(db.Text, nullable=True)
     counselor_one_liner = db.Column(db.Text, nullable=True)
 
-    # Legacy Fields (Keeping these so your app doesn't break)
     college_information = db.Column(db.Text, nullable=True)
     joining_documents = db.Column(db.Text, nullable=True)
-    document_source_file = db.Column(db.String(255), nullable=True)
+    document_source_file = db.Column(db.Text, nullable=True)
 
 
-# 🚨 NEW: Dynamic Cutoffs Table for Excel 2 Data
 class CollegeCutoff(db.Model):
     __tablename__ = 'college_cutoffs'
 
@@ -513,13 +504,8 @@ class CollegeCutoff(db.Model):
     college_id = db.Column(db.Integer, db.ForeignKey('colleges.id'), nullable=False)
     college = db.relationship('College', backref=db.backref('cutoffs', lazy=True, cascade="all, delete-orphan"))
 
-    # e.g., General, OBC, SC, ST
-    allotted_category = db.Column(db.String(100), nullable=False)
-
-    # 🚨 DYNAMIC RANKS (Stored as a JSON string)
-    # Example: {"Round 1": "15000", "Round 2": "16500", "Mop-Up": "18000", "Stray Round 2": "19000"}
+    allotted_category = db.Column(db.Text, nullable=False)  # Now TEXT
     cutoff_data = db.Column(db.Text, nullable=True)
-
 
 # ==========================================
 # 6. STUDENT JOURNEY (Junction Tables)
