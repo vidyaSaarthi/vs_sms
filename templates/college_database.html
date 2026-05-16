@@ -51,14 +51,16 @@
                     <div class="card-header text-white p-4" style="background: linear-gradient(135deg, var(--brand-blue) 0%, #1e3c72 100%);">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h3 class="fw-bold mb-1">{{ college.name }}</h3>
+                                <h3 class="fw-bold mb-1">{{ college.true_college_name }}</h3>
                                 <p class="mb-2 opacity-75"><i class="fas fa-map-marker-alt me-2"></i>{{ college.city }}, {{ college.state.name if college.state else 'Unknown State' }}</p>
                             </div>
                             <div class="text-end">
-                                {% if college.state_rank %}
-                                    <span class="badge bg-warning text-dark fs-6 shadow-sm mb-1">State Rank: #{{ college.state_rank }}</span><br>
+                                {% if college.college_code %}
+                                    <span class="badge bg-warning text-dark fs-6 shadow-sm mb-1"><i class="fas fa-barcode me-1"></i>{{ college.college_code }}</span><br>
                                 {% endif %}
-                                <span class="badge bg-light text-dark">{{ college.college_type or 'Unknown Type' }}</span>
+                                <span class="badge bg-light text-dark shadow-sm border">
+                                    <i class="fas fa-graduation-cap text-secondary me-1"></i>{{ college.course_name or 'N/A' }} • {{ college.college_type or 'N/A' }}
+                                </span>
                             </div>
                         </div>
 
@@ -78,7 +80,7 @@
 
                                 <div class="mb-3">
                                     <small class="text-muted d-block text-uppercase fw-bold">Annual Fees</small>
-                                    <strong class="fs-5 text-dark">{{ college.fees or 'N/A' }}</strong>
+                                    <div class="text-dark mt-1" style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.4;">{{ college.fees or 'N/A' }}</div>
                                 </div>
 
                                 {% if college.hidden_fees_warning and college.hidden_fees_warning != 'None' %}
@@ -109,36 +111,40 @@
                                 <h5 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-chart-line text-primary me-2"></i>Last Year Cutoffs</h5>
 
                                 {% if college.cutoffs %}
+                                {% if college.cutoffs %}
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover align-middle">
+
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Category</th>
-                                                <th>Round 1</th>
-                                                <th>Round 2</th>
-                                                <th>Stray/Mop-Up</th>
+                                                {% set first_cutoff = college.cutoffs[0].parsed_data %}
+                                                {% set sorted_rounds = first_cutoff.keys() | sort %}
+                                                {% for round_name in sorted_rounds %}
+                                                    <th>{{ round_name }}</th>
+                                                {% endfor %}
                                             </tr>
                                         </thead>
+
                                         <tbody>
                                             {% for cutoff in college.cutoffs %}
                                             <tr>
                                                 <td class="fw-bold">{{ cutoff.allotted_category }}</td>
-                                                <td>{{ cutoff.parsed_data.get('Round 1', '-') }}</td>
-                                                <td>{{ cutoff.parsed_data.get('Round 2', '-') }}</td>
-                                                <td>
-                                                    {% if cutoff.parsed_data.get('Stray Round') %}
-                                                        {{ cutoff.parsed_data.get('Stray Round') }}
-                                                    {% elif cutoff.parsed_data.get('Round 3') %}
-                                                        {{ cutoff.parsed_data.get('Round 3') }}
-                                                    {% else %}
-                                                        -
-                                                    {% endif %}
-                                                </td>
+                                                {% for round_name in sorted_rounds %}
+                                                    <td>
+                                                        {% if cutoff.parsed_data.get(round_name) %}
+                                                            {{ cutoff.parsed_data.get(round_name)|float|int if cutoff.parsed_data.get(round_name)|replace('.0', '')|is_number else cutoff.parsed_data.get(round_name) | replace('.0', '') }}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
                                             </tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
+                                {% else %}
                                 {% else %}
                                 <p class="text-muted fst-italic">No cutoff data available for this college.</p>
                                 {% endif %}
@@ -168,14 +174,14 @@
                                 {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
                                 <div class="mb-3">
                                     <span class="badge bg-success mb-1 w-100 text-start"><i class="fas fa-check-circle me-1"></i> Strengths</span>
-                                    <p class="small text-muted mb-0" style="line-height: 1.2;">{{ college.top_3_strengths }}</p>
+                                    <p class="small text-muted mb-0" style="line-height: 1.4; white-space: pre-wrap;">{{ college.top_3_strengths | replace(' | ', '\n\n') }}</p>
                                 </div>
                                 {% endif %}
 
                                 {% if college.top_3_red_flags and college.top_3_red_flags != 'None' %}
                                 <div>
                                     <span class="badge bg-danger mb-1 w-100 text-start"><i class="fas fa-flag me-1"></i> Red Flags</span>
-                                    <p class="small text-danger fw-bold mb-0" style="line-height: 1.2;">{{ college.top_3_red_flags }}</p>
+                                    <p class="small text-danger fw-bold mb-0" style="line-height: 1.4; white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n') }}</p>
                                 </div>
                                 {% endif %}
 
