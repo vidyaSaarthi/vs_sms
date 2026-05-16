@@ -1690,7 +1690,7 @@ def college_directory():
     universities = University.query.order_by(University.name.asc()).all()
     courses = Course.query.order_by(Course.name.asc()).all()
 
-    return render_template('colleges.html',
+    return render_template('college_database.html',
                            colleges=colleges, states=states,
                            universities=universities, courses=courses,
                            search_query=search_query, state_filter=state_filter,
