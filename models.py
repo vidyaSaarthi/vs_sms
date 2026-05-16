@@ -464,7 +464,8 @@ class College(db.Model):
     university_name = db.Column(db.String(255), nullable=True)  # Text fallback
 
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
-    course = db.relationship('Course', backref=db.backref('colleges', lazy=True))
+    # 🚨 FIX: Removed the backref to prevent collision with existing Course models
+    course = db.relationship('Course', overlaps="colleges")
 
     # Ranks & Money
     state_rank = db.Column(db.Integer, nullable=True)
