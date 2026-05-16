@@ -395,8 +395,8 @@ class FormEvent(db.Model):
     form_id = db.Column(db.Integer, db.ForeignKey('forms.id'), nullable=False)
 
     event_name = db.Column(db.String(150), nullable=False)  # e.g., "Correction Window", "Admit Card Download"
-    start_date = db.Column(db.Date, nullable=True)
-    end_date = db.Column(db.Date, nullable=True)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
     event_link = db.Column(db.String(500), nullable=True)  # Link specific to this activity
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

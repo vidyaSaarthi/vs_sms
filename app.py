@@ -78,6 +78,14 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
 
+    try:
+        db.session.execute(text('ALTER TABLE form_events ALTER COLUMN start_date TYPE TIMESTAMP WITHOUT TIME ZONE'))
+        db.session.execute(text('ALTER TABLE form_events ALTER COLUMN end_date TYPE TIMESTAMP WITHOUT TIME ZONE'))
+        db.session.commit()
+        print("✅ Upgraded Form Events to support precise timings.")
+    except Exception as e:
+        db.session.rollback()
+
     # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
         db.session.add(Staff(username='admin', password_hash=generate_password_hash('admin123'), role='admin'))
@@ -701,8 +709,9 @@ def add_form_event(form_id):
         new_event = FormEvent(
             form_id=form_id,
             event_name=request.form.get('event_name'),
-            start_date=datetime.strptime(start_str, '%Y-%m-%d').date() if start_str else None,
-            end_date=datetime.strptime(end_str, '%Y-%m-%d').date() if end_str else None,
+            # 🚨 Updated to parse exact Date AND Time
+            start_date=datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None,
             event_link=request.form.get('event_link')
         )
         db.session.add(new_event)

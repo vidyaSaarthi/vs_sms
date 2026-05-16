@@ -105,9 +105,9 @@
                                                 <i class="fas fa-thumbtack text-danger me-1"></i> <strong>{{ event.event_name }}</strong>
                                                 <span class="ms-2 text-muted">
                                                     {% if event.start_date and event.end_date %}
-                                                        {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
+                                                        {{ event.start_date.strftime('%d %b %Y, %I:%M %p') }} - {{ event.end_date.strftime('%d %b %Y, %I:%M %p') }}
                                                     {% elif event.end_date %}
-                                                        By {{ event.end_date.strftime('%d %b') }}
+                                                        By {{ event.end_date.strftime('%d %b %Y, %I:%M %p') }}
                                                     {% endif %}
                                                 </span>
                                                 {% if event.event_link %}
@@ -164,7 +164,7 @@
                         {% if counselling_forms_grouped %}
                             {% for exam_name, forms_list in counselling_forms_grouped.items() %}
                             <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="pill-{{ loop.index }}" role="tabpanel">
-                                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="bg-light">
                                             <tr>
@@ -224,9 +224,9 @@
                                                             <i class="fas fa-thumbtack text-danger me-1"></i> <strong>{{ event.event_name }}</strong>
                                                             <span class="ms-2 text-muted">
                                                                 {% if event.start_date and event.end_date %}
-                                                                    {{ event.start_date.strftime('%d %b') }} - {{ event.end_date.strftime('%d %b') }}
+                                                                    {{ event.start_date.strftime('%d %b %Y, %I:%M %p') }} - {{ event.end_date.strftime('%d %b %Y, %I:%M %p') }}
                                                                 {% elif event.end_date %}
-                                                                    By {{ event.end_date.strftime('%d %b') }}
+                                                                    By {{ event.end_date.strftime('%d %b %Y, %I:%M %p') }}
                                                                 {% endif %}
                                                             </span>
                                                             {% if event.event_link %}
@@ -433,11 +433,11 @@
 
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-primary">Start Date</label>
-                            <input type="date" name="start_date" class="form-control" value="{{ form.start_date.strftime('%Y-%m-%d') if form.start_date else '' }}">
+                            <input type="datetime-local" name="start_date" class="form-control" value="{{ form.start_date.strftime('%Y-%m-%d') if form.start_date else '' }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-danger">Deadline</label>
-                            <input type="date" name="end_date" class="form-control" value="{{ form.end_date.strftime('%Y-%m-%d') if form.end_date else '' }}">
+                            <input type="datetime-local" name="end_date" class="form-control" value="{{ form.end_date.strftime('%Y-%m-%d') if form.end_date else '' }}">
                         </div>
 
                         {% if form.form_type == 'Exam' or form.exam_id %}
@@ -504,14 +504,14 @@
                         <label class="form-label fw-bold">Activity Name</label>
                         <input type="text" name="event_name" class="form-control" placeholder="e.g. Correction Window, Merit List Release" required>
                     </div>
-                    <div class="row mb-3">
+                   <div class="row mb-3">
                         <div class="col-6">
-                            <label class="form-label fw-bold">Start Date</label>
-                            <input type="date" name="start_date" class="form-control">
+                            <label class="form-label fw-bold">Start Date & Time</label>
+                            <input type="datetime-local" name="start_date" class="form-control">
                         </div>
                         <div class="col-6">
-                            <label class="form-label fw-bold text-danger">End Date (Deadline)</label>
-                            <input type="date" name="end_date" class="form-control" required>
+                            <label class="form-label fw-bold text-danger">End Date & Time (Deadline)</label>
+                            <input type="datetime-local" name="end_date" class="form-control" required>
                         </div>
                     </div>
                     <div class="mb-3">
