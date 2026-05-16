@@ -583,7 +583,7 @@ class CounsellingActivity(db.Model):
     # 🚨 FIXED: Points to 'counselling.id' (singular)
     counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id', ondelete='CASCADE'), nullable=False)
 
-    activity_name = db.Column(db.String(255), nullable=False)
+    activity_name = db.Column(db.Text, nullable=False)
     start_date = db.Column(db.DateTime, nullable=True)
     end_date = db.Column(db.DateTime, nullable=True)
 
@@ -611,7 +611,7 @@ class RoundActivity(db.Model):
     # 🚨 FIXED: Points to 'counselling_rounds.id'
     round_id = db.Column(db.Integer, db.ForeignKey('counselling_rounds.id', ondelete='CASCADE'), nullable=False)
 
-    activity_name = db.Column(db.String(255), nullable=False)
+    activity_name = db.Column(db.Text, nullable=False)
     start_date = db.Column(db.DateTime, nullable=True)
     end_date = db.Column(db.DateTime, nullable=True)
     is_actionable = db.Column(db.Boolean, default=False)

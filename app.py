@@ -70,6 +70,14 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
+    try:
+        db.session.execute(text('ALTER TABLE counselling_activities ALTER COLUMN activity_name TYPE TEXT'))
+        db.session.execute(text('ALTER TABLE round_activities ALTER COLUMN activity_name TYPE TEXT'))
+        db.session.commit()
+        print("✅ Upgraded activity name limits to support long descriptions.")
+    except Exception as e:
+        db.session.rollback()
+
     # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
         db.session.add(Staff(username='admin', password_hash=generate_password_hash('admin123'), role='admin'))
