@@ -111,7 +111,6 @@
                                 <h5 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-chart-line text-primary me-2"></i>Last Year Cutoffs</h5>
 
                                 {% if college.cutoffs %}
-                                {% if college.cutoffs %}
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover align-middle">
 
@@ -136,7 +135,8 @@
                                                             {{ cutoff.parsed_data.get(round_name)|float|int if cutoff.parsed_data.get(round_name)|replace('.0', '')|is_number else cutoff.parsed_data.get(round_name) | replace('.0', '') }}
                                                         {% else %}
                                                             -
-                                                        {% endif %} </td>
+                                                        {% endif %}
+                                                    </td>
                                                 {% endfor %}
                                             </tr>
                                             {% endfor %}
@@ -144,7 +144,6 @@
                                     </table>
                                 </div>
                                 {% else %}
-
                                 <p class="text-muted fst-italic">No cutoff data available for this college.</p>
                                 {% endif %}
 
