@@ -86,6 +86,32 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
 
+        # Phase 2: College Database Expansion Migration
+        try:
+            columns_to_add = [
+                "true_college_name VARCHAR(255)", "college_code VARCHAR(100)", "district VARCHAR(100)",
+                "city VARCHAR(100)", "complete_address TEXT", "nearby_airport VARCHAR(255)",
+                "nearby_train_station VARCHAR(255)", "university_name VARCHAR(255)", "state_rank INTEGER",
+                "aiq_rank INTEGER", "hidden_fees_warning TEXT", "seat_distribution TEXT",
+                "overall_rating FLOAT", "academics_rating FLOAT", "clinical_exposure_rating FLOAT",
+                "hostel_mess_rating FLOAT", "campus_life_rating FLOAT", "academics_summary TEXT",
+                "faculty_mentorship_summary TEXT", "patient_flow_hospital_summary TEXT", "hostel_summary TEXT",
+                "mess_summary TEXT", "campus_life_summary TEXT", "pg_prospects_summary TEXT",
+                "strictness_discipline TEXT", "gender_rules TEXT", "top_3_strengths TEXT",
+                "top_3_red_flags TEXT", "counselor_one_liner TEXT", "document_source_file VARCHAR(255)"
+            ]
+
+            for col in columns_to_add:
+                try:
+                    db.session.execute(text(f'ALTER TABLE colleges ADD COLUMN {col}'))
+                except Exception:
+                    pass  # Column already exists
+
+            db.session.commit()
+            print("✅ Expanded College table for new Counselor DB architecture.")
+        except Exception as e:
+            db.session.rollback()
+
     # 1. Inject Master Admin
     if not Staff.query.filter_by(username='admin').first():
         db.session.add(Staff(username='admin', password_hash=generate_password_hash('admin123'), role='admin'))
