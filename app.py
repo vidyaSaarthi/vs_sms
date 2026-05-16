@@ -812,6 +812,7 @@ def student_pipeline():
     status_filter = request.args.get('status', '')
     counselling_filter = request.args.get('counselling', '')
     exam_id_filter = request.args.get('exam_id', '')
+    category_filter = request.args.get('category', '')
     active_tab = request.args.get('tab', 'all')
 
     query = Student.query
@@ -831,6 +832,8 @@ def student_pipeline():
             StudentCounsellingRegistration.counselling_id == int(counselling_filter))
     if exam_id_filter:
         query = query.join(StudentExamResult).filter(StudentExamResult.exam_id == int(exam_id_filter))
+    if category_filter:
+        query = query.filter(Student.category == category_filter)
 
     all_count = query.count()
     jee_count = query.filter(Student.exam_type == 'JEE').count()
@@ -849,7 +852,8 @@ def student_pipeline():
     return render_template('students.html', students=students, search_query=search_query, active_tab=active_tab,
                            counsellor_filter=counsellor_filter, status_filter=status_filter,
                            counselling_filter=counselling_filter, exam_id_filter=exam_id_filter,
-                           counsellors=counsellor_list, active_counsellings=active_counsellings,
+                           category_filter=category_filter, counsellors=counsellor_list,
+                           active_counsellings=active_counsellings,
                            all_count=all_count, jee_count=jee_count, neet_count=neet_count)
 
 
