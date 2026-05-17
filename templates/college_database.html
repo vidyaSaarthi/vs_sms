@@ -17,22 +17,42 @@
         </div>
         <div class="card-body p-4">
             <form method="GET" action="{{ url_for('college_database') }}" class="row g-3 align-items-center">
-                <div class="col-md-7">
+                <div class="col-lg-4 col-md-12">
                     <div class="input-group input-group-lg shadow-sm" style="border-radius: 12px; overflow: hidden;">
                         <span class="input-group-text bg-white border-0" style="color: #cc0000;"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control border-0 bg-white" placeholder="Search by College Name, City, or District..." value="{{ search_query }}" autofocus style="box-shadow: none;">
+                        <input type="text" name="search" class="form-control border-0 bg-white" placeholder="Search Name, City, District..." value="{{ search_query }}" autofocus style="box-shadow: none; font-size: 0.95rem;">
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <select name="state" class="form-select form-select-lg shadow-sm border-0 fw-bold text-secondary" style="border-radius: 12px; background-color: #fff;">
-                        <option value="">All States / Pan-India</option>
+
+                <div class="col-lg-2 col-md-4">
+                    <select name="state" class="form-select form-select-lg shadow-sm border-0 fw-bold text-secondary" style="border-radius: 12px; background-color: #fff; font-size: 0.9rem;">
+                        <option value="">All States</option>
                         {% for s in all_states %}
                             <option value="{{ s.name }}" {% if state_filter == s.name %}selected{% endif %}>{{ s.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-lg w-100 shadow-sm fw-bold text-white" style="border-radius: 12px; background-color: #cc0000; border: none; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(204,0,0,0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)';">
+
+                <div class="col-lg-2 col-md-4">
+                    <select name="course" class="form-select form-select-lg shadow-sm border-0 fw-bold text-secondary" style="border-radius: 12px; background-color: #fff; font-size: 0.9rem;">
+                        <option value="">All Courses</option>
+                        {% for c in all_courses %}
+                            <option value="{{ c.name }}" {% if course_filter == c.name %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <select name="type" class="form-select form-select-lg shadow-sm border-0 fw-bold text-secondary" style="border-radius: 12px; background-color: #fff; font-size: 0.9rem;">
+                        <option value="">All Types</option>
+                        {% for t in all_types %}
+                            <option value="{{ t }}" {% if type_filter == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-12">
+                    <button type="submit" class="btn btn-lg w-100 shadow-sm fw-bold text-white" style="border-radius: 12px; background-color: #cc0000; border: none; font-size: 1.05rem; padding-top: 0.6rem; padding-bottom: 0.6rem; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(204,0,0,0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)';">
                         Explore <i class="fas fa-arrow-right ms-1"></i>
                     </button>
                 </div>
@@ -40,7 +60,7 @@
         </div>
     </div>
 
-    {% if not search_query and not state_filter %}
+    {% if not search_query and not state_filter and not course_filter and not type_filter %}
         <div class="text-center py-5 mt-4">
             <div class="d-inline-block p-4 rounded-circle shadow-sm mb-4" style="background-color: #f6e89e;">
                 <i class="fas fa-university fa-4x text-dark"></i>

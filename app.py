@@ -1385,6 +1385,8 @@ from sqlalchemy import or_  # Make sure you have 'or_' imported at the top!
 def college_database():
     search_query = request.args.get('search', '').strip()
     state_filter = request.args.get('state', '').strip()
+    course_filter = request.args.get('course', '').strip()
+    type_filter = request.args.get('type', '').strip()
 
     # Base query
     query = College.query
@@ -1403,13 +1405,26 @@ def college_database():
     if state_filter:
         query = query.join(State).filter(State.name == state_filter)
 
-    # Get a list of all states for the dropdown filter
+    if course_filter:
+        query = query.join(Course).filter(Course.name == course_filter)
+
+    if type_filter:
+        query = query.filter(College.college_type == type_filter)
+
+    # Get dynamic lists for the dropdown filters based on live database records
     all_states = State.query.order_by(State.name).all()
+    all_courses = Course.query.order_by(Course.name).all()
 
-    # If the user searched, return results. Otherwise, return an empty list to keep the page clean initially.
-    colleges = query.order_by(College.state_rank.asc()).all() if (search_query or state_filter) else []
+    unique_types_query = db.session.query(College.college_type).distinct().filter(College.college_type != None,
+                                                                                  College.college_type != 'Unknown').order_by(
+        College.college_type).all()
+    all_types = [t[0] for t in unique_types_query]
 
-    # For Cutoffs, we need to parse the JSON string back into a Python dictionary
+    # If the user searched or filtered, return results. Otherwise, empty list.
+    colleges = query.order_by(College.state_rank.asc()).all() if (
+                search_query or state_filter or course_filter or type_filter) else []
+
+    # Parse Cutoffs JSON
     import json
     for college in colleges:
         for cutoff in college.cutoffs:
@@ -1424,9 +1439,12 @@ def college_database():
     return render_template('college_database.html',
                            colleges=colleges,
                            all_states=all_states,
+                           all_courses=all_courses,
+                           all_types=all_types,
                            search_query=search_query,
-                           state_filter=state_filter)
-
+                           state_filter=state_filter,
+                           course_filter=course_filter,
+                           type_filter=type_filter)
 
 @app.route('/student/<int:id>/export')
 @login_required
