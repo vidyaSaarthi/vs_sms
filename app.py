@@ -1980,6 +1980,11 @@ def application_matrix():
     return render_template('application_matrix.html',
                            pending_checklist=pending_checklist,
                            students=students,
+                           exams_grouped=exams_grouped,
+                           exam_matrix=exam_matrix,
+                           couns_grouped=couns_grouped,
+                           couns_matrix=couns_matrix,
+                           exam_type=exam_type)
 
 @app.route('/reports/workflow-tracker')
 @login_required
