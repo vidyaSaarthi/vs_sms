@@ -78,7 +78,7 @@ try:
             "name": current_college_processing,
             "true_name": clean_value(row.get('True College Name')),
             "code": clean_value(row.get('College_code')),
-            "type": clean_value(row.get('Type_x')),
+            "type": clean_value(row.get('Type_x')) or clean_value(row.get('Type')) or clean_value(row.get('college_type')) or "Unknown",
             "year": clean_value(row.get('Established year')),
             "state_id": state_id,
             "district": clean_value(row.get('District')),
