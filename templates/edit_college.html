@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid pt-4 pb-5" style="background-color: #f8f9fa; min-height: 100vh;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary mb-2 fw-bold"><i class="fas fa-arrow-left me-1"></i>Back to Search</a>
+            <h2 class="fw-bold mb-0 text-dark"><i class="fas fa-edit text-danger me-2"></i>Live Editor: {{ college.true_college_name }}</h2>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('edit_college', college_id=college.id) }}">
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 mb-4" style="border-radius: 15px;">
+                    <div class="card-header bg-white border-bottom fw-bold text-primary py-3"><i class="fas fa-info-circle me-2"></i>Core Identity</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">True College Name</label>
+                            <input type="text" name="true_college_name" class="form-control fw-bold" value="{{ college.true_college_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">College Code</label>
+                            <input type="text" name="college_code" class="form-control" value="{{ college.college_code or '' }}">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Course</label>
+                                <select name="course_id" class="form-select">
+                                    <option value="">Unknown</option>
+                                    {% for c in courses %}
+                                        <option value="{{ c.id }}" {% if college.course_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Type</label>
+                                <input type="text" name="college_type" class="form-control" value="{{ college.college_type or '' }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">University Affiliation</label>
+                            <select name="university_id" class="form-select">
+                                <option value="">Unknown</option>
+                                {% for u in universities %}
+                                    <option value="{{ u.id }}" {% if college.university_id == u.id %}selected{% endif %}>{{ u.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">State</label>
+                                <select name="state_id" class="form-select">
+                                    <option value="">Unknown</option>
+                                    {% for s in states %}
+                                        <option value="{{ s.id }}" {% if college.state_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">City</label>
+                                <input type="text" name="city" class="form-control" value="{{ college.city or '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                    <div class="card-header bg-white border-bottom fw-bold text-success py-3"><i class="fas fa-rupee-sign me-2"></i>Fees & Logistics</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Annual Fees (Multiline allowed)</label>
+                            <textarea name="fees" class="form-control" rows="3">{{ college.fees or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-danger">Hidden Fees Warning</label>
+                            <input type="text" name="hidden_fees_warning" class="form-control border-danger" value="{{ college.hidden_fees_warning or '' }}">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Service Bond</label>
+                                <textarea name="service_bond" class="form-control" rows="2">{{ college.service_bond or '' }}</textarea>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">Disc. Penalty</label>
+                                <textarea name="discontinued_bond" class="form-control" rows="2">{{ college.discontinued_bond or '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-header bg-white border-bottom fw-bold text-danger py-3"><i class="fas fa-search-location me-2"></i>Reality Check Intel</div>
+                    <div class="card-body">
+                        
+                        <div class="mb-4 p-3 rounded bg-light border">
+                            <label class="form-label fw-bold text-dark"><i class="fas fa-quote-left text-warning me-2"></i>Counselor One-Liner</label>
+                            <textarea name="counselor_one_liner" class="form-control fw-bold text-primary" rows="2">{{ college.counselor_one_liner or '' }}</textarea>
+                        </div>
+
+                        <div class="row g-2 mb-4">
+                            <div class="col-4">
+                                <label class="form-label small fw-bold text-muted">Overall /10</label>
+                                <input type="number" step="0.1" name="overall_rating" class="form-control" value="{{ college.overall_rating or '' }}">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-bold text-muted">Academics</label>
+                                <input type="number" step="0.1" name="academics_rating" class="form-control" value="{{ college.academics_rating or '' }}">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-bold text-muted">Hostel</label>
+                                <input type="number" step="0.1" name="hostel_mess_rating" class="form-control" value="{{ college.hostel_mess_rating or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-success"><i class="fas fa-arrow-up me-1"></i>Key Strengths</label>
+                            <textarea name="top_3_strengths" class="form-control border-success" rows="3">{{ college.top_3_strengths or '' }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-danger"><i class="fas fa-flag me-1"></i>Red Flags</label>
+                            <textarea name="top_3_red_flags" class="form-control border-danger" rows="3">{{ college.top_3_red_flags or '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-warning"><i class="fas fa-gavel me-1"></i>Strictness</label>
+                            <textarea name="strictness_discipline" class="form-control" rows="2">{{ college.strictness_discipline or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-info"><i class="fas fa-venus-mars me-1"></i>Gender Rules</label>
+                            <textarea name="gender_rules" class="form-control" rows="2">{{ college.gender_rules or '' }}</textarea>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                    <div class="card-header bg-white border-bottom fw-bold text-dark py-3"><i class="fas fa-folder-open text-primary me-2"></i>Deep Dive Summaries</div>
+                    <div class="card-body bg-light">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Academics Environment</label>
+                            <textarea name="academics_summary" class="form-control" rows="2">{{ college.academics_summary or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Faculty & Mentorship</label>
+                            <textarea name="faculty_mentorship_summary" class="form-control" rows="2">{{ college.faculty_mentorship_summary or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Patient Flow & Hospital</label>
+                            <textarea name="patient_flow_hospital_summary" class="form-control" rows="2">{{ college.patient_flow_hospital_summary or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">PG Prospects / Internal Quota</label>
+                            <textarea name="pg_prospects_summary" class="form-control" rows="2">{{ college.pg_prospects_summary or '' }}</textarea>
+                        </div>
+                        
+                        <hr>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Campus Life</label>
+                            <textarea name="campus_life_summary" class="form-control" rows="2">{{ college.campus_life_summary or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Hostel Infrastructure</label>
+                            <textarea name="hostel_summary" class="form-control" rows="2">{{ college.hostel_summary or '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Mess & Food Quality</label>
+                            <textarea name="mess_summary" class="form-control" rows="2">{{ college.mess_summary or '' }}</textarea>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card shadow-lg border-0 mt-4 position-sticky bottom-0" style="z-index: 1000; border-radius: 15px 15px 0 0;">
+            <div class="card-body text-end bg-white p-3">
+                <a href="javascript:history.back()" class="btn btn-light fw-bold me-2 px-4">Cancel</a>
+                <button type="submit" class="btn fw-bold text-white px-5 shadow-sm" style="background-color: #cc0000; border-radius: 8px;">
+                    <i class="fas fa-save me-2"></i>Save Live Updates
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

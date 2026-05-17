@@ -116,6 +116,12 @@
                                             </span>
                                         </div>
                                     {% endif %}
+
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('edit_college', college_id=college.id) }}" class="btn btn-sm btn-light fw-bold shadow-sm" style="border-radius: 8px; color: #1e3c72;">
+                                            <i class="fas fa-edit me-1 text-danger"></i> Live Edit
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 

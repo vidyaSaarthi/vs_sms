@@ -2856,6 +2856,78 @@ def delete_round_artifact(artifact_id):
     return redirect(url_for('master_data', tab='master-couns-tab'))
 
 
+@app.route('/colleges/edit/<int:college_id>', methods=['GET', 'POST'])
+@login_required
+def edit_college(college_id):
+    college = College.query.get_or_404(college_id)
+
+    if request.method == 'POST':
+        try:
+            # 1. Basic Info
+            college.true_college_name = request.form.get('true_college_name')
+            college.college_code = request.form.get('college_code')
+            college.college_type = request.form.get('college_type')
+
+            course_id_val = request.form.get('course_id')
+            college.course_id = int(course_id_val) if course_id_val else None
+
+            state_id_val = request.form.get('state_id')
+            college.state_id = int(state_id_val) if state_id_val else None
+
+            uni_id_val = request.form.get('university_id')
+            college.university_id = int(uni_id_val) if uni_id_val else None
+
+            college.city = request.form.get('city')
+
+            # 2. Money & Logistics
+            college.fees = request.form.get('fees')
+            college.hidden_fees_warning = request.form.get('hidden_fees_warning')
+            college.service_bond = request.form.get('service_bond')
+            college.discontinued_bond = request.form.get('discontinued_bond')
+            college.nearby_train_station = request.form.get('nearby_train_station')
+            college.nearby_airport = request.form.get('nearby_airport')
+
+            # 3. Reality Check & Ratings
+            def safe_float(val):
+                return float(val) if val and val.strip() else None
+
+            college.overall_rating = safe_float(request.form.get('overall_rating'))
+            college.academics_rating = safe_float(request.form.get('academics_rating'))
+            college.hostel_mess_rating = safe_float(request.form.get('hostel_mess_rating'))
+
+            college.top_3_strengths = request.form.get('top_3_strengths')
+            college.top_3_red_flags = request.form.get('top_3_red_flags')
+            college.strictness_discipline = request.form.get('strictness_discipline')
+            college.gender_rules = request.form.get('gender_rules')
+            college.counselor_one_liner = request.form.get('counselor_one_liner')
+
+            # 4. Deep Dive Summaries
+            college.academics_summary = request.form.get('academics_summary')
+            college.faculty_mentorship_summary = request.form.get('faculty_mentorship_summary')
+            college.patient_flow_hospital_summary = request.form.get('patient_flow_hospital_summary')
+            college.hostel_summary = request.form.get('hostel_summary')
+            college.mess_summary = request.form.get('mess_summary')
+            college.campus_life_summary = request.form.get('campus_life_summary')
+            college.pg_prospects_summary = request.form.get('pg_prospects_summary')
+
+            db.session.commit()
+            flash(f"Live Update Successful: {college.true_college_name} has been updated!", "success")
+            return redirect(url_for('college_database', search=college.true_college_name))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating college: {str(e)}", "error")
+
+    # For the GET request, load dropdown data
+    states = State.query.order_by(State.name.asc()).all()
+    universities = University.query.order_by(University.name.asc()).all()
+    courses = Course.query.order_by(Course.name.asc()).all()
+
+    return render_template('edit_college.html', college=college, states=states, universities=universities,
+                           courses=courses)
+
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
 
