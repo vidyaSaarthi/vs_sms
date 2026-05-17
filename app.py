@@ -1919,15 +1919,67 @@ def application_matrix():
         else:
             for course in c.courses:
                 couns_grouped.setdefault(course.name, []).append(c)
+    couns_grouped = {}
+    for c in active_counsellings:
+        if not c.courses:
+            couns_grouped.setdefault("General / Untagged", []).append(c)
+        else:
+            for course in c.courses:
+                couns_grouped.setdefault(course.name, []).append(c)
     couns_grouped = dict(sorted(couns_grouped.items()))
 
+    # 🚨 NEW: Build the Pending Forms Checklist based directly on the Matrix status
+    pending_checklist = []
+
+    for student_id, exams in exam_matrix.items():
+        for exam_id, status in exams.items():
+            if status == 'Pending':
+                student = next((s for s in students if s.id == student_id), None)
+                exam = next((e for e in active_exams if e.id == exam_id), None)
+                if student and exam:
+                    course_name = exam.courses[0].name if exam.courses else "General"
+                    # Find the next upcoming form for this exam to display deadline
+                    forms = Form.query.filter_by(exam_id=exam.id).order_by(Form.end_date.asc()).all()
+                    form_name = forms[0].name if forms else f"{exam.name} Form"
+                    deadline = forms[0].end_date if forms else None
+
+                    pending_checklist.append({
+                        'student_id': student.id,
+                        'student_name': student.full_name,
+                        'course_name': course_name,
+                        'process_type': 'Exam',
+                        'process_name': exam.name,
+                        'form_name': form_name,
+                        'deadline': deadline
+                    })
+
+    for student_id, couns in couns_matrix.items():
+        for couns_id, status in couns.items():
+            if status == 'Pending':
+                student = next((s for s in students if s.id == student_id), None)
+                counselling = next((c for c in active_counsellings if c.id == couns_id), None)
+                if student and counselling:
+                    course_name = counselling.courses[0].name if counselling.courses else "General"
+                    forms = Form.query.filter_by(counselling_id=counselling.id).order_by(Form.end_date.asc()).all()
+                    form_name = forms[0].name if forms else f"{counselling.name} Form"
+                    deadline = forms[0].end_date if forms else None
+
+                    pending_checklist.append({
+                        'student_id': student.id,
+                        'student_name': student.full_name,
+                        'course_name': course_name,
+                        'process_type': 'Counselling',
+                        'process_name': counselling.name,
+                        'form_name': form_name,
+                        'deadline': deadline
+                    })
+
+    # Sort the checklist by deadline (putting items with no deadline at the bottom)
+    pending_checklist.sort(key=lambda x: x['deadline'] if x['deadline'] else date.max)
+
     return render_template('application_matrix.html',
+                           pending_checklist=pending_checklist,
                            students=students,
-                           exams_grouped=exams_grouped,
-                           exam_matrix=exam_matrix,
-                           couns_grouped=couns_grouped,
-                           couns_matrix=couns_matrix,
-                           exam_type=exam_type)
 
 @app.route('/reports/workflow-tracker')
 @login_required
