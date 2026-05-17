@@ -160,19 +160,19 @@
                                 <div class="row g-3 mb-4">
                                     {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
                                     <div class="col-lg-6">
-                                        <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;">
-                                            <i class="fas fa-arrow-up me-2"></i>Key Strengths
-                                        </span>
-                                        <div class="small text-dark lh-base ps-2 pe-1" style="white-space: pre-wrap;">{{ college.top_3_strengths | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
+                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #10b981 !important;">
+                                            <span class="d-block small text-uppercase fw-bold mb-2" style="color: #10b981;"><i class="fas fa-arrow-up me-1"></i> Key Strengths</span>
+                                            <div class="small text-dark lh-base" style="white-space: pre-wrap;">{{ college.top_3_strengths | replace(' | ', '\n\n') }}</div>
+                                        </div>
                                     </div>
                                     {% endif %}
 
                                     {% if college.top_3_red_flags and college.top_3_red_flags != 'None' %}
                                     <div class="col-lg-6">
-                                        <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7;">
-                                            <i class="fas fa-flag me-2"></i>Red Flags
-                                        </span>
-                                        <div class="small text-danger fw-bold lh-base ps-2 pe-1" style="white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
+                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #cc0000 !important;">
+                                            <span class="d-block small text-uppercase fw-bold mb-2" style="color: #cc0000;"><i class="fas fa-flag me-1"></i> Red Flags</span>
+                                            <div class="small fw-bold lh-base" style="color: #cc0000; white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n') }}</div>
+                                        </div>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -180,8 +180,8 @@
                                 <div class="row g-3">
                                     {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
                                     <div class="col-lg-6">
-                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-warning border-4 h-100">
-                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-gavel text-warning me-1"></i> Strictness</span>
+                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #f6e89e !important;">
+                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-gavel me-1" style="color: #d4af37;"></i> Strictness</span>
                                             <span class="small text-dark fw-semibold lh-sm" style="white-space: pre-wrap;">{{ college.strictness_discipline }}</span>
                                         </div>
                                     </div>
@@ -189,8 +189,8 @@
 
                                     {% if college.gender_rules and college.gender_rules != 'None' %}
                                     <div class="col-lg-6">
-                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-info border-4 h-100">
-                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-venus-mars text-info me-1"></i> Gender Rules</span>
+                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #ccdfed !important;">
+                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-venus-mars me-1" style="color: #5a9bd4;"></i> Gender Rules</span>
                                             <span class="small text-dark fw-semibold lh-sm" style="white-space: pre-wrap;">{{ college.gender_rules }}</span>
                                         </div>
                                     </div>
