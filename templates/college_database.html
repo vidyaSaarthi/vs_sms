@@ -151,48 +151,7 @@
                                     <h5 class="fw-bold text-dark mb-0">Reality Check</h5>
                                 </div>
 
-                                <div class="row g-4 mb-4">
-                                    <div class="col-md-6">
-                                        <div class="p-3 rounded shadow-sm border h-100" style="background-color: #fafbfc;">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <span class="small fw-bold text-secondary text-uppercase">Overall Score</span>
-                                                <span class="badge bg-dark fs-6">{{ college.overall_rating or '-' }} <i class="fas fa-star text-warning ms-1"></i></span>
-                                            </div>
-                                            <div class="progress mb-3 shadow-sm" style="height: 8px;">
-                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (college.overall_rating or 0)|float * 10 }}%" aria-valuenow="{{ college.overall_rating or 0 }}" aria-valuemin="0" aria-valuemax="10"></div>
-                                            </div>
-
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="small text-muted"><i class="fas fa-book-open text-primary me-2"></i>Academics</span>
-                                                <strong class="text-dark">{{ college.academics_rating or '-' }}/10</strong>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span class="small text-muted"><i class="fas fa-building text-success me-2"></i>Hostel/Mess</span>
-                                                <strong class="text-dark">{{ college.hostel_mess_rating or '-' }}/10</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="d-flex flex-column h-100 gap-3">
-                                            {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
-                                            <div class="bg-white p-3 rounded shadow-sm border border-start border-warning border-4 flex-grow-1">
-                                                <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-gavel text-warning me-1"></i> Strictness</span>
-                                                <span class="small text-dark fw-semibold lh-sm">{{ college.strictness_discipline }}</span>
-                                            </div>
-                                            {% endif %}
-
-                                            {% if college.gender_rules and college.gender_rules != 'None' %}
-                                            <div class="bg-white p-3 rounded shadow-sm border border-start border-info border-4 flex-grow-1">
-                                                <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-venus-mars text-info me-1"></i> Gender Rules</span>
-                                                <span class="small text-dark fw-semibold lh-sm">{{ college.gender_rules }}</span>
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row g-3">
+                                <div class="row g-3 mb-4">
                                     {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
                                     <div class="col-lg-6">
                                         <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;">
@@ -208,6 +167,26 @@
                                             <i class="fas fa-flag me-2"></i>Red Flags
                                         </span>
                                         <div class="small text-danger fw-bold lh-base ps-2 pe-1" style="white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row g-3">
+                                    {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
+                                    <div class="col-lg-6">
+                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-warning border-4 h-100">
+                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-gavel text-warning me-1"></i> Strictness</span>
+                                            <span class="small text-dark fw-semibold lh-sm" style="white-space: pre-wrap;">{{ college.strictness_discipline }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if college.gender_rules and college.gender_rules != 'None' %}
+                                    <div class="col-lg-6">
+                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-info border-4 h-100">
+                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-venus-mars text-info me-1"></i> Gender Rules</span>
+                                            <span class="small text-dark fw-semibold lh-sm" style="white-space: pre-wrap;">{{ college.gender_rules }}</span>
+                                        </div>
                                     </div>
                                     {% endif %}
                                 </div>
