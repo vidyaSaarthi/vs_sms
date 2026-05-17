@@ -7,7 +7,7 @@
         <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h2 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.5px;">
-                    <i class="fas fa-bolt text-danger me-2"></i>Counselor Cheat Sheet
+                    <i class="fas fa-bolt text-danger me-2"></i>College Intelligence Hub
                 </h2>
                 <span class="badge rounded-pill shadow-sm" style="background-color: #ccdfed; color: #1e3c72; border: 1px solid rgba(30, 60, 114, 0.2); font-weight: 700; padding: 0.5em 1em;">
                     <i class="fas fa-circle text-success me-1" style="font-size: 0.6em; vertical-align: middle;"></i> Live Database
@@ -92,7 +92,7 @@
                         </div>
                     </div>
 
-                    <div class="card-body p-0 bg-white">
+                    <div class="card-body p-0 bg-white border-bottom">
                         <div class="row g-0">
 
                             <div class="col-md-4 p-4 border-end" style="background-color: #fafbfc;">
@@ -124,13 +124,13 @@
                                     <div class="col-6">
                                         <div class="p-3 bg-white shadow-sm border rounded text-center h-100">
                                             <span class="text-muted d-block fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase;">Service Bond</span>
-                                            <span class="fw-bold text-dark">{{ college.service_bond or 'None' }}</span>
+                                            <div class="fw-bold text-dark" style="white-space: pre-wrap; font-size: 0.85rem;">{{ college.service_bond or 'None' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="p-3 bg-white shadow-sm border rounded text-center h-100">
                                             <span class="text-muted d-block fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase;">Disc. Penalty</span>
-                                            <span class="fw-bold text-danger">{{ college.discontinued_bond or 'None' }}</span>
+                                            <div class="fw-bold text-danger" style="white-space: pre-wrap; font-size: 0.85rem;">{{ college.discontinued_bond or 'None' }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -190,10 +190,6 @@
                                 </div>
                                 {% endif %}
 
-                                <div class="mt-4 p-3 bg-light rounded border">
-                                    <span class="text-muted fw-bold text-uppercase d-block mb-1" style="font-size: 0.75rem;"><i class="fas fa-users text-primary me-2"></i>Seat Distribution</span>
-                                    <p class="small mb-0 text-dark fw-semibold">{{ college.seat_distribution or 'Details not specified.' }}</p>
-                                </div>
                             </div>
 
                             <div class="col-md-3 p-4" style="background-color: #fafbfc;">
@@ -223,6 +219,22 @@
                                     </div>
                                 </div>
 
+                                <div class="mb-4">
+                                    {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
+                                    <div class="bg-white p-3 rounded shadow-sm border mb-2 border-start border-warning border-4">
+                                        <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-gavel text-warning me-1"></i> Strictness & Rules</span>
+                                        <span class="small text-dark fw-semibold lh-sm">{{ college.strictness_discipline }}</span>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if college.gender_rules and college.gender_rules != 'None' %}
+                                    <div class="bg-white p-3 rounded shadow-sm border border-start border-info border-4">
+                                        <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-venus-mars text-info me-1"></i> Gender Rules</span>
+                                        <span class="small text-dark fw-semibold lh-sm">{{ college.gender_rules }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
                                 {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
                                 <div class="mb-4">
                                     <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;">
@@ -244,6 +256,79 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="bg-white">
+                        <button class="btn w-100 py-3 d-flex justify-content-between align-items-center text-secondary fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#deepDive-{{ loop.index }}" aria-expanded="false" style="background-color: #f8f9fa; border-radius: 0 0 20px 20px; transition: all 0.2s;">
+                            <span><i class="fas fa-folder-open text-primary me-2"></i>View Complete Intelligence Report (Summaries)</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </button>
+
+                        <div class="collapse" id="deepDive-{{ loop.index }}">
+                            <div class="p-4 bg-white border-top">
+                                <div class="row g-4">
+
+                                    <div class="col-md-6">
+                                        <h5 class="fw-bold text-primary mb-4 pb-2 border-bottom"><i class="fas fa-user-md me-2"></i>Academics & Clinical Exposure</h5>
+
+                                        {% if college.academics_summary and college.academics_summary != 'None' %}
+                                        <div class="mb-4">
+                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">Academics Environment</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.academics_summary }}</p>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if college.faculty_mentorship_summary and college.faculty_mentorship_summary != 'None' %}
+                                        <div class="mb-4">
+                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">Faculty & Mentorship</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.faculty_mentorship_summary }}</p>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if college.patient_flow_hospital_summary and college.patient_flow_hospital_summary != 'None' %}
+                                        <div class="mb-4">
+                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">Patient Flow & Hospital</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.patient_flow_hospital_summary }}</p>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if college.pg_prospects_summary and college.pg_prospects_summary != 'None' %}
+                                        <div class="mb-3">
+                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">PG Prospects / Internal Quota</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.pg_prospects_summary }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <h5 class="fw-bold text-success mb-4 pb-2 border-bottom"><i class="fas fa-tree me-2"></i>Campus & Living Experience</h5>
+
+                                        {% if college.campus_life_summary and college.campus_life_summary != 'None' %}
+                                        <div class="mb-4">
+                                            <span class="badge bg-light text-success border mb-2 px-3 py-2">Campus Life</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.campus_life_summary }}</p>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if college.hostel_summary and college.hostel_summary != 'None' %}
+                                        <div class="mb-4">
+                                            <span class="badge bg-light text-success border mb-2 px-3 py-2">Hostel Infrastructure</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.hostel_summary }}</p>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if college.mess_summary and college.mess_summary != 'None' %}
+                                        <div class="mb-3">
+                                            <span class="badge bg-light text-success border mb-2 px-3 py-2">Mess & Food Quality</span>
+                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.mess_summary }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             {% endfor %}
@@ -257,6 +342,20 @@
     .college-card:hover {
         transform: translateY(-5px) !important;
         box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+
+    /* Rotate the chevron icon when collapse is open */
+    .btn[aria-expanded="true"] .toggle-icon {
+        transform: rotate(180deg);
+        transition: transform 0.3s;
+    }
+    .btn[aria-expanded="false"] .toggle-icon {
+        transform: rotate(0deg);
+        transition: transform 0.3s;
+    }
+    .btn[data-bs-toggle="collapse"]:hover {
+        background-color: #e9ecef !important;
+        color: #1e3c72 !important;
     }
 </style>
 {% endblock %}
