@@ -95,7 +95,7 @@
                     <div class="card-body p-0 bg-white border-bottom">
                         <div class="row g-0">
 
-                            <div class="col-md-4 p-4 border-end" style="background-color: #fafbfc;">
+                            <div class="col-md-6 p-4 border-end" style="background-color: #fafbfc;">
                                 <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
                                     <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-3" style="width: 40px; height: 40px;">
                                         <i class="fas fa-rupee-sign"></i>
@@ -120,42 +120,179 @@
                                 </div>
                                 {% endif %}
 
-                                <div class="row g-3 mb-4">
-                                    <div class="col-6">
+                                <div class="row g-3 mb-2">
+                                    <div class="col-lg-4 col-sm-6">
                                         <div class="p-3 bg-white shadow-sm border rounded text-center h-100">
                                             <span class="text-muted d-block fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase;">Service Bond</span>
                                             <div class="fw-bold text-dark" style="white-space: pre-wrap; font-size: 0.85rem;">{{ college.service_bond or 'None' }}</div>
                                         </div>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-lg-4 col-sm-6">
                                         <div class="p-3 bg-white shadow-sm border rounded text-center h-100">
                                             <span class="text-muted d-block fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase;">Disc. Penalty</span>
                                             <div class="fw-bold text-danger" style="white-space: pre-wrap; font-size: 0.85rem;">{{ college.discontinued_bond or 'None' }}</div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="p-3 bg-white shadow-sm border rounded">
-                                    <span class="text-muted d-block fw-bold mb-2 pb-2 border-bottom" style="font-size: 0.75rem; text-transform: uppercase;"><i class="fas fa-map-marked-alt text-primary me-2"></i>Connectivity</span>
-                                    <p class="small mb-2 text-dark"><i class="fas fa-train text-secondary me-2"></i>{{ college.nearby_train_station or 'N/A' }}</p>
-                                    <p class="small mb-0 text-dark"><i class="fas fa-plane text-secondary me-2"></i>{{ college.nearby_airport or 'N/A' }}</p>
+                                    <div class="col-lg-4 col-sm-12">
+                                        <div class="p-3 bg-white shadow-sm border rounded h-100">
+                                            <span class="text-muted d-block fw-bold mb-2 pb-2 border-bottom" style="font-size: 0.7rem; text-transform: uppercase;"><i class="fas fa-map-marked-alt text-primary me-2"></i>Connectivity</span>
+                                            <p class="small mb-2 text-dark" style="font-size: 0.8rem;"><i class="fas fa-train text-secondary me-2"></i>{{ college.nearby_train_station or 'N/A' }}</p>
+                                            <p class="small mb-0 text-dark" style="font-size: 0.8rem;"><i class="fas fa-plane text-secondary me-2"></i>{{ college.nearby_airport or 'N/A' }}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-5 p-4 border-end">
+                            <div class="col-md-6 p-4 bg-white">
                                 <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                                    <div class="text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-3" style="width: 40px; height: 40px; background-color: #1e3c72;">
-                                        <i class="fas fa-chart-bar"></i>
+                                    <div class="bg-danger text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-3" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-search-location"></i>
                                     </div>
-                                    <h5 class="fw-bold text-dark mb-0">Last Year Cutoffs</h5>
+                                    <h5 class="fw-bold text-dark mb-0">Reality Check</h5>
                                 </div>
 
+                                <div class="row g-4 mb-4">
+                                    <div class="col-md-6">
+                                        <div class="p-3 rounded shadow-sm border h-100" style="background-color: #fafbfc;">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <span class="small fw-bold text-secondary text-uppercase">Overall Score</span>
+                                                <span class="badge bg-dark fs-6">{{ college.overall_rating or '-' }} <i class="fas fa-star text-warning ms-1"></i></span>
+                                            </div>
+                                            <div class="progress mb-3 shadow-sm" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (college.overall_rating or 0)|float * 10 }}%" aria-valuenow="{{ college.overall_rating or 0 }}" aria-valuemin="0" aria-valuemax="10"></div>
+                                            </div>
+
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="small text-muted"><i class="fas fa-book-open text-primary me-2"></i>Academics</span>
+                                                <strong class="text-dark">{{ college.academics_rating or '-' }}/10</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="small text-muted"><i class="fas fa-building text-success me-2"></i>Hostel/Mess</span>
+                                                <strong class="text-dark">{{ college.hostel_mess_rating or '-' }}/10</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="d-flex flex-column h-100 gap-3">
+                                            {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
+                                            <div class="bg-white p-3 rounded shadow-sm border border-start border-warning border-4 flex-grow-1">
+                                                <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-gavel text-warning me-1"></i> Strictness</span>
+                                                <span class="small text-dark fw-semibold lh-sm">{{ college.strictness_discipline }}</span>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if college.gender_rules and college.gender_rules != 'None' %}
+                                            <div class="bg-white p-3 rounded shadow-sm border border-start border-info border-4 flex-grow-1">
+                                                <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-venus-mars text-info me-1"></i> Gender Rules</span>
+                                                <span class="small text-dark fw-semibold lh-sm">{{ college.gender_rules }}</span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
+                                    <div class="col-lg-6">
+                                        <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;">
+                                            <i class="fas fa-arrow-up me-2"></i>Key Strengths
+                                        </span>
+                                        <div class="small text-dark lh-base ps-2 pe-1" style="white-space: pre-wrap;">{{ college.top_3_strengths | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if college.top_3_red_flags and college.top_3_red_flags != 'None' %}
+                                    <div class="col-lg-6">
+                                        <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7;">
+                                            <i class="fas fa-flag me-2"></i>Red Flags
+                                        </span>
+                                        <div class="small text-danger fw-bold lh-base ps-2 pe-1" style="white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-light border-bottom">
+                        <h4 class="fw-bold text-dark mb-4"><i class="fas fa-folder-open text-primary me-2 shadow-sm p-2 bg-white rounded-circle"></i>Complete Intelligence Report</h4>
+                        <div class="row g-4">
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold text-primary mb-4 pb-2 border-bottom border-primary"><i class="fas fa-user-md me-2"></i>Academics & Clinical Exposure</h5>
+
+                                {% if college.academics_summary and college.academics_summary != 'None' %}
+                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">Academics Environment</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.academics_summary }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if college.faculty_mentorship_summary and college.faculty_mentorship_summary != 'None' %}
+                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">Faculty & Mentorship</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.faculty_mentorship_summary }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if college.patient_flow_hospital_summary and college.patient_flow_hospital_summary != 'None' %}
+                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">Patient Flow & Hospital</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.patient_flow_hospital_summary }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if college.pg_prospects_summary and college.pg_prospects_summary != 'None' %}
+                                <div class="mb-3 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">PG Prospects / Internal Quota</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.pg_prospects_summary }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="fw-bold text-success mb-4 pb-2 border-bottom border-success"><i class="fas fa-tree me-2"></i>Campus & Living Experience</h5>
+
+                                {% if college.campus_life_summary and college.campus_life_summary != 'None' %}
+                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-success text-white mb-2 px-3 py-2 shadow-sm">Campus Life</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.campus_life_summary }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if college.hostel_summary and college.hostel_summary != 'None' %}
+                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-success text-white mb-2 px-3 py-2 shadow-sm">Hostel Infrastructure</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.hostel_summary }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if college.mess_summary and college.mess_summary != 'None' %}
+                                <div class="mb-3 bg-white p-3 rounded shadow-sm border">
+                                    <span class="badge bg-success text-white mb-2 px-3 py-2 shadow-sm">Mess & Food Quality</span>
+                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.mess_summary }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="background-color: #f1f5f9; border-radius: 0 0 20px 20px;">
+                        <button class="btn w-100 py-3 d-flex justify-content-between align-items-center fw-bold text-dark border-0" type="button" data-bs-toggle="collapse" data-bs-target="#cutoffs-{{ loop.index }}" aria-expanded="false" style="border-radius: 0 0 20px 20px; font-size: 1.05rem;">
+                            <span><i class="fas fa-chart-line text-primary me-2 shadow-sm p-2 bg-white rounded-circle"></i>View Last Year Cutoffs</span>
+                            <i class="fas fa-chevron-down toggle-icon text-muted"></i>
+                        </button>
+
+                        <div class="collapse" id="cutoffs-{{ loop.index }}">
+                            <div class="p-4 bg-white border-top" style="border-radius: 0 0 20px 20px;">
                                 {% if college.cutoffs %}
                                 <div class="table-responsive shadow-sm border" style="border-radius: 10px; overflow: hidden;">
                                     <table class="table table-hover align-middle mb-0 text-center">
                                         <thead style="background-color: #ccdfed;">
                                             <tr>
-                                                <th class="text-start py-3 ps-3 text-dark fw-bold border-0">Category</th>
+                                                <th class="text-start py-3 ps-4 text-dark fw-bold border-0">Allotted Category</th>
                                                 {% set first_cutoff = college.cutoffs[0].parsed_data %}
                                                 {% set sorted_rounds = first_cutoff.keys() | sort %}
                                                 {% for round_name in sorted_rounds %}
@@ -166,11 +303,11 @@
                                         <tbody class="bg-white">
                                             {% for cutoff in college.cutoffs %}
                                             <tr>
-                                                <td class="text-start ps-3 fw-bold text-secondary">{{ cutoff.allotted_category }}</td>
+                                                <td class="text-start ps-4 fw-bold text-secondary">{{ cutoff.allotted_category }}</td>
                                                 {% for round_name in sorted_rounds %}
                                                     <td>
                                                         {% if cutoff.parsed_data.get(round_name) %}
-                                                            <span class="badge bg-light text-dark border p-2 shadow-sm" style="font-family: monospace; font-size: 0.85rem;">
+                                                            <span class="badge bg-light text-dark border p-2 shadow-sm" style="font-family: monospace; font-size: 0.95rem;">
                                                                 {{ cutoff.parsed_data.get(round_name) | replace('.0', '') }}
                                                             </span>
                                                         {% else %}
@@ -189,142 +326,6 @@
                                     <p class="text-muted fw-bold mb-0">No cutoff history available.</p>
                                 </div>
                                 {% endif %}
-
-                            </div>
-
-                            <div class="col-md-3 p-4" style="background-color: #fafbfc;">
-                                <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                                    <div class="bg-danger text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-3" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-search-location"></i>
-                                    </div>
-                                    <h5 class="fw-bold text-dark mb-0">Reality Check</h5>
-                                </div>
-
-                                <div class="bg-white p-3 rounded shadow-sm border mb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="small fw-bold text-secondary text-uppercase">Overall Score</span>
-                                        <span class="badge bg-dark fs-6">{{ college.overall_rating or '-' }} <i class="fas fa-star text-warning ms-1"></i></span>
-                                    </div>
-                                    <div class="progress mb-3" style="height: 6px;">
-                                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (college.overall_rating or 0)|float * 10 }}%" aria-valuenow="{{ college.overall_rating or 0 }}" aria-valuemin="0" aria-valuemax="10"></div>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small text-muted"><i class="fas fa-book-open text-primary me-2"></i>Academics</span>
-                                        <strong class="text-dark">{{ college.academics_rating or '-' }}/10</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="small text-muted"><i class="fas fa-building text-success me-2"></i>Hostel/Mess</span>
-                                        <strong class="text-dark">{{ college.hostel_mess_rating or '-' }}/10</strong>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
-                                    <div class="bg-white p-3 rounded shadow-sm border mb-2 border-start border-warning border-4">
-                                        <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-gavel text-warning me-1"></i> Strictness & Rules</span>
-                                        <span class="small text-dark fw-semibold lh-sm">{{ college.strictness_discipline }}</span>
-                                    </div>
-                                    {% endif %}
-
-                                    {% if college.gender_rules and college.gender_rules != 'None' %}
-                                    <div class="bg-white p-3 rounded shadow-sm border border-start border-info border-4">
-                                        <span class="d-block small text-muted text-uppercase fw-bold mb-1"><i class="fas fa-venus-mars text-info me-1"></i> Gender Rules</span>
-                                        <span class="small text-dark fw-semibold lh-sm">{{ college.gender_rules }}</span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-
-                                {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
-                                <div class="mb-4">
-                                    <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc;">
-                                        <i class="fas fa-arrow-up me-2"></i>Key Strengths
-                                    </span>
-                                    <div class="small text-dark lh-base ps-2" style="white-space: pre-wrap;">{{ college.top_3_strengths | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
-                                </div>
-                                {% endif %}
-
-                                {% if college.top_3_red_flags and college.top_3_red_flags != 'None' %}
-                                <div>
-                                    <span class="badge w-100 text-start py-2 px-3 mb-2 shadow-sm" style="background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7;">
-                                        <i class="fas fa-flag me-2"></i>Red Flags
-                                    </span>
-                                    <div class="small text-danger fw-bold lh-base ps-2" style="white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n• ') | replace('1. ', '• ') }}</div>
-                                </div>
-                                {% endif %}
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white">
-                        <button class="btn w-100 py-3 d-flex justify-content-between align-items-center text-secondary fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#deepDive-{{ loop.index }}" aria-expanded="false" style="background-color: #f8f9fa; border-radius: 0 0 20px 20px; transition: all 0.2s;">
-                            <span><i class="fas fa-folder-open text-primary me-2"></i>View Complete Intelligence Report (Summaries)</span>
-                            <i class="fas fa-chevron-down toggle-icon"></i>
-                        </button>
-
-                        <div class="collapse" id="deepDive-{{ loop.index }}">
-                            <div class="p-4 bg-white border-top">
-                                <div class="row g-4">
-
-                                    <div class="col-md-6">
-                                        <h5 class="fw-bold text-primary mb-4 pb-2 border-bottom"><i class="fas fa-user-md me-2"></i>Academics & Clinical Exposure</h5>
-
-                                        {% if college.academics_summary and college.academics_summary != 'None' %}
-                                        <div class="mb-4">
-                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">Academics Environment</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.academics_summary }}</p>
-                                        </div>
-                                        {% endif %}
-
-                                        {% if college.faculty_mentorship_summary and college.faculty_mentorship_summary != 'None' %}
-                                        <div class="mb-4">
-                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">Faculty & Mentorship</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.faculty_mentorship_summary }}</p>
-                                        </div>
-                                        {% endif %}
-
-                                        {% if college.patient_flow_hospital_summary and college.patient_flow_hospital_summary != 'None' %}
-                                        <div class="mb-4">
-                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">Patient Flow & Hospital</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.patient_flow_hospital_summary }}</p>
-                                        </div>
-                                        {% endif %}
-
-                                        {% if college.pg_prospects_summary and college.pg_prospects_summary != 'None' %}
-                                        <div class="mb-3">
-                                            <span class="badge bg-light text-primary border mb-2 px-3 py-2">PG Prospects / Internal Quota</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.pg_prospects_summary }}</p>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <h5 class="fw-bold text-success mb-4 pb-2 border-bottom"><i class="fas fa-tree me-2"></i>Campus & Living Experience</h5>
-
-                                        {% if college.campus_life_summary and college.campus_life_summary != 'None' %}
-                                        <div class="mb-4">
-                                            <span class="badge bg-light text-success border mb-2 px-3 py-2">Campus Life</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.campus_life_summary }}</p>
-                                        </div>
-                                        {% endif %}
-
-                                        {% if college.hostel_summary and college.hostel_summary != 'None' %}
-                                        <div class="mb-4">
-                                            <span class="badge bg-light text-success border mb-2 px-3 py-2">Hostel Infrastructure</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.hostel_summary }}</p>
-                                        </div>
-                                        {% endif %}
-
-                                        {% if college.mess_summary and college.mess_summary != 'None' %}
-                                        <div class="mb-3">
-                                            <span class="badge bg-light text-success border mb-2 px-3 py-2">Mess & Food Quality</span>
-                                            <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.mess_summary }}</p>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -353,9 +354,12 @@
         transform: rotate(0deg);
         transition: transform 0.3s;
     }
+    /* Button Hover states for the expandables */
     .btn[data-bs-toggle="collapse"]:hover {
-        background-color: #e9ecef !important;
-        color: #1e3c72 !important;
+        background-color: #e2e8f0 !important;
+    }
+    .btn[data-bs-toggle="collapse"]:focus {
+        box-shadow: none !important;
     }
 </style>
 {% endblock %}
