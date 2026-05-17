@@ -286,7 +286,8 @@
         </div>
     </div>
 
-        </div> <div class="tab-pane fade" id="checklist-view" role="tabpanel">
+        </div>
+        <div class="tab-pane fade" id="checklist-view" role="tabpanel">
             <div class="card shadow-lg border-0" style="border-radius: 15px; background-color: #fff; overflow: hidden;">
                 <div class="card-header bg-white border-bottom p-4">
                     <h4 class="fw-bold mb-0 text-dark"><i class="fas fa-clipboard-list text-danger me-2"></i>Action Required: Pending Forms</h4>
@@ -294,12 +295,16 @@
                 <div class="card-body p-0">
                     {% if pending_checklist %}
                     <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0" id="pending-table">
                             <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
                                 <tr>
-                                    <th class="ps-4 py-3">Student Name</th>
+                                    <th class="ps-4 py-3 sortable" style="cursor: pointer;" title="Click to sort">
+                                        Student Name <i class="fas fa-sort text-muted ms-1 sort-icon"></i>
+                                    </th>
                                     <th>Course</th>
-                                    <th>Process / Form Name</th>
+                                    <th class="sortable" style="cursor: pointer;" title="Click to sort">
+                                        Process / Form Name <i class="fas fa-sort text-muted ms-1 sort-icon"></i>
+                                    </th>
                                     <th>Deadline</th>
                                     <th class="pe-4 text-end">Action</th>
                                 </tr>
@@ -312,6 +317,13 @@
                                     </td>
                                     <td><span class="badge bg-secondary">{{ item.course_name }}</span></td>
                                     <td>
+                                        <div class="mb-1">
+                                            {% if item.process_type == 'Exam' %}
+                                                <span class="badge bg-primary text-white" style="font-size: 0.65rem; padding: 0.25em 0.5em;"><i class="fas fa-pen-nib me-1"></i>Exam</span>
+                                            {% else %}
+                                                <span class="badge text-white" style="font-size: 0.65rem; padding: 0.25em 0.5em; background-color: #6f42c1;"><i class="fas fa-sitemap me-1"></i>Counselling</span>
+                                            {% endif %}
+                                        </div>
                                         <div class="fw-bold text-dark">{{ item.process_name }}</div>
                                         <div class="small text-danger"><i class="fas fa-file-signature me-1"></i>{{ item.form_name }}</div>
                                     </td>
@@ -341,5 +353,34 @@
                     {% endif %}
                 </div>
             </div>
-        </div> </div> </div>
+        </div> <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+                const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
+                    v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+                    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+                document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', (() => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const idx = Array.from(th.parentNode.children).indexOf(th);
+                    const asc = this.asc = !this.asc;
+
+                    // Reset all icons
+                    table.querySelectorAll('.sort-icon').forEach(icon => icon.className = 'fas fa-sort text-muted ms-1 sort-icon');
+                    // Set active icon
+                    th.querySelector('.sort-icon').className = asc ? 'fas fa-sort-up text-dark ms-1 sort-icon' : 'fas fa-sort-down text-dark ms-1 sort-icon';
+
+                    // Sort rows
+                    Array.from(tbody.querySelectorAll('tr'))
+                        .sort(comparer(idx, asc))
+                        .forEach(tr => tbody.appendChild(tr));
+                })));
+            });
+        </script>
+
+
+
+
+    </div> </div>
 {% endblock %}
