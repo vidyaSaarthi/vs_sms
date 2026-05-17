@@ -89,6 +89,7 @@ with app.app_context():
         # Phase 2: College Database Expansion Migration
     try:
         columns_to_add = [
+            "course_id INTEGER", "university_id INTEGER",
             "true_college_name VARCHAR(255)", "college_code VARCHAR(100)", "district VARCHAR(100)",
             "city VARCHAR(100)", "complete_address TEXT", "nearby_airport VARCHAR(255)",
             "nearby_train_station VARCHAR(255)", "university_name VARCHAR(255)", "state_rank INTEGER",
@@ -100,6 +101,8 @@ with app.app_context():
             "strictness_discipline TEXT", "gender_rules TEXT", "top_3_strengths TEXT",
             "top_3_red_flags TEXT", "counselor_one_liner TEXT", "document_source_file VARCHAR(255)"
         ]
+
+
 
         for col in columns_to_add:
             try:

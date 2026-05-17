@@ -53,40 +53,69 @@ try:
                                            {"name": f"%{state_name}%"}).fetchone()
             if state_result: state_id = state_result[0]
 
-        insert_query = text("""
-            INSERT INTO colleges (
-                name, true_college_name, college_code, college_type, established_year,
-                state_id, district, city, complete_address, nearby_airport, nearby_train_station,
-                university_name, state_rank, aiq_rank, fees, service_bond, discontinued_bond,
-                hidden_fees_warning, seat_distribution, overall_rating, academics_rating,
-                clinical_exposure_rating, hostel_mess_rating, campus_life_rating,
-                academics_summary, faculty_mentorship_summary, patient_flow_hospital_summary,
-                hostel_summary, mess_summary, campus_life_summary, pg_prospects_summary,
-                strictness_discipline, gender_rules, top_3_strengths, top_3_red_flags,
-                counselor_one_liner, document_source_file
-            ) VALUES (
-                :name, :true_name, :code, :type, :year, :state_id, :district, :city, :address,
-                :airport, :train, :uni, :state_rank, :aiq_rank, :fees, :service, :disc,
-                :hidden, :seats, :orating, :arating, :crating, :hrating, :lrating,
-                :asum, :fsum, :psum, :hossum, :msum, :csum, :pgsum, :strict, :gender,
-                :str, :red, :oneliner, :doc
-            ) RETURNING id
-        """)
+        # --- SMART UNIVERSITY LOOKUP ---
+        raw_uni_name = clean_value(row.get('University Name')) or clean_value(row.get('University_x')) or clean_value(
+            row.get('University'))
+        uni_id_val = None
+        if raw_uni_name and raw_uni_name.lower() != 'unknown':
+            uni_res = session.execute(text("SELECT id FROM universities WHERE name ILIKE :name"),
+                                      {"name": raw_uni_name}).fetchone()
+            if uni_res:
+                uni_id_val = uni_res[0]
+            else:
+                res = session.execute(text("INSERT INTO universities (name) VALUES (:name) RETURNING id"),
+                                      {"name": raw_uni_name})
+                uni_id_val = res.fetchone()[0]
 
-        # ALL values are safely parsed through clean_value()
+        # --- SMART COURSE LOOKUP ---
+        raw_course_name = clean_value(row.get('Course_x')) or clean_value(row.get('Course')) or "Unknown"
+        course_id_val = None
+        if raw_course_name and raw_course_name.lower() != 'unknown':
+            course_res = session.execute(text("SELECT id FROM courses WHERE name ILIKE :name"),
+                                         {"name": raw_course_name}).fetchone()
+            if course_res:
+                course_id_val = course_res[0]
+            else:
+                res = session.execute(text("INSERT INTO courses (name) VALUES (:name) RETURNING id"),
+                                      {"name": raw_course_name})
+                course_id_val = res.fetchone()[0]
+
+        insert_query = text("""
+                    INSERT INTO colleges (
+                        name, true_college_name, college_code, college_type, course_id, established_year,
+                        state_id, university_id, district, city, complete_address, nearby_airport, nearby_train_station,
+                        university_name, state_rank, aiq_rank, fees, service_bond, discontinued_bond,
+                        hidden_fees_warning, seat_distribution, overall_rating, academics_rating,
+                        clinical_exposure_rating, hostel_mess_rating, campus_life_rating,
+                        academics_summary, faculty_mentorship_summary, patient_flow_hospital_summary,
+                        hostel_summary, mess_summary, campus_life_summary, pg_prospects_summary,
+                        strictness_discipline, gender_rules, top_3_strengths, top_3_red_flags,
+                        counselor_one_liner, document_source_file
+                    ) VALUES (
+                        :name, :true_name, :code, :type, :c_id, :year, :state_id, :uni_id, :district, :city, :address,
+                        :airport, :train, :uni, :state_rank, :aiq_rank, :fees, :service, :disc,
+                        :hidden, :seats, :orating, :arating, :crating, :hrating, :lrating,
+                        :asum, :fsum, :psum, :hossum, :msum, :csum, :pgsum, :strict, :gender,
+                        :str, :red, :oneliner, :doc
+                    ) RETURNING id
+                """)
+
         params = {
             "name": current_college_processing,
             "true_name": clean_value(row.get('True College Name')),
             "code": clean_value(row.get('College_code')),
-            "type": clean_value(row.get('Type_x')) or clean_value(row.get('Type')) or clean_value(row.get('college_type')) or "Unknown",
+            "type": clean_value(row.get('Type_x')) or clean_value(row.get('Type')) or clean_value(
+                row.get('college_type')) or "Unknown",
+            "c_id": course_id_val,
             "year": clean_value(row.get('Established year')),
             "state_id": state_id,
+            "uni_id": uni_id_val,
             "district": clean_value(row.get('District')),
             "city": clean_value(row.get('city')),
             "address": clean_value(row.get('complete_address')),
             "airport": clean_value(row.get('nearby_airport')),
             "train": clean_value(row.get('nearby_train_station')),
-            "uni": clean_value(row.get('University Name')),
+            "uni": raw_uni_name,  # Saves the text string so it shows up on the frontend!
             "state_rank": clean_value(row.get('state_rank')),
             "aiq_rank": clean_value(row.get('aiq_rank')),
             "fees": clean_value(row.get('Fees')),
