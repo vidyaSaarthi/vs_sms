@@ -290,11 +290,19 @@
                                 {% if college.cutoffs %}
                                 <div class="table-responsive shadow-sm border" style="border-radius: 10px; overflow: hidden;">
                                     <table class="table table-hover align-middle mb-0 text-center">
+                                        {% set ns = namespace(all_rounds=[]) %}
+                                        {% for cutoff in college.cutoffs %}
+                                            {% for r_name in cutoff.parsed_data.keys() %}
+                                                {% if r_name not in ns.all_rounds %}
+                                                    {% set ns.all_rounds = ns.all_rounds + [r_name] %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                        {% set sorted_rounds = ns.all_rounds | sort %}
+
                                         <thead style="background-color: #ccdfed;">
                                             <tr>
                                                 <th class="text-start py-3 ps-4 text-dark fw-bold border-0">Allotted Category</th>
-                                                {% set first_cutoff = college.cutoffs[0].parsed_data %}
-                                                {% set sorted_rounds = first_cutoff.keys() | sort %}
                                                 {% for round_name in sorted_rounds %}
                                                     <th class="py-3 text-dark fw-bold border-0">{{ round_name }}</th>
                                                 {% endfor %}
