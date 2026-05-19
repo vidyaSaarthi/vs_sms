@@ -60,9 +60,33 @@
                         </td>
                         <td>
                             {% if res.post_allotment_action %}
-                                <span class="badge shadow-sm" style="background-color: #ffffff; color: #1e3c72; border: 1px solid #ccdfed; padding: 0.5em 0.8em; font-size: 0.8rem;">
-                                    <i class="fas fa-clipboard-check me-1" style="color: #d4af37;"></i> {{ res.post_allotment_action }}
-                                </span>
+                                {% set action_lower = res.post_allotment_action | lower %}
+
+                                {% if 'freeze' in action_lower %}
+                                    <span class="badge shadow-sm" style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; padding: 0.5em 0.8em; font-size: 0.8rem;">
+                                        <i class="fas fa-lock me-1"></i> {{ res.post_allotment_action }}
+                                    </span>
+                                {% elif 'float' in action_lower %}
+                                    <span class="badge shadow-sm" style="background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; padding: 0.5em 0.8em; font-size: 0.8rem;">
+                                        <i class="fas fa-arrow-up me-1"></i> {{ res.post_allotment_action }}
+                                    </span>
+                                {% elif 'slide' in action_lower %}
+                                    <span class="badge shadow-sm" style="background-color: #e2d9f3; color: #432874; border: 1px solid #d1bcf9; padding: 0.5em 0.8em; font-size: 0.8rem;">
+                                        <i class="fas fa-arrows-alt-h me-1"></i> {{ res.post_allotment_action }}
+                                    </span>
+                                {% elif 'withdraw' in action_lower %}
+                                    <span class="badge shadow-sm" style="background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 0.5em 0.8em; font-size: 0.8rem;">
+                                        <i class="fas fa-times-circle me-1"></i> {{ res.post_allotment_action }}
+                                    </span>
+                                {% elif 'pending' in action_lower %}
+                                    <span class="badge shadow-sm" style="background-color: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; padding: 0.5em 0.8em; font-size: 0.8rem;">
+                                        <i class="fas fa-hourglass-half me-1"></i> {{ res.post_allotment_action }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge shadow-sm" style="background-color: #ffffff; color: #1e3c72; border: 1px solid #ccdfed; padding: 0.5em 0.8em; font-size: 0.8rem;">
+                                        <i class="fas fa-clipboard-check me-1" style="color: #d4af37;"></i> {{ res.post_allotment_action }}
+                                    </span>
+                                {% endif %}
                             {% else %}
                                 <span class="text-muted small opacity-50">-</span>
                             {% endif %}
