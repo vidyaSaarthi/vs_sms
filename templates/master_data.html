@@ -10,7 +10,6 @@
         </div>
     </div>
 
-<!-- 🚨 UI FIX: TAB NAVIGATION -->
     <ul class="nav nav-tabs mb-4 border-bottom-0 flex-nowrap" id="masterDataTabs" role="tablist" style="border-bottom: 2px solid #dee2e6 !important; overflow-x: auto; overflow-y: hidden; white-space: nowrap;">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold px-3 py-3 shadow-sm border-bottom-0" id="exams-tab" data-bs-toggle="tab" data-bs-target="#tab-exams" type="button" role="tab" style="border-top: 3px solid var(--brand-red); color: #333;">
@@ -39,12 +38,8 @@
         </li>
     </ul>
 
-    <!-- 🚨 UI FIX: TAB CONTENT PANES -->
     <div class="tab-content" id="masterDataTabsContent">
 
-        <!-- ==========================================
-             TAB 1: ENTRANCE EXAMS
-             ========================================== -->
         <div class="tab-pane fade show active" id="tab-exams" role="tabpanel">
             <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
                 <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
@@ -59,7 +54,7 @@
                             <thead class="bg-light sticky-top" style="z-index: 1;">
                                 <tr>
                                     <th class="ps-4 bg-light">Exam Name</th>
-                                    <th class="bg-light">Exam Date</th> <!-- 🚨 Renamed -->
+                                    <th class="bg-light">Exam Date</th>
                                     <th class="bg-light">Mapped Courses</th>
                                     <th class="text-end pe-4 bg-light">Actions</th>
                                 </tr>
@@ -99,7 +94,6 @@
                                     </td>
                                 </tr>
 
-                                <!-- EDIT EXAM MODAL -->
                                 <div class="modal fade" id="editExamModal{{ exam.id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content border-0 shadow">
@@ -115,7 +109,7 @@
                                                     </div>
 
                                                     <div class="mb-3">
-                                                        <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label> <!-- 🚨 Renamed -->
+                                                        <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
                                                         <input type="date" name="exam_date" class="form-control" value="{{ exam.exam_date.strftime('%Y-%m-%d') if exam.exam_date else '' }}">
                                                     </div>
 
@@ -150,9 +144,6 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             TAB 2: STATES
-             ========================================== -->
         <div class="tab-pane fade" id="tab-states" role="tabpanel">
             <div class="card shadow-sm border-0" style="border-radius: 12px; max-width: 800px; margin: 0 auto; overflow: hidden;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
@@ -172,7 +163,6 @@
                             </div>
                         </li>
 
-                        <!-- Edit State Modal -->
                         <div class="modal fade" id="editStateModal{{ state.id }}" tabindex="-1">
                             <div class="modal-dialog modal-sm">
                                 <div class="modal-content shadow border-0">
@@ -192,9 +182,6 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             TAB 3: UNIVERSITIES
-             ========================================== -->
         <div class="tab-pane fade" id="tab-unis" role="tabpanel">
             <div class="card shadow-sm border-0" style="border-radius: 12px; max-width: 800px; margin: 0 auto; overflow: hidden;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
@@ -214,7 +201,6 @@
                             </div>
                         </li>
 
-                        <!-- Edit Uni Modal -->
                         <div class="modal fade" id="editUniModal{{ uni.id }}" tabindex="-1">
                             <div class="modal-dialog modal-sm">
                                 <div class="modal-content shadow border-0">
@@ -234,9 +220,6 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             TAB 4: COURSES
-             ========================================== -->
         <div class="tab-pane fade" id="tab-courses" role="tabpanel">
             <div class="card shadow-sm border-0" style="border-radius: 12px; max-width: 800px; margin: 0 auto; overflow: hidden;">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
@@ -256,7 +239,6 @@
                             </div>
                         </li>
 
-                        <!-- Edit Course Modal -->
                         <div class="modal fade" id="editCourseModal{{ course.id }}" tabindex="-1">
                             <div class="modal-dialog modal-sm">
                                 <div class="modal-content shadow border-0">
@@ -276,7 +258,6 @@
             </div>
         </div>
 
-        <!-- TAB 5: MASTER COUNSELLING PROCESSES CONTENT -->
         <div class="tab-pane fade" id="tab-master-couns" role="tabpanel">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
@@ -287,7 +268,6 @@
                 </div>
                 <div class="card-body p-0">
             {% if counselling_grouped %}
-                <!-- 🚨 NEW: DYNAMIC SUB-TABS ROW -->
                 <div class="bg-light p-3 border-bottom">
                     <ul class="nav nav-pills gap-2" id="masterCounsSubTabs" role="tablist">
                         {% for exam_name, processes in counselling_grouped.items() %}
@@ -300,7 +280,6 @@
                     </ul>
                 </div>
 
-                <!-- 🚨 NEW: TAB CONTENT PANES -->
                 <div class="tab-content" id="masterCounsSubTabsContent">
                     {% for exam_name, processes in counselling_grouped.items() %}
                     <div class="tab-pane fade {% if loop.first %}show active{% endif %} p-4" id="mc-pill-{{ loop.index }}" role="tabpanel">
@@ -339,7 +318,7 @@
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-2">
                                                         <a href="{{ url_for('student_pipeline', counselling=c.id) }}" class="btn btn-sm btn-outline-info fw-bold" title="View Registered Students"><i class="fas fa-users"></i></a>
-                                                        <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}"><i class="fas fa-list-ol me-1"></i> Rounds</button>
+                                                        <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#manageRoundsModal{{ c.id }}"><i class="fas fa-project-diagram me-1"></i> Workflow & Rules</button>
                                                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCounsellingModal{{ c.id }}" title="Edit"><i class="fas fa-edit"></i></button>
                                                         <form action="/admissions/delete/counselling/{{ c.id }}" method="POST" class="m-0" onsubmit="return confirm('Delete this entire counselling process?');">
                                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
@@ -368,19 +347,7 @@
             </div>
         </div>
 
-
-
-
-    </div> <!-- End Tab Content -->
-
-</div> <!-- End Container -->
-
-<!-- ==========================================
-     GLOBAL ADD MODALS
-     ========================================== -->
-
-<!-- ADD EXAM MODAL -->
-<div class="modal fade" id="addExamModal" tabindex="-1">
+    </div> </div> <div class="modal fade" id="addExamModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
             <form action="{{ url_for('add_exam') }}" method="POST">
@@ -395,7 +362,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label> <!-- 🚨 Renamed -->
+                        <label class="form-label fw-bold">Exam Date <span class="text-muted fw-normal">(Optional)</span></label>
                         <input type="date" name="exam_date" class="form-control">
                     </div>
 
@@ -403,7 +370,6 @@
                         <label class="form-label fw-bold">Exam End Date <span class="text-muted fw-normal">(For multi-day windows)</span></label>
                         <input type="date" name="exam_end_date" class="form-control">
                     </div>
-
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Map Courses <span class="text-muted fw-normal">(Optional)</span></label>
@@ -423,7 +389,6 @@
     </div>
 </div>
 
-<!-- ADD STATE MODAL -->
 <div class="modal fade" id="addStateModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content border-0 shadow">
@@ -439,7 +404,6 @@
     </div>
 </div>
 
-<!-- ADD UNIVERSITY MODAL -->
 <div class="modal fade" id="addUniModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content border-0 shadow">
@@ -455,7 +419,6 @@
     </div>
 </div>
 
-<!-- ADD COURSE MODAL -->
 <div class="modal fade" id="addCourseModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content border-0 shadow">
@@ -472,29 +435,111 @@
 </div>
 
 
-<!-- MASTER COUNSELLING MODALS -->
 {% for c in counsellings %}
-<!-- 🚨 NEW ADVANCED WORKFLOW DASHBOARD MODAL -->
+
 <div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content text-start border-0 shadow-lg" style="background-color: #f8f9fa;">
             <div class="modal-header bg-dark text-white border-0">
                 <div>
-                    <h4 class="modal-title fw-bold mb-0"><i class="fas fa-project-diagram text-warning me-2"></i>{{ c.name }} | Workflow Builder</h4>
-                    <small class="opacity-75">Configure global deadlines, phases, and specific round activities.</small>
+                    <h4 class="modal-title fw-bold mb-0"><i class="fas fa-project-diagram text-warning me-2"></i>{{ c.name }} | Workflow & Knowledge Base</h4>
+                    <small class="opacity-75">Configure global rules, links, timeline phases, and specific round activities.</small>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body p-0">
+            <div class="modal-body p-0 bg-light">
+
+                <div class="p-4 border-bottom bg-white">
+                    <h6 class="fw-bold text-dark mb-4"><i class="fas fa-book-open text-primary me-2"></i>Global Knowledge Base</h6>
+                    <div class="row g-4">
+
+                        <div class="col-md-5 border-end border-md-0 border-lg-end">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fw-bold text-secondary small text-uppercase">Important Documents & Portals</span>
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#addLink{{ c.id }}"><i class="fas fa-plus me-1"></i> Add Link</button>
+                            </div>
+
+                            <div class="collapse mb-3" id="addLink{{ c.id }}">
+                                <form action="{{ url_for('add_counselling_link', counselling_id=c.id) }}" method="POST" class="bg-primary bg-opacity-10 p-3 border border-primary border-opacity-25 rounded shadow-sm">
+                                    <input type="text" name="title" class="form-control form-control-sm mb-2" placeholder="Title (e.g. Information Brochure 2026)" required>
+                                    <input type="url" name="url" class="form-control form-control-sm mb-2" placeholder="URL / Drive Link" required>
+                                    <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Save Link</button>
+                                </form>
+                            </div>
+
+                            <div style="max-height: 200px; overflow-y: auto; padding-right: 5px;">
+                                {% if c.important_links %}
+                                    {% for link in c.important_links %}
+                                    <div class="d-flex gap-2 align-items-center mb-2">
+                                        <a href="{{ link.url }}" target="_blank" class="btn btn-white border shadow-sm text-start text-dark fw-bold text-truncate flex-grow-1" style="font-size: 0.85rem;" title="{{ link.title }}">
+                                            <i class="fas fa-external-link-alt text-danger me-2"></i>{{ link.title }}
+                                        </a>
+                                        <form method="POST" action="{{ url_for('delete_counselling_link', link_id=link.id) }}" class="m-0" onsubmit="return confirm('Remove this link?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm shadow-sm h-100"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-3 text-muted border border-dashed rounded bg-light">
+                                        <i class="fas fa-link d-block fs-4 opacity-25 mb-1"></i>
+                                        <span class="small fw-bold">No global links added.</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fw-bold text-secondary small text-uppercase">Counselling-Level Rules</span>
+                                <button class="btn btn-sm btn-outline-warning text-dark py-0 px-2 fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRule{{ c.id }}"><i class="fas fa-plus me-1"></i> Add Rule</button>
+                            </div>
+
+                            <div class="collapse mb-3" id="addRule{{ c.id }}">
+                                <form action="{{ url_for('add_counselling_rule', counselling_id=c.id) }}" method="POST" class="bg-warning bg-opacity-10 p-3 border border-warning border-opacity-50 rounded shadow-sm">
+                                    <input type="text" name="rule_title" class="form-control form-control-sm fw-bold mb-2 text-dark" placeholder="Rule Category (e.g. Service Bond, Eligibility...)" required>
+                                    <textarea name="rule_content" class="form-control form-control-sm mb-2" rows="4" placeholder="Paste the summarized rules or bullet points here..." required></textarea>
+                                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark shadow-sm">Save Rule to Engine</button>
+                                </form>
+                            </div>
+
+                            <div class="accordion accordion-flush border rounded overflow-hidden shadow-sm" id="rulesAcc{{ c.id }}">
+                                {% set rules_dict = c.rules_data | from_json %}
+
+                                {% if rules_dict %}
+                                    {% for title, content in rules_dict.items() %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header d-flex bg-white">
+                                            <button class="accordion-button collapsed fw-bold text-dark py-2 flex-grow-1" style="font-size: 0.9rem;" type="button" data-bs-toggle="collapse" data-bs-target="#rule-{{ c.id }}-{{ loop.index }}">
+                                                <i class="fas fa-bookmark text-secondary me-2"></i>{{ title }}
+                                            </button>
+                                            <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id, rule_title=title) }}" class="m-0 d-flex align-items-center pe-2 border-bottom" onsubmit="return confirm('Delete this rule?');">
+                                                <button type="submit" class="btn btn-sm text-danger border-0"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </h2>
+                                        <div id="rule-{{ c.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rulesAcc{{ c.id }}">
+                                            <div class="accordion-body bg-light text-dark small" style="white-space: pre-wrap; line-height: 1.5;">{{ content }}</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-4 text-center text-muted bg-light">
+                                        <i class="fas fa-gavel mb-2 fs-3 opacity-25 d-block"></i>
+                                        <span class="small fw-bold">Rules Engine is Empty.</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 <div class="row g-0 h-100">
 
-                    <!-- LEFT COLUMN: GLOBAL TIMELINE (UMBRELLA LEVEL) -->
                     <div class="col-md-4 border-end bg-white p-4">
                         <h6 class="fw-bold text-primary mb-3"><i class="fas fa-globe me-2"></i>Global Timeline</h6>
                         <p class="small text-muted mb-3">Activities that apply to the entire counselling process (e.g., Master Registration).</p>
 
-                        <!-- List Global Activities -->
                         <div class="mb-4">
                             {% if c.global_activities %}
                                 {% for act in c.global_activities %}
@@ -543,7 +588,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Add Global Activity Form -->
                         <div class="card border-0 bg-light">
                             <div class="card-body p-3">
                                 <h6 class="fw-bold text-dark" style="font-size: 0.85rem;">+ Add Global Activity</h6>
@@ -560,14 +604,12 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN: THE ROUNDS ECOSYSTEM -->
                     <div class="col-md-8 p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
                             <h6 class="fw-bold text-danger mb-0"><i class="fas fa-layer-group me-2"></i>Rounds & Phases</h6>
                             <button class="btn btn-sm btn-outline-danger fw-bold" data-bs-toggle="collapse" data-bs-target="#addRoundForm{{ c.id }}"><i class="fas fa-plus me-1"></i>New Round</button>
                         </div>
 
-                        <!-- Form to Add a New Round (Hidden by default) -->
                         <div class="collapse mb-4" id="addRoundForm{{ c.id }}">
                             <div class="card card-body border-danger">
                                 <form action="{{ url_for('add_counselling_round', counselling_id=c.id) }}" method="POST" class="d-flex gap-2">
@@ -578,11 +620,10 @@
                             </div>
                         </div>
 
-                        <!-- The Rounds Accordion -->
                         {% if c.rounds %}
                         <div class="accordion" id="roundsAccordion{{ c.id }}">
                             {% for r in c.rounds %}
-                            <div class="accordion-item mb-3 border-0 shadow-sm rounded overflow-hidden">
+                            <div class="accordion-item mb-4 border shadow-sm rounded overflow-hidden">
                                 <h2 class="accordion-header" id="headingRound{{ r.id }}">
                                     <button class="accordion-button collapsed fw-bold bg-white text-dark border-bottom" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRound{{ r.id }}" aria-expanded="false" aria-controls="collapseRound{{ r.id }}">
                                         <i class="fas fa-check-circle text-success me-2"></i>{{ r.round_number }}
@@ -591,8 +632,47 @@
                                 <div id="collapseRound{{ r.id }}" class="accordion-collapse collapse" aria-labelledby="headingRound{{ r.id }}" data-bs-parent="#roundsAccordion{{ c.id }}">
                                     <div class="accordion-body bg-light p-4">
 
+                                        <div class="mb-4 bg-white p-3 border rounded shadow-sm">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="fw-bold text-dark mb-0"><i class="fas fa-gavel text-warning me-2"></i>Round-Specific Rules</h6>
+                                                <button class="btn btn-sm btn-outline-warning fw-bold text-dark py-0 px-2" data-bs-toggle="collapse" data-bs-target="#addRoundRule{{ r.id }}">
+                                                    <i class="fas fa-plus me-1"></i> Add Rule
+                                                </button>
+                                            </div>
+
+                                            <div class="collapse mb-3" id="addRoundRule{{ r.id }}">
+                                                <form action="{{ url_for('add_round_rule', round_id=r.id) }}" method="POST" class="bg-warning bg-opacity-10 p-3 border border-warning border-opacity-50 rounded">
+                                                    <input type="text" name="rule_title" class="form-control form-control-sm fw-bold mb-2" placeholder="Rule Title (e.g. Free Exit, Upgradation...)" required>
+                                                    <textarea name="rule_content" class="form-control form-control-sm mb-2" rows="3" placeholder="Paste rules..." required></textarea>
+                                                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark">Save Round Rule</button>
+                                                </form>
+                                            </div>
+
+                                            <div class="accordion accordion-flush border rounded" id="rrulesAcc{{ r.id }}">
+                                                {% set r_rules_dict = r.rules_data | from_json %}
+                                                {% if r_rules_dict %}
+                                                    {% for r_title, r_content in r_rules_dict.items() %}
+                                                    <div class="accordion-item">
+                                                        <h2 class="accordion-header d-flex bg-light">
+                                                            <button class="accordion-button collapsed py-2 text-dark small fw-bold flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#rrule-{{ r.id }}-{{ loop.index }}">
+                                                                {{ r_title }}
+                                                            </button>
+                                                            <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id, rule_title=r_title) }}" class="m-0 d-flex align-items-center pe-2 border-bottom" onsubmit="return confirm('Delete this round rule?');">
+                                                                <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-trash"></i></button>
+                                                            </form>
+                                                        </h2>
+                                                        <div id="rrule-{{ r.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rrulesAcc{{ r.id }}">
+                                                            <div class="accordion-body bg-white text-dark small" style="white-space: pre-wrap; font-size: 0.8rem;">{{ r_content }}</div>
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <div class="p-2 text-center text-muted small bg-light">No specific rules added for this round.</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
                                         <div class="row g-4">
-                                            <!-- Round Activities Column -->
                                             <div class="col-md-6 border-end">
                                                 <h6 class="fw-bold text-dark" style="font-size: 0.9rem;"><i class="fas fa-tasks me-2"></i>Schedule & Activities</h6>
 
@@ -663,40 +743,37 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Round Artifacts Column -->
                                             <div class="col-md-6">
-                                                <h6 class="fw-bold text-success" style="font-size: 0.9rem;"><i class="fas fa-paperclip me-2"></i>Documents & Links</h6>
+                                                <h6 class="fw-bold text-success" style="font-size: 0.9rem;"><i class="fas fa-paperclip me-2"></i>Round Documents</h6>
 
                                                 <ul class="list-group list-group-flush mb-3">
                                                     {% for art in r.artifacts %}
                                                     <li class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center" style="font-size: 0.85rem;">
-                                                        <a href="{{ art.document_link }}" target="_blank" class="text-decoration-none fw-bold text-primary">
+                                                        <a href="{{ art.document_link }}" target="_blank" class="text-decoration-none fw-bold text-primary text-truncate pe-2">
                                                             <i class="fas fa-link me-1"></i>{{ art.document_name }}
                                                         </a>
-                                                        <form action="{{ url_for('delete_round_artifact', artifact_id=art.id) }}" method="POST" onsubmit="return confirm('Remove link?');">
+                                                        <form action="{{ url_for('delete_round_artifact', artifact_id=art.id) }}" method="POST" onsubmit="return confirm('Remove document?');">
                                                             <button type="submit" class="btn btn-sm text-danger p-0"><i class="fas fa-times"></i></button>
                                                         </form>
                                                     </li>
                                                     {% else %}
-                                                    <li class="list-group-item bg-transparent px-0 py-2 text-muted small">No links attached.</li>
+                                                    <li class="list-group-item bg-transparent px-0 py-2 text-muted small">No round documents attached.</li>
                                                     {% endfor %}
                                                 </ul>
 
-                                                <button class="btn btn-sm btn-outline-success w-100 fw-bold" data-bs-toggle="collapse" data-bs-target="#formArt{{ r.id }}">+ Attach Link</button>
+                                                <button class="btn btn-sm btn-outline-success w-100 fw-bold" data-bs-toggle="collapse" data-bs-target="#formArt{{ r.id }}">+ Attach Document</button>
 
                                                 <div class="collapse mt-2" id="formArt{{ r.id }}">
                                                     <div class="card card-body p-2 border-success">
                                                         <form action="{{ url_for('add_round_artifact', round_id=r.id) }}" method="POST">
-                                                            <input type="text" name="document_name" class="form-control form-control-sm mb-2" placeholder="e.g. Seat Matrix, Result" required>
-                                                            <input type="url" name="document_link" class="form-control form-control-sm mb-2" placeholder="https://..." required>
+                                                            <input type="text" name="document_name" class="form-control form-control-sm mb-2" placeholder="e.g. Seat Matrix, Result PDF" required>
+                                                            <input type="url" name="document_link" class="form-control form-control-sm mb-2" placeholder="URL Link" required>
                                                             <button type="submit" class="btn btn-success btn-sm w-100 fw-bold">Save Link</button>
                                                         </form>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div> <!-- End Row -->
-
-                                        <div class="mt-4 text-end border-top pt-3">
+                                        </div> <div class="mt-4 text-end border-top pt-3">
                                             <form action="/admissions/delete_round/{{ r.id }}" method="POST" class="d-inline" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete {{ r.round_number }} and all its activities?');">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt me-1"></i>Delete Entire Round</button>
                                             </form>
@@ -708,14 +785,15 @@
                             {% endfor %}
                         </div>
                         {% else %}
-                        <div class="text-center py-5 text-muted bg-white rounded border border-dashed">
-                            <i class="fas fa-layer-group fs-2 mb-2 opacity-50"></i>
-                            <p class="mb-0">No rounds created yet. Click 'New Round' to begin mapping.</p>
+                        <div class="text-center py-5 text-muted bg-white rounded border border-dashed shadow-sm">
+                            <i class="fas fa-layer-group fs-2 mb-2 opacity-50 d-block"></i>
+                            <p class="mb-0 fw-bold">No rounds created yet.</p>
                         </div>
                         {% endif %}
 
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -796,110 +874,4 @@
                     <h5 class="modal-title fw-bold text-dark">New Counselling Process</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Process Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
-                        <select name="exam_id" id="examSelect_add" class="form-select">
-                            <option value="">None / Not Applicable</option>
-                            {% for exam in exams %}
-                            <option value="{{ exam.id }}">{{ exam.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3 border-bottom pb-3">
-                        <label class="form-label fw-bold text-success">Target Degree Courses</label>
-                        <select name="course_ids" id="courseSelect_add" class="form-select" multiple style="height: 100px;">
-                            {% for crs in courses %}
-                            <option value="{{ crs.id }}">{{ crs.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple.</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Type</label>
-                        <select name="counselling_type" id="counTypeSelect" class="form-select" required onchange="toggleCounsellingTarget()">
-                            <option value="">Select Type...</option>
-                            <option value="State">State Counselling</option>
-                            <option value="University">Independent University</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="counTargetDiv" style="display: none;">
-                        <label class="form-label fw-bold" id="counTargetLabel">Select Entity</label>
-                        <select name="target_id" id="counTargetSelect" class="form-select">
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Process</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    // JS required for Master Counselling dropdown logic
-    const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
-    const unisData = [ {% for u in universities %}{ id: {{ u.id }}, name: "{{ u.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
-    const examCourseMap = {{ exam_course_mapping | tojson | safe }};
-
-    function updateCourseDropdown(examSelectId, courseSelectId) {
-        const examId = document.getElementById(examSelectId).value;
-        const courseSelect = document.getElementById(courseSelectId);
-
-        courseSelect.innerHTML = '';
-
-        if (examId && examCourseMap[examId] && examCourseMap[examId].length > 0) {
-            examCourseMap[examId].forEach(course => {
-                let option = document.createElement('option');
-                option.value = course.id;
-                option.text = course.name;
-                courseSelect.appendChild(option);
-            });
-        } else {
-            const allCourses = [ {% for c in courses %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
-            allCourses.forEach(course => {
-                let option = document.createElement('option');
-                option.value = course.id;
-                option.text = course.name;
-                courseSelect.appendChild(option);
-            });
-        }
-    }
-
-    const addExamSelect = document.querySelector('#examSelect_add');
-    if (addExamSelect) {
-        addExamSelect.addEventListener('change', function() {
-            updateCourseDropdown(this.id, 'courseSelect_add');
-        });
-    }
-
-    function toggleCounsellingTarget() {
-        const type = document.getElementById('counTypeSelect').value;
-        const div = document.getElementById('counTargetDiv');
-        const select = document.getElementById('counTargetSelect');
-        const label = document.getElementById('counTargetLabel');
-
-        select.innerHTML = '<option value="">Select...</option>';
-        if (type === 'State') {
-            label.innerText = 'Which State?';
-            statesData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
-            div.style.display = 'block';
-        } else if (type === 'University') {
-            label.innerText = 'Which University?';
-            unisData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
-            div.style.display = 'block';
-        } else {
-            div.style.display = 'none';
-        }
-    }
-</script>
-
-{% endblock %}
+                <div class="modal-body p-4
