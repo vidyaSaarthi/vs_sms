@@ -8,14 +8,23 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
+from sqlalchemy.dialects.postgresql import JSONB
 
 # Consolidated Imports (🚨 FinanceRecord added here)
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
     Counselling, Form, CounsellingRound, College, StudentCounsellingRegistration, StudentRoundResult, \
     Course, StudentExamResult, Task, FormEvent, FinanceRecord, StudentFormSubmission, CounsellingActivity, RoundActivity, RoundArtifact, \
-    StudentActivityStatus
+    StudentActivityStatus, ImportantLink
 
 app = Flask(__name__)
+
+@app.template_filter('from_json')
+def from_json(value):
+    try:
+        # If it's a string, load it. If it's already a dict, return it.
+        return json.loads(value) if isinstance(value, str) else value
+    except:
+        return {}
 
 # Cloud-Safe Environment Variables
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'vidyasaarthi_fallback_key')
@@ -2853,6 +2862,110 @@ def delete_round_artifact(artifact_id):
     except Exception:
         db.session.rollback()
         flash("Error removing artifact.", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
+
+# ==========================================
+# 🚨 DYNAMIC KNOWLEDGE BASE ROUTES (LINKS & RULES)
+# ==========================================
+
+@app.route('/admissions/counselling/<int:counselling_id>/add_rule', methods=['POST'])
+@login_required
+def add_counselling_rule(counselling_id):
+    counselling = Counselling.query.get_or_404(counselling_id)
+    rule_title = request.form.get('rule_title')
+    rule_content = request.form.get('rule_content')
+
+    if rule_title and rule_content:
+        try:
+            current_rules = json.loads(counselling.rules_data) if isinstance(counselling.rules_data,
+                                                                             str) else counselling.rules_data
+            if not current_rules: current_rules = {}
+        except:
+            current_rules = {}
+
+        current_rules[rule_title.strip()] = rule_content.strip()
+        counselling.rules_data = json.dumps(current_rules) if isinstance(counselling.rules_data, str) else current_rules
+        db.session.commit()
+        flash(f"Rule '{rule_title}' added successfully!", "success")
+
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
+
+@app.route('/admissions/counselling/delete_rule/<int:counselling_id>/<string:rule_title>', methods=['POST'])
+@login_required
+def delete_counselling_rule(counselling_id, rule_title):
+    counselling = Counselling.query.get_or_404(counselling_id)
+    try:
+        current_rules = json.loads(counselling.rules_data) if isinstance(counselling.rules_data,
+                                                                         str) else counselling.rules_data
+        if current_rules and rule_title in current_rules:
+            del current_rules[rule_title]
+            counselling.rules_data = json.dumps(current_rules) if isinstance(counselling.rules_data,
+                                                                             str) else current_rules
+            db.session.commit()
+            flash("Rule deleted successfully.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error deleting rule.", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
+
+@app.route('/admissions/counselling/<int:counselling_id>/add_link', methods=['POST'])
+@login_required
+def add_counselling_link(counselling_id):
+    try:
+        raw_url = request.form.get('url')
+        embed_url = convert_to_embed_link(raw_url.strip()) if raw_url else None
+
+        new_link = ImportantLink(
+            counselling_id=counselling_id,
+            title=request.form.get('title'),
+            url=embed_url or raw_url
+        )
+        db.session.add(new_link)
+        db.session.commit()
+        flash("Global Link added successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding link: {str(e)}", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
+
+@app.route('/admissions/delete_link/<int:link_id>', methods=['POST'])
+@login_required
+def delete_counselling_link(link_id):
+    link = ImportantLink.query.get_or_404(link_id)
+    try:
+        db.session.delete(link)
+        db.session.commit()
+        flash("Global Link removed.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error removing link.", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab'))
+
+
+@app.route('/admissions/round/<int:round_id>/add_rule', methods=['POST'])
+@login_required
+def add_round_rule(round_id):
+    c_round = CounsellingRound.query.get_or_404(round_id)
+    rule_title = request.form.get('rule_title')
+    rule_content = request.form.get('rule_content')
+
+    if rule_title and rule_content:
+        try:
+            current_rules = json.loads(c_round.rules_data) if isinstance(c_round.rules_data,
+                                                                         str) else c_round.rules_data
+            if not current_rules: current_rules = {}
+        except:
+            current_rules = {}
+
+        current_rules[rule_title.strip()] = rule_content.strip()
+        c_round.rules_data = json.dumps(current_rules) if isinstance(c_round.rules_data, str) else current_rules
+        db.session.commit()
+        flash(f"Round rule '{rule_title}' added successfully!", "success")
+
     return redirect(url_for('master_data', tab='master-couns-tab'))
 
 

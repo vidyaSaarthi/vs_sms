@@ -26,9 +26,10 @@ def clean_value(val):
 
 
 print("1. Loading Excel Files...")
-df1 = pd.read_excel('excel1.xlsx')
-df2 = pd.read_excel('excel2.xlsx')
-df3 = pd.read_excel('excel3.xlsx')
+location = r'H:\My Drive\Business\Vidya Saarthi\2026\Counsellings\NEET UG\Colleges Study - Perplexity\Haryana_Colleges_Study'
+df1 = pd.read_excel('basic_haryana.xlsx')
+df2 = pd.read_excel('cutoffs_haryana.xlsx')
+df3 = pd.read_excel('College_Database.xlsx')
 
 print("2. Merging Excel 1 and Excel 3...")
 merged_df = pd.merge(df1, df3, left_on='college_information_document_name', right_on='document_source_file', how='left')

@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime, date
+from sqlalchemy.dialects.postgresql import JSONB
 
 db = SQLAlchemy()
 
@@ -347,6 +348,8 @@ class Counselling(db.Model):
     security_fees = db.Column(db.Numeric(10, 2), nullable=True)
     required_documents = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Add this inside class Counselling(db.Model):
+    rules_data = db.Column(JSONB)
 
     # ==============================
     # RELATIONSHIPS
@@ -416,6 +419,8 @@ class CounsellingRound(db.Model):
 
     round_number = db.Column(db.String(50), nullable=False)
     rules = db.Column(db.Text, nullable=True)
+    # Add this inside class CounsellingRound(db.Model):
+    rules_data = db.Column(JSONB)
 
     # Note: The hardcoded links and old schedule relationship have been removed!
     # The new RoundActivity and RoundArtifact tables automatically connect here via their backrefs.
@@ -688,3 +693,14 @@ class RoundArtifact(db.Model):
 
     def __repr__(self):
         return f"<RoundArtifact {self.document_name}>"
+
+
+class ImportantLink(db.Model):
+    __tablename__ = 'important_links'
+    id = db.Column(db.Integer, primary_key=True)
+    counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.Text, nullable=False)
+
+    counselling = db.relationship('Counselling',
+                                  backref=db.backref('important_links', lazy=True, cascade="all, delete-orphan"))
