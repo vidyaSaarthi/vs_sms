@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_, text
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm.attributes import flag_modified
 
 # Consolidated Imports (🚨 FinanceRecord added here)
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
@@ -2887,17 +2888,18 @@ def add_counselling_rule(counselling_id):
     rule_content = request.form.get('rule_content')
 
     if rule_title and rule_content:
-        try:
-            current_rules = json.loads(counselling.rules_data) if isinstance(counselling.rules_data,
-                                                                             str) else counselling.rules_data
-            if not current_rules: current_rules = {}
-        except:
-            current_rules = {}
+        # Get existing dictionary
+        current_rules = counselling.rules_data if counselling.rules_data else {}
 
+        # Update the dictionary
         current_rules[rule_title.strip()] = rule_content.strip()
-        counselling.rules_data = json.dumps(current_rules) if isinstance(counselling.rules_data, str) else current_rules
+
+        # 🚨 THE FIX: Force SQLAlchemy to see the change in the JSON column
+        counselling.rules_data = current_rules
+        flag_modified(counselling, "rules_data")
+
         db.session.commit()
-        flash(f"Rule '{rule_title}' added successfully!", "success")
+        flash(f"Global Rule '{rule_title}' saved!", "success")
 
     return redirect(url_for('master_data', tab='master-couns-tab'))
 
@@ -2964,17 +2966,18 @@ def add_round_rule(round_id):
     rule_content = request.form.get('rule_content')
 
     if rule_title and rule_content:
-        try:
-            current_rules = json.loads(c_round.rules_data) if isinstance(c_round.rules_data,
-                                                                         str) else c_round.rules_data
-            if not current_rules: current_rules = {}
-        except:
-            current_rules = {}
+        # Get existing dictionary
+        current_rules = c_round.rules_data if c_round.rules_data else {}
 
+        # Update the dictionary
         current_rules[rule_title.strip()] = rule_content.strip()
-        c_round.rules_data = json.dumps(current_rules) if isinstance(c_round.rules_data, str) else current_rules
+
+        # 🚨 THE FIX: Force SQLAlchemy to see the change
+        c_round.rules_data = current_rules
+        flag_modified(c_round, "rules_data")
+
         db.session.commit()
-        flash(f"Round rule '{rule_title}' added successfully!", "success")
+        flash(f"Round rule '{rule_title}' saved!", "success")
 
     return redirect(url_for('master_data', tab='master-couns-tab'))
 
