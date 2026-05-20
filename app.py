@@ -2904,23 +2904,26 @@ def add_counselling_rule(counselling_id):
     return redirect(url_for('master_data', tab='master-couns-tab'))
 
 
-@app.route('/admissions/counselling/delete_rule/<int:counselling_id>/<string:rule_title>', methods=['POST'])
+@app.route('/admissions/counselling/delete_rule/<int:counselling_id>', methods=['POST'])
 @login_required
-def delete_counselling_rule(counselling_id, rule_title):
+def delete_counselling_rule(counselling_id):
     counselling = Counselling.query.get_or_404(counselling_id)
+    rule_title = request.form.get('rule_title')  # 🚨 Passed safely via form, not URL
+
     try:
         current_rules = json.loads(counselling.rules_data) if isinstance(counselling.rules_data,
                                                                          str) else counselling.rules_data
         if current_rules and rule_title in current_rules:
             del current_rules[rule_title]
-            counselling.rules_data = json.dumps(current_rules) if isinstance(counselling.rules_data,
-                                                                             str) else current_rules
+            counselling.rules_data = current_rules
+            flag_modified(counselling, "rules_data")
             db.session.commit()
-            flash("Rule deleted successfully.", "success")
-    except Exception:
+            flash("Global Rule deleted.", "success")
+    except Exception as e:
         db.session.rollback()
-        flash("Error deleting rule.", "error")
-    return redirect(url_for('master_data', tab='master-couns-tab'))
+        flash(f"Error deleting rule: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=counselling.id))
 
 
 @app.route('/admissions/counselling/<int:counselling_id>/add_link', methods=['POST'])
@@ -3051,6 +3054,83 @@ def edit_college(college_id):
 
     return render_template('edit_college.html', college=college, states=states, universities=universities,
                            courses=courses)
+
+
+@app.route('/admissions/round/delete_rule/<int:round_id>', methods=['POST'])
+@login_required
+def delete_round_rule(round_id):
+    c_round = CounsellingRound.query.get_or_404(round_id)
+    rule_title = request.form.get('rule_title')  # 🚨 Passed safely via form
+
+    try:
+        current_rules = json.loads(c_round.rules_data) if isinstance(c_round.rules_data, str) else c_round.rules_data
+        if current_rules and rule_title in current_rules:
+            del current_rules[rule_title]
+            c_round.rules_data = current_rules
+            flag_modified(c_round, "rules_data")
+            db.session.commit()
+            flash("Round rule deleted.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting rule: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=c_round.counselling_id))
+
+
+# 🚨 ADD THESE NEW ROUTES FOR EDITING:
+
+@app.route('/admissions/edit_link/<int:link_id>', methods=['POST'])
+@login_required
+def edit_counselling_link(link_id):
+    link = ImportantLink.query.get_or_404(link_id)
+    try:
+        link.title = request.form.get('title')
+        raw_url = request.form.get('url')
+        link.url = convert_to_embed_link(raw_url.strip()) if raw_url else None
+        db.session.commit()
+        flash("Global Link updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating link: {str(e)}", "error")
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=link.counselling_id))
+
+
+@app.route('/admissions/edit_rule', methods=['POST'])
+@login_required
+def edit_dynamic_rule():
+    entity_type = request.form.get('entity_type')  # 'counselling' or 'round'
+    entity_id = request.form.get('entity_id')
+    old_title = request.form.get('old_title')
+    new_title = request.form.get('new_title')
+    new_content = request.form.get('new_content')
+
+    try:
+        if entity_type == 'counselling':
+            entity = Counselling.query.get_or_404(int(entity_id))
+            couns_id = entity.id
+        else:
+            entity = CounsellingRound.query.get_or_404(int(entity_id))
+            couns_id = entity.counselling_id
+
+        current_rules = json.loads(entity.rules_data) if isinstance(entity.rules_data, str) else entity.rules_data
+        if not current_rules: current_rules = {}
+
+        # Remove the old key and insert the new one
+        if old_title in current_rules:
+            del current_rules[old_title]
+
+        current_rules[new_title.strip()] = new_content.strip()
+
+        entity.rules_data = current_rules
+        flag_modified(entity, "rules_data")
+        db.session.commit()
+
+        flash("Rule updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating rule: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
 
 
 

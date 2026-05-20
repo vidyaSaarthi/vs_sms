@@ -475,8 +475,16 @@
                                         <a href="{{ link.url }}" target="_blank" class="btn btn-white border shadow-sm text-start text-dark fw-bold text-truncate flex-grow-1" style="font-size: 0.85rem;" title="{{ link.title }}">
                                             <i class="fas fa-external-link-alt text-danger me-2"></i>{{ link.title }}
                                         </a>
+                                        <button class="btn btn-outline-primary btn-sm shadow-sm h-100" data-bs-toggle="collapse" data-bs-target="#editLink{{ link.id }}"><i class="fas fa-edit"></i></button>
                                         <form method="POST" action="{{ url_for('delete_counselling_link', link_id=link.id) }}" class="m-0" onsubmit="return confirm('Remove this link?');">
                                             <button type="submit" class="btn btn-outline-danger btn-sm shadow-sm h-100"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    <div class="collapse mb-2" id="editLink{{ link.id }}">
+                                        <form action="{{ url_for('edit_counselling_link', link_id=link.id) }}" method="POST" class="bg-light p-2 border rounded shadow-sm">
+                                            <input type="text" name="title" class="form-control form-control-sm mb-1" value="{{ link.title }}" required>
+                                            <input type="url" name="url" class="form-control form-control-sm mb-2" value="{{ link.url }}" required>
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Update Link</button>
                                         </form>
                                     </div>
                                     {% endfor %}
@@ -508,19 +516,32 @@
 
                                 {% if rules_dict %}
                                     {% for title, content in rules_dict.items() %}
-                                    <div class="accordion-item">
+                                    <div class="accordion-item border-bottom">
                                         <h2 class="accordion-header d-flex bg-white">
                                             <button class="accordion-button collapsed fw-bold text-dark py-2 flex-grow-1" style="font-size: 0.9rem;" type="button" data-bs-toggle="collapse" data-bs-target="#rule-{{ c.id }}-{{ loop.index }}">
                                                 <i class="fas fa-bookmark text-secondary me-2"></i>{{ title }}
                                             </button>
-                                            <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id, rule_title=title) }}"
-                                                  class="m-0 d-flex align-items-center pe-2 border-bottom"
-                                                  onsubmit="return confirm('Delete this rule?');">
-                                                <button type="submit" class="btn btn-sm text-danger border-0"><i class="fas fa-trash"></i></button>
-                                            </form>
+                                            <div class="d-flex align-items-center pe-2 border-bottom">
+                                                <button class="btn btn-sm text-primary border-0 p-1 me-1" data-bs-toggle="collapse" data-bs-target="#editRule{{ c.id }}{{ loop.index }}"><i class="fas fa-edit"></i></button>
+                                                <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id) }}" class="m-0" onsubmit="return confirm('Delete this rule?');">
+                                                    <input type="hidden" name="rule_title" value="{{ title }}">
+                                                    <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
                                         </h2>
                                         <div id="rule-{{ c.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rulesAcc{{ c.id }}">
                                             <div class="accordion-body bg-light text-dark small" style="white-space: pre-wrap; line-height: 1.5;">{{ content }}</div>
+                                        </div>
+
+                                        <div class="collapse" id="editRule{{ c.id }}{{ loop.index }}">
+                                            <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-3 border-top border-warning">
+                                                <input type="hidden" name="entity_type" value="counselling">
+                                                <input type="hidden" name="entity_id" value="{{ c.id }}">
+                                                <input type="hidden" name="old_title" value="{{ title }}">
+                                                <input type="text" name="new_title" class="form-control form-control-sm fw-bold mb-2 text-dark" value="{{ title }}" required>
+                                                <textarea name="new_content" class="form-control form-control-sm mb-2" rows="6" required>{{ content }}</textarea>
+                                                <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark shadow-sm">Save Changes</button>
+                                            </form>
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -654,21 +675,34 @@
                                                 {% set r_rules_dict = r.rules_data | from_json %}
                                                 {% if r_rules_dict %}
                                                     {% for r_title, r_content in r_rules_dict.items() %}
-                                                    <div class="accordion-item">
+                                                    <div class="accordion-item border-bottom">
                                                         <h2 class="accordion-header d-flex bg-light">
                                                             <button class="accordion-button collapsed py-2 text-dark small fw-bold flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#rrule-{{ r.id }}-{{ loop.index }}">
                                                                 {{ r_title }}
                                                             </button>
-                                                            <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id, rule_title=r_title) }}"
-                                                                  class="m-0 d-flex align-items-center pe-2 border-bottom"
-                                                                  onsubmit="return confirm('Delete this round rule?');">
-                                                                <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-trash"></i></button>
-                                                            </form>
+                                                            <div class="d-flex align-items-center pe-2 border-bottom bg-light">
+                                                                <button class="btn btn-sm text-primary border-0 p-1 me-1" data-bs-toggle="collapse" data-bs-target="#editRoundRule{{ r.id }}{{ loop.index }}"><i class="fas fa-edit"></i></button>
+                                                                <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id) }}" class="m-0" onsubmit="return confirm('Delete this round rule?');">
+                                                                    <input type="hidden" name="rule_title" value="{{ r_title }}">
+                                                                    <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-trash"></i></button>
+                                                                </form>
+                                                            </div>
                                                         </h2>
                                                         <div id="rrule-{{ r.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rrulesAcc{{ r.id }}">
                                                             <div class="accordion-body bg-white text-dark small" style="white-space: pre-wrap; font-size: 0.8rem;">{{ r_content }}</div>
                                                         </div>
-                                                    </div>
+
+                                                        <div class="collapse" id="editRoundRule{{ r.id }}{{ loop.index }}">
+                                                            <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-3 border-top border-warning">
+                                                                <input type="hidden" name="entity_type" value="round">
+                                                                <input type="hidden" name="entity_id" value="{{ r.id }}">
+                                                                <input type="hidden" name="old_title" value="{{ r_title }}">
+                                                                <input type="text" name="new_title" class="form-control form-control-sm fw-bold mb-2 text-dark" value="{{ r_title }}" required>
+                                                                <textarea name="new_content" class="form-control form-control-sm mb-2" rows="4" required>{{ r_content }}</textarea>
+                                                                <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark shadow-sm">Save Changes</button>
+                                                            </form>
+                                                        </div>
+</div>
                                                     {% endfor %}
                                                 {% else %}
                                                     <div class="p-2 text-center text-muted small bg-light">No specific rules added for this round.</div>
@@ -982,6 +1016,25 @@
             div.style.display = 'none';
         }
     }
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const modalId = urlParams.get('open_modal');
+
+    if (modalId) {
+        var modalElement = document.getElementById('manageRoundsModal' + modalId);
+        if (modalElement) {
+            var myModal = new bootstrap.Modal(modalElement);
+            myModal.show();
+
+            // Clean up the URL so a manual refresh doesn't pop it open again
+            const newUrl = window.location.pathname + '?tab=master-couns-tab';
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    }
+});
 </script>
 
 {% endblock %}
