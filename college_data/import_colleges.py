@@ -12,7 +12,6 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-
 def clean_value(val):
     if pd.isna(val) or (isinstance(val, float) and math.isnan(val)):
         return None
@@ -21,24 +20,66 @@ def clean_value(val):
         if v.lower() in ['na', 'nan', '-', 'none', '', 'not mentioned', 'n/a']:
             return None
         return v
-    # Force EVERYTHING to be a string before it hits the DB
     return str(val)
 
-
 print("1. Loading Excel Files...")
-location = r'H:\My Drive\Business\Vidya Saarthi\2026\Counsellings\NEET UG\Colleges Study - Perplexity\Haryana_Colleges_Study'
-df1 = pd.read_excel('basic_haryana.xlsx')
-df2 = pd.read_excel('cutoffs_haryana.xlsx')
-df3 = pd.read_excel('College_Database.xlsx')
+location = r'H:\My Drive\Business\Vidya Saarthi\2026\Counsellings\NEET UG\Colleges Study - Perplexity\AIQ_Colleges_Study\\'
+df1 = pd.read_excel(location + 'basic_mcc.xlsx')
+df2 = pd.read_excel(location + 'cutoffs_mcc.xlsx')
+df3 = pd.read_excel(location + 'College_Database.xlsx')
 
 print("2. Merging Excel 1 and Excel 3...")
 merged_df = pd.merge(df1, df3, left_on='college_information_document_name', right_on='document_source_file', how='left')
-print(f"   Found {len(merged_df)} unique colleges.")
+
+print("\n--- 🛠️ PRE-FLIGHT VALIDATION CHECKS ---")
+
+# CHECK 1: Merge Integrity (Row Counts & Distinct Names)
+df1_count = len(df1)
+merged_count = len(merged_df)
+df1_distinct = df1['Cleaned College Name'].nunique()
+merged_distinct = merged_df['Cleaned College Name'].nunique()
+
+print(f"Check 1: Merge Integrity")
+print(f"  -> df1 rows: {df1_count} | merged rows: {merged_count}")
+print(f"  -> df1 distinct colleges: {df1_distinct} | merged distinct colleges: {merged_distinct}")
+
+if df1_count != merged_count:
+    print("\n❌ CRITICAL ERROR: Row count changed after merge! You have duplicate document names in Excel 3 (df3).")
+    print("🛑 ABORTING script.")
+    sys.exit(1)
+else:
+    print("  ✅ SUCCESS: Merge preserved exact row counts.")
+
+if df1_distinct != merged_distinct:
+    print("\n❌ CRITICAL ERROR: Distinct college count changed after merge!")
+    print("🛑 ABORTING script.")
+    sys.exit(1)
+else:
+    print("  ✅ SUCCESS: Distinct college names are preserved.")
+
+# CHECK 2: df2 (Cutoffs) vs df1 (Basic) Mapping
+# Convert both to lowercase and strip whitespace for strict matching
+df1_true_names = set(df1['True College Name'].dropna().astype(str).str.strip().str.lower())
+df2_names = set(df2['College Name'].dropna().astype(str).str.strip().str.lower())
+
+in_df2_not_df1 = df2_names - df1_true_names
+
+print(f"\nCheck 2: Cutoff vs Basic Mapping")
+if in_df2_not_df1:
+    print(f"❌ CRITICAL ERROR: Found {len(in_df2_not_df1)} colleges in df2 (Cutoffs) that DO NOT EXIST in df1 (Basic)!")
+    for c in in_df2_not_df1:
+        print(f"   - {c}")
+    print("\n🛑 ABORTING script to prevent orphan cutoff records in the database.")
+    sys.exit(1)
+else:
+    print("  ✅ SUCCESS: All colleges in df2 perfectly map to df1.")
+
+print("--- END PRE-FLIGHT CHECKS ---\n")
+
 
 print("3. Executing Strict Database Import...")
 college_id_map = {}
 cutoff_count = 0
-unmatched_colleges = set()
 current_college_processing = "Unknown"
 
 try:
@@ -116,7 +157,7 @@ try:
             "address": clean_value(row.get('complete_address')),
             "airport": clean_value(row.get('nearby_airport')),
             "train": clean_value(row.get('nearby_train_station')),
-            "uni": raw_uni_name,  # Saves the text string so it shows up on the frontend!
+            "uni": raw_uni_name,
             "state_rank": clean_value(row.get('state_rank')),
             "aiq_rank": clean_value(row.get('aiq_rank')),
             "fees": clean_value(row.get('Fees')),
@@ -162,8 +203,8 @@ try:
         lookup_name = str(true_name).strip().lower()
         college_id = college_id_map.get(lookup_name)
 
+        # We keep this check just for safety, but the pre-flight check handles the main failure.
         if not college_id:
-            unmatched_colleges.add(true_name)
             continue
 
         cutoff_data = {}
@@ -187,11 +228,6 @@ try:
     session.commit()
     print("   Colleges inserted successfully!")
     print(f"   Successfully inserted {cutoff_count} cutoff records!")
-
-    if unmatched_colleges:
-        print(
-            f"\n⚠️ WARNING: {len(unmatched_colleges)} colleges from Excel 2 did NOT match a 'True College Name' in Excel 1.")
-
     print("\n🎉 FULL BATCH MIGRATION COMPLETE!")
 
 except Exception as e:
