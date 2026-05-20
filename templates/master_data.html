@@ -692,6 +692,7 @@
                                                             <div class="accordion-body bg-white text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 1.5rem; letter-spacing: 0.3px;">{{ r_content }}</div>
                                                         </div>
 
+
                                                         <div class="collapse" id="editRoundRule{{ r.id }}{{ loop.index }}">
                                                             <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-3 border-top border-warning">
                                                                 <input type="hidden" name="entity_type" value="round">
