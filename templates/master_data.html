@@ -513,7 +513,9 @@
                                             <button class="accordion-button collapsed fw-bold text-dark py-2 flex-grow-1" style="font-size: 0.9rem;" type="button" data-bs-toggle="collapse" data-bs-target="#rule-{{ c.id }}-{{ loop.index }}">
                                                 <i class="fas fa-bookmark text-secondary me-2"></i>{{ title }}
                                             </button>
-                                            <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id, rule_title=title) }}" class="m-0 d-flex align-items-center pe-2 border-bottom" onsubmit="return confirm('Delete this rule?');">
+                                            <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id, rule_title=title) }}"
+                                                  class="m-0 d-flex align-items-center pe-2 border-bottom"
+                                                  onsubmit="return confirm('Delete this rule?');">
                                                 <button type="submit" class="btn btn-sm text-danger border-0"><i class="fas fa-trash"></i></button>
                                             </form>
                                         </h2>
@@ -657,7 +659,9 @@
                                                             <button class="accordion-button collapsed py-2 text-dark small fw-bold flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#rrule-{{ r.id }}-{{ loop.index }}">
                                                                 {{ r_title }}
                                                             </button>
-                                                            <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id, rule_title=r_title) }}" class="m-0 d-flex align-items-center pe-2 border-bottom" onsubmit="return confirm('Delete this round rule?');">
+                                                            <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id, rule_title=r_title) }}"
+                                                                  class="m-0 d-flex align-items-center pe-2 border-bottom"
+                                                                  onsubmit="return confirm('Delete this round rule?');">
                                                                 <button type="submit" class="btn btn-sm text-danger border-0 p-1"><i class="fas fa-trash"></i></button>
                                                             </form>
                                                         </h2>
