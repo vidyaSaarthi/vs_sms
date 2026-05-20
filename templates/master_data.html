@@ -438,7 +438,7 @@
 {% for c in counsellings %}
 
 <div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content text-start border-0 shadow-lg" style="background-color: #f8f9fa;">
             <div class="modal-header bg-dark text-white border-0">
                 <div>
@@ -530,7 +530,7 @@
                                             </div>
                                         </h2>
                                         <div id="rule-{{ c.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rulesAcc{{ c.id }}">
-                                            <div class="accordion-body bg-light text-dark small" style="white-space: pre-wrap; line-height: 1.5;">{{ content }}</div>
+                                            <div class="accordion-body bg-light text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 1.5rem; letter-spacing: 0.3px;">{{ content }}</div>
                                         </div>
 
                                         <div class="collapse" id="editRule{{ c.id }}{{ loop.index }}">
@@ -689,7 +689,7 @@
                                                             </div>
                                                         </h2>
                                                         <div id="rrule-{{ r.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rrulesAcc{{ r.id }}">
-                                                            <div class="accordion-body bg-white text-dark small" style="white-space: pre-wrap; font-size: 0.8rem;">{{ r_content }}</div>
+                                                            <div class="accordion-body bg-white text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 1.5rem; letter-spacing: 0.3px;">{{ r_content }}</div>
                                                         </div>
 
                                                         <div class="collapse" id="editRoundRule{{ r.id }}{{ loop.index }}">
