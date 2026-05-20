@@ -874,4 +874,110 @@
                     <h5 class="modal-title fw-bold text-dark">New Counselling Process</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Process Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., HSTES B.Tech 2026" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-danger">Associated Exam <span class="fw-normal text-muted">(Optional)</span></label>
+                        <select name="exam_id" id="examSelect_add" class="form-select">
+                            <option value="">None / Not Applicable</option>
+                            {% for exam in exams %}
+                            <option value="{{ exam.id }}">{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label fw-bold text-success">Target Degree Courses</label>
+                        <select name="course_ids" id="courseSelect_add" class="form-select" multiple style="height: 100px;">
+                            {% for crs in courses %}
+                            <option value="{{ crs.id }}">{{ crs.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Hold CTRL (Windows) or CMD (Mac) to select multiple.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Type</label>
+                        <select name="counselling_type" id="counTypeSelect" class="form-select" required onchange="toggleCounsellingTarget()">
+                            <option value="">Select Type...</option>
+                            <option value="State">State Counselling</option>
+                            <option value="University">Independent University</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="counTargetDiv" style="display: none;">
+                        <label class="form-label fw-bold" id="counTargetLabel">Select Entity</label>
+                        <select name="target_id" id="counTargetSelect" class="form-select">
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn fw-bold text-dark w-100" style="background-color: var(--brand-yellow);">Save Process</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JS required for Master Counselling dropdown logic
+    const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const unisData = [ {% for u in universities %}{ id: {{ u.id }}, name: "{{ u.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    const examCourseMap = {{ exam_course_mapping | tojson | safe }};
+
+    function updateCourseDropdown(examSelectId, courseSelectId) {
+        const examId = document.getElementById(examSelectId).value;
+        const courseSelect = document.getElementById(courseSelectId);
+
+        courseSelect.innerHTML = '';
+
+        if (examId && examCourseMap[examId] && examCourseMap[examId].length > 0) {
+            examCourseMap[examId].forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.text = course.name;
+                courseSelect.appendChild(option);
+            });
+        } else {
+            const allCourses = [ {% for c in courses %}{ id: {{ c.id }}, name: "{{ c.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+            allCourses.forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.text = course.name;
+                courseSelect.appendChild(option);
+            });
+        }
+    }
+
+    const addExamSelect = document.querySelector('#examSelect_add');
+    if (addExamSelect) {
+        addExamSelect.addEventListener('change', function() {
+            updateCourseDropdown(this.id, 'courseSelect_add');
+        });
+    }
+
+    function toggleCounsellingTarget() {
+        const type = document.getElementById('counTypeSelect').value;
+        const div = document.getElementById('counTargetDiv');
+        const select = document.getElementById('counTargetSelect');
+        const label = document.getElementById('counTargetLabel');
+
+        select.innerHTML = '<option value="">Select...</option>';
+        if (type === 'State') {
+            label.innerText = 'Which State?';
+            statesData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else if (type === 'University') {
+            label.innerText = 'Which University?';
+            unisData.forEach(item => select.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    }
+</script>
+
+{% endblock %}
