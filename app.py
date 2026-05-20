@@ -95,6 +95,16 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
 
+        # Add this block inside the 'with app.app_context():' section
+    try:
+        db.session.execute(text('ALTER TABLE counselling ADD COLUMN IF NOT EXISTS rules_data JSONB'))
+        db.session.execute(text('ALTER TABLE counselling_rounds ADD COLUMN IF NOT EXISTS rules_data JSONB'))
+        db.session.commit()
+        print("✅ Added rules_data columns to Counselling and Rounds tables.")
+    except Exception as e:
+        db.session.rollback()
+        print(f"⚠️ Rules migration skipped or already applied: {e}")
+
         # Phase 2: College Database Expansion Migration
     try:
         columns_to_add = [
