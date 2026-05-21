@@ -437,481 +437,482 @@
 
 {% for c in counsellings %}
 
-<div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content text-start border-0 shadow-lg" style="background-color: #f8f9fa;">
-            <div class="modal-header bg-dark text-white border-0">
-                <div>
-                    <h4 class="modal-title fw-bold mb-0"><i class="fas fa-project-diagram text-warning me-2"></i>{{ c.name }} | Workflow & Knowledge Base</h4>
-                    <small class="opacity-75">Configure global rules, links, timeline phases, and specific round activities.</small>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-<div class="modal-body p-0 bg-light d-flex flex-column">
-
-                <div class="bg-white border-bottom shadow-sm px-4 pt-3" style="position: sticky; top: 0; z-index: 10;">
-                    <ul class="nav nav-tabs border-bottom-0 gap-2" id="workflowTabs{{ c.id }}" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-links-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-links-{{ c.id }}" type="button" role="tab">
-                                <i class="fas fa-link text-primary me-2"></i>Global Links
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-rules-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-rules-{{ c.id }}" type="button" role="tab">
-                                <i class="fas fa-gavel text-warning me-2"></i>Global Rules
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-timeline-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-timeline-{{ c.id }}" type="button" role="tab">
-                                <i class="fas fa-globe text-info me-2"></i>Global Timeline
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-rounds-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-rounds-{{ c.id }}" type="button" role="tab">
-                                <i class="fas fa-layer-group text-danger me-2"></i>Rounds & Phases
-                            </button>
-                        </li>
-                    </ul>
+    <div class="modal fade" id="manageRoundsModal{{ c.id }}" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content text-start border-0 shadow-lg" style="background-color: #f8f9fa;">
+                <div class="modal-header bg-dark text-white border-0">
+                    <div>
+                        <h4 class="modal-title fw-bold mb-0"><i class="fas fa-project-diagram text-warning me-2"></i>{{ c.name }} | Workflow & Knowledge Base</h4>
+                        <small class="opacity-75">Configure global rules, links, timeline phases, and specific round activities.</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="tab-content flex-grow-1 p-4 overflow-auto" id="workflowTabsContent{{ c.id }}">
+    <div class="modal-body p-0 bg-light d-flex flex-column">
 
-                    <div class="tab-pane fade show active" id="pane-links-{{ c.id }}" role="tabpanel">
-                        <div class="max-w-4xl mx-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h5 class="fw-bold text-dark mb-1">Important Documents & Portals</h5>
-                                    <p class="text-muted small mb-0">Official brochures, fee structures, and login links.</p>
-                                </div>
-                                <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#addLink{{ c.id }}"><i class="fas fa-plus me-2"></i>Add Link</button>
-                            </div>
+                    <div class="bg-white border-bottom shadow-sm px-4 pt-3" style="position: sticky; top: 0; z-index: 10;">
+                        <ul class="nav nav-tabs border-bottom-0 gap-2" id="workflowTabs{{ c.id }}" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-links-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-links-{{ c.id }}" type="button" role="tab">
+                                    <i class="fas fa-link text-primary me-2"></i>Global Links
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-rules-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-rules-{{ c.id }}" type="button" role="tab">
+                                    <i class="fas fa-gavel text-warning me-2"></i>Global Rules
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-timeline-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-timeline-{{ c.id }}" type="button" role="tab">
+                                    <i class="fas fa-globe text-info me-2"></i>Global Timeline
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold text-dark px-4 py-3 border-0 border-bottom border-3 border-transparent" id="tab-rounds-{{ c.id }}" data-bs-toggle="tab" data-bs-target="#pane-rounds-{{ c.id }}" type="button" role="tab">
+                                    <i class="fas fa-layer-group text-danger me-2"></i>Rounds & Phases
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
 
-                            <div class="collapse mb-4" id="addLink{{ c.id }}">
-                                <form action="{{ url_for('add_counselling_link', counselling_id=c.id) }}" method="POST" class="bg-primary bg-opacity-10 p-4 border border-primary border-opacity-25 rounded shadow-sm">
-                                    <div class="row g-3">
-                                        <div class="col-md-5">
-                                            <input type="text" name="title" class="form-control fw-bold" placeholder="Title (e.g. Information Brochure 2026)" required>
-                                        </div>
-                                        <div class="col-md-5">
-                                            <input type="url" name="url" class="form-control" placeholder="URL / Drive Link" required>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button type="submit" class="btn btn-primary w-100 fw-bold">Save</button>
-                                        </div>
+                    <div class="tab-content flex-grow-1 p-4 overflow-auto" id="workflowTabsContent{{ c.id }}">
+
+                        <div class="tab-pane fade show active" id="pane-links-{{ c.id }}" role="tabpanel">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-1">Important Documents & Portals</h5>
+                                        <p class="text-muted small mb-0">Official brochures, fee structures, and login links.</p>
                                     </div>
-                                </form>
-                            </div>
+                                    <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#addLink{{ c.id }}"><i class="fas fa-plus me-2"></i>Add Link</button>
+                                </div>
 
-                            <div class="bg-white rounded border shadow-sm p-2">
-                                {% if c.important_links %}
-                                    {% for link in c.important_links %}
-                                    <div class="d-flex gap-3 align-items-center p-3 border-bottom border-light">
-                                        <div class="flex-grow-1">
-                                            <a href="{{ link.url }}" target="_blank" class="text-decoration-none fw-bold text-dark fs-5 hover-lift">
-                                                <i class="fas fa-external-link-alt text-danger me-3"></i>{{ link.title }}
-                                            </a>
-                                            <div class="text-muted small mt-1 text-truncate" style="max-width: 500px;"><i class="fas fa-globe me-1"></i>{{ link.url }}</div>
+                                <div class="collapse mb-4" id="addLink{{ c.id }}">
+                                    <form action="{{ url_for('add_counselling_link', counselling_id=c.id) }}" method="POST" class="bg-primary bg-opacity-10 p-4 border border-primary border-opacity-25 rounded shadow-sm">
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <input type="text" name="title" class="form-control fw-bold" placeholder="Title (e.g. Information Brochure 2026)" required>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input type="url" name="url" class="form-control" placeholder="URL / Drive Link" required>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="submit" class="btn btn-primary w-100 fw-bold">Save</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="bg-white rounded border shadow-sm p-2">
+                                    {% if c.important_links %}
+                                        {% for link in c.important_links %}
+                                        <div class="d-flex gap-3 align-items-center p-3 border-bottom border-light">
+                                            <div class="flex-grow-1">
+                                                <a href="{{ link.url }}" target="_blank" class="text-decoration-none fw-bold text-dark fs-5 hover-lift">
+                                                    <i class="fas fa-external-link-alt text-danger me-3"></i>{{ link.title }}
+                                                </a>
+                                                <div class="text-muted small mt-1 text-truncate" style="max-width: 500px;"><i class="fas fa-globe me-1"></i>{{ link.url }}</div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-outline-primary shadow-sm" data-bs-toggle="collapse" data-bs-target="#editLink{{ link.id }}"><i class="fas fa-edit"></i> Edit</button>
+                                                <form method="POST" action="{{ url_for('delete_counselling_link', link_id=link.id) }}" class="m-0" onsubmit="return confirm('Remove this link?');">
+                                                    <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="collapse bg-light p-3 border-bottom" id="editLink{{ link.id }}">
+                                            <form action="{{ url_for('edit_counselling_link', link_id=link.id) }}" method="POST" class="row g-3">
+                                                <div class="col-md-5"><input type="text" name="title" class="form-control fw-bold" value="{{ link.title }}" required></div>
+                                                <div class="col-md-5"><input type="url" name="url" class="form-control" value="{{ link.url }}" required></div>
+                                                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100 fw-bold">Update</button></div>
+                                            </form>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="fas fa-link d-block fs-1 opacity-25 mb-3"></i>
+                                            <span class="fs-5 fw-bold">No global links added yet.</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pane-rules-{{ c.id }}" role="tabpanel">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-1">Counselling-Level Rules</h5>
+                                        <p class="text-muted small mb-0">High-level policies like Eligibility, Service Bonds, and Document requirements.</p>
+                                    </div>
+                                    <button class="btn btn-warning fw-bold text-dark shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRule{{ c.id }}"><i class="fas fa-plus me-2"></i>Add Rule</button>
+                                </div>
+
+                                <div class="collapse mb-4" id="addRule{{ c.id }}">
+                                    <form action="{{ url_for('add_counselling_rule', counselling_id=c.id) }}" method="POST" class="bg-warning bg-opacity-10 p-4 border border-warning border-opacity-50 rounded shadow-sm">
+                                        <input type="text" name="rule_title" class="form-control fw-bold mb-3 fs-5 text-dark" placeholder="Rule Title (e.g. Service Bond, Eligibility...)" required>
+                                        <textarea name="rule_content" class="form-control mb-3 fs-6" rows="6" placeholder="Paste the summarized rules or bullet points here..." style="line-height: 1.8;" required></textarea>
+                                        <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5 shadow-sm">Save Rule</button></div>
+                                    </form>
+                                </div>
+
+                                <div class="accordion border rounded overflow-hidden shadow-sm" id="rulesAcc{{ c.id }}">
+                                    {% set rules_dict = c.rules_data | from_json %}
+                                    {% if rules_dict %}
+                                        {% for title, content in rules_dict.items() %}
+                                        <div class="accordion-item border-bottom">
+                                            <h2 class="accordion-header d-flex bg-white">
+                                                <button class="accordion-button collapsed fw-bold text-dark py-3 flex-grow-1 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#rule-{{ c.id }}-{{ loop.index }}">
+                                                    <i class="fas fa-bookmark text-secondary me-3"></i>{{ title }}
+                                                </button>
+                                                <div class="d-flex align-items-center pe-3 bg-white">
+                                                    <button class="btn btn-sm btn-outline-primary me-2 shadow-sm" data-bs-toggle="collapse" data-bs-target="#editRule{{ c.id }}{{ loop.index }}"><i class="fas fa-edit"></i></button>
+                                                    <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id) }}" class="m-0" onsubmit="return confirm('Delete this rule?');">
+                                                        <input type="hidden" name="rule_title" value="{{ title }}">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
+                                                    </form>
+                                                </div>
+                                            </h2>
+                                            <div id="rule-{{ c.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rulesAcc{{ c.id }}">
+                                                <div class="accordion-body bg-light text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 2rem; letter-spacing: 0.2px;">{{ content }}</div>
+                                            </div>
+
+                                            <div class="collapse" id="editRule{{ c.id }}{{ loop.index }}">
+                                                <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-4 border-top border-warning">
+                                                    <input type="hidden" name="entity_type" value="counselling">
+                                                    <input type="hidden" name="entity_id" value="{{ c.id }}">
+                                                    <input type="hidden" name="old_title" value="{{ title }}">
+                                                    <input type="text" name="new_title" class="form-control fw-bold mb-3 fs-5 text-dark" value="{{ title }}" required>
+                                                    <textarea name="new_content" class="form-control mb-3 fs-6" rows="10" style="line-height: 1.8;" required>{{ content }}</textarea>
+                                                    <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5 shadow-sm">Save Changes</button></div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="p-5 text-center text-muted bg-white">
+                                            <i class="fas fa-gavel mb-3 fs-1 opacity-25 d-block"></i>
+                                            <span class="fs-5 fw-bold">Rules Engine is Empty.</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pane-timeline-{{ c.id }}" role="tabpanel">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-1">Global Timeline</h5>
+                                        <p class="text-muted small mb-0">Events applying to the entire process (e.g., Master Registration).</p>
+                                    </div>
+                                    <button class="btn btn-info fw-bold text-white shadow-sm" data-bs-toggle="collapse" data-bs-target="#addGlobalAct{{ c.id }}"><i class="fas fa-plus me-2"></i>Add Event</button>
+                                </div>
+
+                                <div class="collapse mb-4" id="addGlobalAct{{ c.id }}">
+                                    <div class="card card-body border-info bg-info bg-opacity-10 shadow-sm p-4">
+                                        <form action="{{ url_for('add_counselling_activity', counselling_id=c.id) }}" method="POST">
+                                            <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" placeholder="Event Name (e.g. Master Registration)" required>
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold text-muted">Start Date & Time</label>
+                                                    <input type="datetime-local" name="start_date" class="form-control">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-bold text-muted">End Date & Time</label>
+                                                    <input type="datetime-local" name="end_date" class="form-control">
+                                                </div>
+                                            </div>
+                                            <input type="url" name="activity_link" class="form-control mb-3" placeholder="Specific Portal Link (Optional)">
+                                            <div class="text-end"><button type="submit" class="btn btn-info text-white fw-bold px-5">Save Event</button></div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded border shadow-sm p-2">
+                                {% if c.global_activities %}
+                                    {% for act in c.global_activities %}
+                                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                                        <div>
+                                            <strong class="d-block text-dark fs-5 mb-1">{{ act.activity_name }}</strong>
+                                            <span class="text-muted"><i class="far fa-calendar-alt text-info me-2"></i>
+                                                {% if act.start_date and act.end_date %}
+                                                    {{ act.start_date.strftime('%d %b %Y, %I:%M %p') }} <i class="fas fa-arrow-right mx-2 opacity-50"></i> {{ act.end_date.strftime('%d %b %Y, %I:%M %p') }}
+                                                {% elif act.end_date %}
+                                                    Deadline: {{ act.end_date.strftime('%d %b %Y, %I:%M %p') }}
+                                                {% else %}
+                                                    Dates TBD
+                                                {% endif %}
+                                            </span>
                                         </div>
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-outline-primary shadow-sm" data-bs-toggle="collapse" data-bs-target="#editLink{{ link.id }}"><i class="fas fa-edit"></i> Edit</button>
-                                            <form method="POST" action="{{ url_for('delete_counselling_link', link_id=link.id) }}" class="m-0" onsubmit="return confirm('Remove this link?');">
+                                            <button type="button" class="btn btn-outline-primary shadow-sm" data-bs-toggle="collapse" data-bs-target="#editGlobalAct{{ act.id }}"><i class="fas fa-edit"></i></button>
+                                            <form action="{{ url_for('delete_counselling_activity', activity_id=act.id) }}" method="POST" onsubmit="return confirm('Remove global activity?');">
                                                 <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
                                             </form>
                                         </div>
                                     </div>
-                                    <div class="collapse bg-light p-3 border-bottom" id="editLink{{ link.id }}">
-                                        <form action="{{ url_for('edit_counselling_link', link_id=link.id) }}" method="POST" class="row g-3">
-                                            <div class="col-md-5"><input type="text" name="title" class="form-control fw-bold" value="{{ link.title }}" required></div>
-                                            <div class="col-md-5"><input type="url" name="url" class="form-control" value="{{ link.url }}" required></div>
-                                            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100 fw-bold">Update</button></div>
+                                    <div class="collapse bg-light p-4 border-bottom" id="editGlobalAct{{ act.id }}">
+                                        <form action="{{ url_for('edit_counselling_activity', activity_id=act.id) }}" method="POST">
+                                            <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" value="{{ act.activity_name }}" required>
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="small fw-bold text-muted">Start Date & Time</label>
+                                                    <input type="datetime-local" name="start_date" class="form-control" value="{{ act.start_date.strftime('%Y-%m-%dT%H:%M') if act.start_date else '' }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="small fw-bold text-muted">End Date & Time</label>
+                                                    <input type="datetime-local" name="end_date" class="form-control" value="{{ act.end_date.strftime('%Y-%m-%dT%H:%M') if act.end_date else '' }}">
+                                                </div>
+                                            </div>
+                                            <input type="url" name="activity_link" class="form-control mb-3" placeholder="Specific Link (Optional)" value="{{ act.activity_link or '' }}">
+                                            <div class="text-end"><button type="submit" class="btn btn-primary fw-bold px-5">Update</button></div>
                                         </form>
                                     </div>
                                     {% endfor %}
                                 {% else %}
                                     <div class="text-center py-5 text-muted">
-                                        <i class="fas fa-link d-block fs-1 opacity-25 mb-3"></i>
-                                        <span class="fs-5 fw-bold">No global links added yet.</span>
+                                        <i class="far fa-calendar d-block fs-1 opacity-25 mb-3"></i>
+                                        <span class="fs-5 fw-bold">No global events added yet.</span>
                                     </div>
                                 {% endif %}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="tab-pane fade" id="pane-rules-{{ c.id }}" role="tabpanel">
-                        <div class="max-w-4xl mx-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h5 class="fw-bold text-dark mb-1">Counselling-Level Rules</h5>
-                                    <p class="text-muted small mb-0">High-level policies like Eligibility, Service Bonds, and Document requirements.</p>
-                                </div>
-                                <button class="btn btn-warning fw-bold text-dark shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRule{{ c.id }}"><i class="fas fa-plus me-2"></i>Add Rule</button>
-                            </div>
-
-                            <div class="collapse mb-4" id="addRule{{ c.id }}">
-                                <form action="{{ url_for('add_counselling_rule', counselling_id=c.id) }}" method="POST" class="bg-warning bg-opacity-10 p-4 border border-warning border-opacity-50 rounded shadow-sm">
-                                    <input type="text" name="rule_title" class="form-control fw-bold mb-3 fs-5 text-dark" placeholder="Rule Title (e.g. Service Bond, Eligibility...)" required>
-                                    <textarea name="rule_content" class="form-control mb-3 fs-6" rows="6" placeholder="Paste the summarized rules or bullet points here..." style="line-height: 1.8;" required></textarea>
-                                    <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5 shadow-sm">Save Rule</button></div>
-                                </form>
-                            </div>
-
-                            <div class="accordion border rounded overflow-hidden shadow-sm" id="rulesAcc{{ c.id }}">
-                                {% set rules_dict = c.rules_data | from_json %}
-                                {% if rules_dict %}
-                                    {% for title, content in rules_dict.items() %}
-                                    <div class="accordion-item border-bottom">
-                                        <h2 class="accordion-header d-flex bg-white">
-                                            <button class="accordion-button collapsed fw-bold text-dark py-3 flex-grow-1 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#rule-{{ c.id }}-{{ loop.index }}">
-                                                <i class="fas fa-bookmark text-secondary me-3"></i>{{ title }}
-                                            </button>
-                                            <div class="d-flex align-items-center pe-3 bg-white">
-                                                <button class="btn btn-sm btn-outline-primary me-2 shadow-sm" data-bs-toggle="collapse" data-bs-target="#editRule{{ c.id }}{{ loop.index }}"><i class="fas fa-edit"></i></button>
-                                                <form method="POST" action="{{ url_for('delete_counselling_rule', counselling_id=c.id) }}" class="m-0" onsubmit="return confirm('Delete this rule?');">
-                                                    <input type="hidden" name="rule_title" value="{{ title }}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
-                                                </form>
-                                            </div>
-                                        </h2>
-                                        <div id="rule-{{ c.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rulesAcc{{ c.id }}">
-                                            <div class="accordion-body bg-light text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 2rem; letter-spacing: 0.2px;">{{ content }}</div>
-                                        </div>
-
-                                        <div class="collapse" id="editRule{{ c.id }}{{ loop.index }}">
-                                            <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-4 border-top border-warning">
-                                                <input type="hidden" name="entity_type" value="counselling">
-                                                <input type="hidden" name="entity_id" value="{{ c.id }}">
-                                                <input type="hidden" name="old_title" value="{{ title }}">
-                                                <input type="text" name="new_title" class="form-control fw-bold mb-3 fs-5 text-dark" value="{{ title }}" required>
-                                                <textarea name="new_content" class="form-control mb-3 fs-6" rows="10" style="line-height: 1.8;" required>{{ content }}</textarea>
-                                                <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5 shadow-sm">Save Changes</button></div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="p-5 text-center text-muted bg-white">
-                                        <i class="fas fa-gavel mb-3 fs-1 opacity-25 d-block"></i>
-                                        <span class="fs-5 fw-bold">Rules Engine is Empty.</span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="pane-timeline-{{ c.id }}" role="tabpanel">
-                        <div class="max-w-4xl mx-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h5 class="fw-bold text-dark mb-1">Global Timeline</h5>
-                                    <p class="text-muted small mb-0">Events applying to the entire process (e.g., Master Registration).</p>
-                                </div>
-                                <button class="btn btn-info fw-bold text-white shadow-sm" data-bs-toggle="collapse" data-bs-target="#addGlobalAct{{ c.id }}"><i class="fas fa-plus me-2"></i>Add Event</button>
-                            </div>
-
-                            <div class="collapse mb-4" id="addGlobalAct{{ c.id }}">
-                                <div class="card card-body border-info bg-info bg-opacity-10 shadow-sm p-4">
-                                    <form action="{{ url_for('add_counselling_activity', counselling_id=c.id) }}" method="POST">
-                                        <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" placeholder="Event Name (e.g. Master Registration)" required>
-                                        <div class="row g-3 mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted">Start Date & Time</label>
-                                                <input type="datetime-local" name="start_date" class="form-control">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-muted">End Date & Time</label>
-                                                <input type="datetime-local" name="end_date" class="form-control">
-                                            </div>
-                                        </div>
-                                        <input type="url" name="activity_link" class="form-control mb-3" placeholder="Specific Portal Link (Optional)">
-                                        <div class="text-end"><button type="submit" class="btn btn-info text-white fw-bold px-5">Save Event</button></div>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded border shadow-sm p-2">
-                            {% if c.global_activities %}
-                                {% for act in c.global_activities %}
-                                <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                        <div class="tab-pane fade" id="pane-rounds-{{ c.id }}" role="tabpanel">
+                            <div class="max-w-5xl mx-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
                                     <div>
-                                        <strong class="d-block text-dark fs-5 mb-1">{{ act.activity_name }}</strong>
-                                        <span class="text-muted"><i class="far fa-calendar-alt text-info me-2"></i>
-                                            {% if act.start_date and act.end_date %}
-                                                {{ act.start_date.strftime('%d %b %Y, %I:%M %p') }} <i class="fas fa-arrow-right mx-2 opacity-50"></i> {{ act.end_date.strftime('%d %b %Y, %I:%M %p') }}
-                                            {% elif act.end_date %}
-                                                Deadline: {{ act.end_date.strftime('%d %b %Y, %I:%M %p') }}
-                                            {% else %}
-                                                Dates TBD
-                                            {% endif %}
-                                        </span>
+                                        <h5 class="fw-bold text-danger mb-1">Rounds & Phases</h5>
+                                        <p class="text-muted small mb-0">Build out the specific schedule, rules, and documents for each individual round.</p>
                                     </div>
-                                    <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-primary shadow-sm" data-bs-toggle="collapse" data-bs-target="#editGlobalAct{{ act.id }}"><i class="fas fa-edit"></i></button>
-                                        <form action="{{ url_for('delete_counselling_activity', activity_id=act.id) }}" method="POST" onsubmit="return confirm('Remove global activity?');">
-                                            <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-danger fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRoundForm{{ c.id }}"><i class="fas fa-plus me-2"></i>New Round</button>
+                                </div>
+
+                                <div class="collapse mb-5" id="addRoundForm{{ c.id }}">
+                                    <div class="card card-body border-danger bg-danger bg-opacity-10 p-4 shadow-sm">
+                                        <form action="{{ url_for('add_counselling_round', counselling_id=c.id) }}" method="POST" class="d-flex gap-3 align-items-center">
+                                            <input type="text" name="round_number" class="form-control form-control-lg fw-bold w-50" placeholder="e.g. Round 1, Mop-Up Round" required>
+                                            <button type="submit" class="btn btn-danger btn-lg fw-bold px-5">Create Round Ecosystem</button>
                                         </form>
                                     </div>
                                 </div>
-                                <div class="collapse bg-light p-4 border-bottom" id="editGlobalAct{{ act.id }}">
-                                    <form action="{{ url_for('edit_counselling_activity', activity_id=act.id) }}" method="POST">
-                                        <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" value="{{ act.activity_name }}" required>
-                                        <div class="row g-3 mb-3">
-                                            <div class="col-md-6">
-                                                <label class="small fw-bold text-muted">Start Date & Time</label>
-                                                <input type="datetime-local" name="start_date" class="form-control" value="{{ act.start_date.strftime('%Y-%m-%dT%H:%M') if act.start_date else '' }}">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="small fw-bold text-muted">End Date & Time</label>
-                                                <input type="datetime-local" name="end_date" class="form-control" value="{{ act.end_date.strftime('%Y-%m-%dT%H:%M') if act.end_date else '' }}">
-                                            </div>
-                                        </div>
-                                        <input type="url" name="activity_link" class="form-control mb-3" placeholder="Specific Link (Optional)" value="{{ act.activity_link or '' }}">
-                                        <div class="text-end"><button type="submit" class="btn btn-primary fw-bold px-5">Update</button></div>
-                                    </form>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center py-5 text-muted">
-                                    <i class="far fa-calendar d-block fs-1 opacity-25 mb-3"></i>
-                                    <span class="fs-5 fw-bold">No global events added yet.</span>
-                                </div>
-                            {% endif %}
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="tab-pane fade" id="pane-rounds-{{ c.id }}" role="tabpanel">
-                        <div class="max-w-5xl mx-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h5 class="fw-bold text-danger mb-1">Rounds & Phases</h5>
-                                    <p class="text-muted small mb-0">Build out the specific schedule, rules, and documents for each individual round.</p>
-                                </div>
-                                <button class="btn btn-danger fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRoundForm{{ c.id }}"><i class="fas fa-plus me-2"></i>New Round</button>
-                            </div>
+                                {% if c.rounds %}
+                                <div class="accordion" id="roundsAccordion{{ c.id }}">
+                                    {% for r in c.rounds %}
+                                    <div class="accordion-item mb-4 border shadow-sm rounded overflow-hidden">
+                                        <h2 class="accordion-header bg-white">
+                                            <button class="accordion-button collapsed fw-bold text-dark fs-5 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRound{{ r.id }}">
+                                                <i class="fas fa-layer-group text-danger me-3"></i>{{ r.round_number }}
+                                            </button>
+                                        </h2>
+                                        <div id="collapseRound{{ r.id }}" class="accordion-collapse collapse" data-bs-parent="#roundsAccordion{{ c.id }}">
+                                            <div class="accordion-body bg-light p-4 p-md-5">
 
-                            <div class="collapse mb-5" id="addRoundForm{{ c.id }}">
-                                <div class="card card-body border-danger bg-danger bg-opacity-10 p-4 shadow-sm">
-                                    <form action="{{ url_for('add_counselling_round', counselling_id=c.id) }}" method="POST" class="d-flex gap-3 align-items-center">
-                                        <input type="text" name="round_number" class="form-control form-control-lg fw-bold w-50" placeholder="e.g. Round 1, Mop-Up Round" required>
-                                        <button type="submit" class="btn btn-danger btn-lg fw-bold px-5">Create Round Ecosystem</button>
-                                    </form>
-                                </div>
-                            </div>
+                                                <ul class="nav nav-pills mb-4 pb-3 border-bottom gap-2" id="roundTabs{{ r.id }}" role="tablist">
+                                                    <li class="nav-item">
+                                                        <button class="nav-link active fw-bold px-4" data-bs-toggle="pill" data-bs-target="#r-rules-{{ r.id }}" type="button"><i class="fas fa-gavel me-2"></i>Rules</button>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <button class="nav-link fw-bold px-4" data-bs-toggle="pill" data-bs-target="#r-schedule-{{ r.id }}" type="button"><i class="fas fa-tasks me-2"></i>Schedule</button>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <button class="nav-link fw-bold px-4" data-bs-toggle="pill" data-bs-target="#r-docs-{{ r.id }}" type="button"><i class="fas fa-paperclip me-2"></i>Documents</button>
+                                                    </li>
+                                                </ul>
 
-                            {% if c.rounds %}
-                            <div class="accordion" id="roundsAccordion{{ c.id }}">
-                                {% for r in c.rounds %}
-                                <div class="accordion-item mb-4 border shadow-sm rounded overflow-hidden">
-                                    <h2 class="accordion-header bg-white">
-                                        <button class="accordion-button collapsed fw-bold text-dark fs-5 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRound{{ r.id }}">
-                                            <i class="fas fa-layer-group text-danger me-3"></i>{{ r.round_number }}
-                                        </button>
-                                    </h2>
-                                    <div id="collapseRound{{ r.id }}" class="accordion-collapse collapse" data-bs-parent="#roundsAccordion{{ c.id }}">
-                                        <div class="accordion-body bg-light p-4 p-md-5">
+                                                <div class="tab-content">
+                                                    <div class="tab-pane fade show active" id="r-rules-{{ r.id }}">
+                                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                                            <h6 class="fw-bold text-dark mb-0 fs-5">Specific Rules for {{ r.round_number }}</h6>
+                                                            <button class="btn btn-warning fw-bold text-dark shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRoundRule{{ r.id }}"><i class="fas fa-plus me-2"></i> Add Rule</button>
+                                                        </div>
 
-                                            <ul class="nav nav-pills mb-4 pb-3 border-bottom gap-2" id="roundTabs{{ r.id }}" role="tablist">
-                                                <li class="nav-item">
-                                                    <button class="nav-link active fw-bold px-4" data-bs-toggle="pill" data-bs-target="#r-rules-{{ r.id }}" type="button"><i class="fas fa-gavel me-2"></i>Rules</button>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <button class="nav-link fw-bold px-4" data-bs-toggle="pill" data-bs-target="#r-schedule-{{ r.id }}" type="button"><i class="fas fa-tasks me-2"></i>Schedule</button>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <button class="nav-link fw-bold px-4" data-bs-toggle="pill" data-bs-target="#r-docs-{{ r.id }}" type="button"><i class="fas fa-paperclip me-2"></i>Documents</button>
-                                                </li>
-                                            </ul>
+                                                        <div class="collapse mb-4" id="addRoundRule{{ r.id }}">
+                                                            <form action="{{ url_for('add_round_rule', round_id=r.id) }}" method="POST" class="bg-warning bg-opacity-10 p-4 border border-warning rounded shadow-sm">
+                                                                <input type="text" name="rule_title" class="form-control fw-bold mb-3 fs-5" placeholder="Rule Title (e.g. Free Exit, Upgradation...)" required>
+                                                                <textarea name="rule_content" class="form-control mb-3 fs-6" rows="5" placeholder="Paste rules..." style="line-height: 1.8;" required></textarea>
+                                                                <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5">Save Round Rule</button></div>
+                                                            </form>
+                                                        </div>
 
-                                            <div class="tab-content">
-                                                <div class="tab-pane fade show active" id="r-rules-{{ r.id }}">
-                                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <h6 class="fw-bold text-dark mb-0 fs-5">Specific Rules for {{ r.round_number }}</h6>
-                                                        <button class="btn btn-warning fw-bold text-dark shadow-sm" data-bs-toggle="collapse" data-bs-target="#addRoundRule{{ r.id }}"><i class="fas fa-plus me-2"></i> Add Rule</button>
-                                                    </div>
+                                                        <div class="accordion border rounded overflow-hidden shadow-sm" id="rrulesAcc{{ r.id }}">
+                                                            {% set r_rules_dict = r.rules_data | from_json %}
+                                                            {% if r_rules_dict %}
+                                                                {% for r_title, r_content in r_rules_dict.items() %}
+                                                                <div class="accordion-item border-bottom">
+                                                                    <h2 class="accordion-header d-flex bg-white">
+                                                                        <button class="accordion-button collapsed py-3 text-dark fw-bold flex-grow-1 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#rrule-{{ r.id }}-{{ loop.index }}">
+                                                                            {{ r_title }}
+                                                                        </button>
+                                                                        <div class="d-flex align-items-center pe-3 bg-white">
+                                                                            <button class="btn btn-outline-primary me-2 shadow-sm" data-bs-toggle="collapse" data-bs-target="#editRoundRule{{ r.id }}{{ loop.index }}"><i class="fas fa-edit"></i></button>
+                                                                            <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id) }}" class="m-0" onsubmit="return confirm('Delete this round rule?');">
+                                                                                <input type="hidden" name="rule_title" value="{{ r_title }}">
+                                                                                <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
+                                                                            </form>
+                                                                        </div>
+                                                                    </h2>
+                                                                    <div id="rrule-{{ r.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rrulesAcc{{ r.id }}">
+                                                                        <div class="accordion-body bg-light text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 2rem; letter-spacing: 0.2px;">{{ r_content }}</div>
+                                                                    </div>
 
-                                                    <div class="collapse mb-4" id="addRoundRule{{ r.id }}">
-                                                        <form action="{{ url_for('add_round_rule', round_id=r.id) }}" method="POST" class="bg-warning bg-opacity-10 p-4 border border-warning rounded shadow-sm">
-                                                            <input type="text" name="rule_title" class="form-control fw-bold mb-3 fs-5" placeholder="Rule Title (e.g. Free Exit, Upgradation...)" required>
-                                                            <textarea name="rule_content" class="form-control mb-3 fs-6" rows="5" placeholder="Paste rules..." style="line-height: 1.8;" required></textarea>
-                                                            <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5">Save Round Rule</button></div>
-                                                        </form>
-                                                    </div>
-
-                                                    <div class="accordion border rounded overflow-hidden shadow-sm" id="rrulesAcc{{ r.id }}">
-                                                        {% set r_rules_dict = r.rules_data | from_json %}
-                                                        {% if r_rules_dict %}
-                                                            {% for r_title, r_content in r_rules_dict.items() %}
-                                                            <div class="accordion-item border-bottom">
-                                                                <h2 class="accordion-header d-flex bg-white">
-                                                                    <button class="accordion-button collapsed py-3 text-dark fw-bold flex-grow-1 fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#rrule-{{ r.id }}-{{ loop.index }}">
-                                                                        {{ r_title }}
-                                                                    </button>
-                                                                    <div class="d-flex align-items-center pe-3 bg-white">
-                                                                        <button class="btn btn-outline-primary me-2 shadow-sm" data-bs-toggle="collapse" data-bs-target="#editRoundRule{{ r.id }}{{ loop.index }}"><i class="fas fa-edit"></i></button>
-                                                                        <form method="POST" action="{{ url_for('delete_round_rule', round_id=r.id) }}" class="m-0" onsubmit="return confirm('Delete this round rule?');">
-                                                                            <input type="hidden" name="rule_title" value="{{ r_title }}">
-                                                                            <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
+                                                                    <div class="collapse" id="editRoundRule{{ r.id }}{{ loop.index }}">
+                                                                        <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-4 border-top border-warning">
+                                                                            <input type="hidden" name="entity_type" value="round">
+                                                                            <input type="hidden" name="entity_id" value="{{ r.id }}">
+                                                                            <input type="hidden" name="old_title" value="{{ r_title }}">
+                                                                            <input type="text" name="new_title" class="form-control fw-bold mb-3 fs-5" value="{{ r_title }}" required>
+                                                                            <textarea name="new_content" class="form-control mb-3 fs-6" rows="8" style="line-height: 1.8;" required>{{ r_content }}</textarea>
+                                                                            <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5 shadow-sm">Save Changes</button></div>
                                                                         </form>
                                                                     </div>
-                                                                </h2>
-                                                                <div id="rrule-{{ r.id }}-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#rrulesAcc{{ r.id }}">
-                                                                    <div class="accordion-body bg-light text-dark fs-6" style="white-space: pre-wrap; line-height: 1.8; padding: 2rem; letter-spacing: 0.2px;">{{ r_content }}</div>
                                                                 </div>
-
-                                                                <div class="collapse" id="editRoundRule{{ r.id }}{{ loop.index }}">
-                                                                    <form action="{{ url_for('edit_dynamic_rule') }}" method="POST" class="bg-white p-4 border-top border-warning">
-                                                                        <input type="hidden" name="entity_type" value="round">
-                                                                        <input type="hidden" name="entity_id" value="{{ r.id }}">
-                                                                        <input type="hidden" name="old_title" value="{{ r_title }}">
-                                                                        <input type="text" name="new_title" class="form-control fw-bold mb-3 fs-5" value="{{ r_title }}" required>
-                                                                        <textarea name="new_content" class="form-control mb-3 fs-6" rows="8" style="line-height: 1.8;" required>{{ r_content }}</textarea>
-                                                                        <div class="text-end"><button type="submit" class="btn btn-warning fw-bold text-dark px-5 shadow-sm">Save Changes</button></div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <div class="p-4 text-center text-muted bg-white">No specific rules added for this round.</div>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-
-                                                <div class="tab-pane fade" id="r-schedule-{{ r.id }}">
-                                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <h6 class="fw-bold text-dark mb-0 fs-5">Schedule & Activities</h6>
-                                                        <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#formAct{{ r.id }}"><i class="fas fa-plus me-2"></i> Add Item</button>
-                                                    </div>
-
-                                                    <div class="collapse mb-4" id="formAct{{ r.id }}">
-                                                        <div class="card card-body p-4 border-primary bg-primary bg-opacity-10 shadow-sm">
-                                                            <form action="{{ url_for('add_round_activity', round_id=r.id) }}" method="POST">
-                                                                <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" placeholder="e.g. Choice Filling" required>
-                                                                <div class="row g-3 mb-3">
-                                                                    <div class="col-md-6">
-                                                                        <label class="form-label small fw-bold text-muted">Start Time</label>
-                                                                        <input type="datetime-local" name="start_date" class="form-control">
-                                                                    </div>
-                                                                    <div class="col-md-6">
-                                                                        <label class="form-label small fw-bold text-muted">End Time / Deadline</label>
-                                                                        <input type="datetime-local" name="end_date" class="form-control">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-check mb-3">
-                                                                    <input class="form-check-input border-dark" type="checkbox" name="is_actionable" id="actCheck{{ r.id }}">
-                                                                    <label class="form-check-label fw-bold text-danger" for="actCheck{{ r.id }}">Action Required by Counselor (Adds to To-Do List)</label>
-                                                                </div>
-                                                                <div class="text-end"><button type="submit" class="btn btn-primary fw-bold px-5">Save Schedule Item</button></div>
-                                                            </form>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <div class="p-4 text-center text-muted bg-white">No specific rules added for this round.</div>
+                                                            {% endif %}
                                                         </div>
                                                     </div>
 
-                                                    <div class="bg-white rounded border shadow-sm p-2">
-                                                        {% for ract in r.activities %}
-                                                        <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
-                                                            <div>
-                                                                <strong class="d-block text-dark fs-5 mb-1">{{ ract.activity_name }}
-                                                                    {% if ract.is_actionable %}<span class="badge bg-warning text-dark ms-2 align-middle" style="font-size: 0.7rem;">Action Required</span>{% endif %}
-                                                                </strong>
-                                                                <span class="text-muted"><i class="far fa-clock text-primary me-2"></i>
-                                                                    {% if ract.start_date and ract.end_date %}
-                                                                        {{ ract.start_date.strftime('%d %b %Y, %I:%M %p') }} <i class="fas fa-arrow-right mx-2 opacity-50"></i> {{ ract.end_date.strftime('%d %b %Y, %I:%M %p') }}
-                                                                    {% elif ract.end_date %}
-                                                                        Due: {{ ract.end_date.strftime('%d %b %Y, %I:%M %p') }}
-                                                                    {% else %}
-                                                                        Dates TBD
-                                                                    {% endif %}
-                                                                </span>
-                                                            </div>
-                                                            <div class="d-flex gap-2">
-                                                                <button type="button" class="btn btn-outline-primary shadow-sm" data-bs-toggle="collapse" data-bs-target="#editRoundActCollapse{{ ract.id }}"><i class="fas fa-edit"></i></button>
-                                                                <form action="{{ url_for('delete_round_activity', activity_id=ract.id) }}" method="POST" onsubmit="return confirm('Delete activity?');">
-                                                                    <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash-alt"></i></button>
+                                                    <div class="tab-pane fade" id="r-schedule-{{ r.id }}">
+                                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                                            <h6 class="fw-bold text-dark mb-0 fs-5">Schedule & Activities</h6>
+                                                            <button class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#formAct{{ r.id }}"><i class="fas fa-plus me-2"></i> Add Item</button>
+                                                        </div>
+
+                                                        <div class="collapse mb-4" id="formAct{{ r.id }}">
+                                                            <div class="card card-body p-4 border-primary bg-primary bg-opacity-10 shadow-sm">
+                                                                <form action="{{ url_for('add_round_activity', round_id=r.id) }}" method="POST">
+                                                                    <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" placeholder="e.g. Choice Filling" required>
+                                                                    <div class="row g-3 mb-3">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-bold text-muted">Start Time</label>
+                                                                            <input type="datetime-local" name="start_date" class="form-control">
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-bold text-muted">End Time / Deadline</label>
+                                                                            <input type="datetime-local" name="end_date" class="form-control">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-check mb-3">
+                                                                        <input class="form-check-input border-dark" type="checkbox" name="is_actionable" id="actCheck{{ r.id }}">
+                                                                        <label class="form-check-label fw-bold text-danger" for="actCheck{{ r.id }}">Action Required by Counselor (Adds to To-Do List)</label>
+                                                                    </div>
+                                                                    <div class="text-end"><button type="submit" class="btn btn-primary fw-bold px-5">Save Schedule Item</button></div>
                                                                 </form>
                                                             </div>
                                                         </div>
-                                                        <div class="collapse bg-light p-4 border-bottom" id="editRoundActCollapse{{ ract.id }}">
-                                                            <form action="{{ url_for('edit_round_activity', activity_id=ract.id) }}" method="POST">
-                                                                <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" value="{{ ract.activity_name }}" required>
-                                                                <div class="row g-3 mb-3">
-                                                                    <div class="col-md-6">
-                                                                        <label class="small fw-bold text-muted">Start Date</label>
-                                                                        <input type="datetime-local" name="start_date" class="form-control" value="{{ ract.start_date.strftime('%Y-%m-%dT%H:%M') if ract.start_date else '' }}">
-                                                                    </div>
-                                                                    <div class="col-md-6">
-                                                                        <label class="small fw-bold text-muted">End Date</label>
-                                                                        <input type="datetime-local" name="end_date" class="form-control" value="{{ ract.end_date.strftime('%Y-%m-%dT%H:%M') if ract.end_date else '' }}">
-                                                                    </div>
+
+                                                        <div class="bg-white rounded border shadow-sm p-2">
+                                                            {% for ract in r.activities %}
+                                                            <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                                                                <div>
+                                                                    <strong class="d-block text-dark fs-5 mb-1">{{ ract.activity_name }}
+                                                                        {% if ract.is_actionable %}<span class="badge bg-warning text-dark ms-2 align-middle" style="font-size: 0.7rem;">Action Required</span>{% endif %}
+                                                                    </strong>
+                                                                    <span class="text-muted"><i class="far fa-clock text-primary me-2"></i>
+                                                                        {% if ract.start_date and ract.end_date %}
+                                                                            {{ ract.start_date.strftime('%d %b %Y, %I:%M %p') }} <i class="fas fa-arrow-right mx-2 opacity-50"></i> {{ ract.end_date.strftime('%d %b %Y, %I:%M %p') }}
+                                                                        {% elif ract.end_date %}
+                                                                            Due: {{ ract.end_date.strftime('%d %b %Y, %I:%M %p') }}
+                                                                        {% else %}
+                                                                            Dates TBD
+                                                                        {% endif %}
+                                                                    </span>
                                                                 </div>
-                                                                <div class="form-check mb-3">
-                                                                    <input class="form-check-input" type="checkbox" name="is_actionable" id="editActCheck{{ ract.id }}" {% if ract.is_actionable %}checked{% endif %}>
-                                                                    <label class="form-check-label fw-bold text-danger" for="editActCheck{{ ract.id }}">Action Required by Counselor</label>
+                                                                <div class="d-flex gap-2">
+                                                                    <button type="button" class="btn btn-outline-primary shadow-sm" data-bs-toggle="collapse" data-bs-target="#editRoundActCollapse{{ ract.id }}"><i class="fas fa-edit"></i></button>
+                                                                    <form action="{{ url_for('delete_round_activity', activity_id=ract.id) }}" method="POST" onsubmit="return confirm('Delete activity?');">
+                                                                        <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash-alt"></i></button>
+                                                                    </form>
                                                                 </div>
-                                                                <div class="text-end"><button type="submit" class="btn btn-primary fw-bold px-5">Update</button></div>
-                                                            </form>
+                                                            </div>
+                                                            <div class="collapse bg-light p-4 border-bottom" id="editRoundActCollapse{{ ract.id }}">
+                                                                <form action="{{ url_for('edit_round_activity', activity_id=ract.id) }}" method="POST">
+                                                                    <input type="text" name="activity_name" class="form-control fw-bold mb-3 fs-5" value="{{ ract.activity_name }}" required>
+                                                                    <div class="row g-3 mb-3">
+                                                                        <div class="col-md-6">
+                                                                            <label class="small fw-bold text-muted">Start Date</label>
+                                                                            <input type="datetime-local" name="start_date" class="form-control" value="{{ ract.start_date.strftime('%Y-%m-%dT%H:%M') if ract.start_date else '' }}">
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="small fw-bold text-muted">End Date</label>
+                                                                            <input type="datetime-local" name="end_date" class="form-control" value="{{ ract.end_date.strftime('%Y-%m-%dT%H:%M') if ract.end_date else '' }}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-check mb-3">
+                                                                        <input class="form-check-input" type="checkbox" name="is_actionable" id="editActCheck{{ ract.id }}" {% if ract.is_actionable %}checked{% endif %}>
+                                                                        <label class="form-check-label fw-bold text-danger" for="editActCheck{{ ract.id }}">Action Required by Counselor</label>
+                                                                    </div>
+                                                                    <div class="text-end"><button type="submit" class="btn btn-primary fw-bold px-5">Update</button></div>
+                                                                </form>
+                                                            </div>
+                                                            {% else %}
+                                                            <div class="text-center py-4 text-muted">No schedule added for this round.</div>
+                                                            {% endfor %}
                                                         </div>
-                                                        {% else %}
-                                                        <div class="text-center py-4 text-muted">No schedule added for this round.</div>
-                                                        {% endfor %}
+                                                    </div>
+
+                                                    <div class="tab-pane fade" id="r-docs-{{ r.id }}">
+                                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                                            <h6 class="fw-bold text-dark mb-0 fs-5">Documents & Results</h6>
+                                                            <button class="btn btn-success fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#formArt{{ r.id }}"><i class="fas fa-paperclip me-2"></i> Attach Link</button>
+                                                        </div>
+
+                                                        <div class="collapse mb-4" id="formArt{{ r.id }}">
+                                                            <div class="card card-body p-4 border-success bg-success bg-opacity-10 shadow-sm">
+                                                                <form action="{{ url_for('add_round_artifact', round_id=r.id) }}" method="POST" class="row g-3">
+                                                                    <div class="col-md-5"><input type="text" name="document_name" class="form-control fw-bold" placeholder="e.g. Seat Matrix, Result PDF" required></div>
+                                                                    <div class="col-md-5"><input type="url" name="document_link" class="form-control" placeholder="URL Link" required></div>
+                                                                    <div class="col-md-2"><button type="submit" class="btn btn-success w-100 fw-bold">Save</button></div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="bg-white rounded border shadow-sm p-2">
+                                                            {% for art in r.artifacts %}
+                                                            <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                                                                <a href="{{ art.document_link }}" target="_blank" class="text-decoration-none fw-bold text-success fs-5 hover-lift">
+                                                                    <i class="fas fa-link me-3 text-danger"></i>{{ art.document_name }}
+                                                                </a>
+                                                                <form action="{{ url_for('delete_round_artifact', artifact_id=art.id) }}" method="POST" onsubmit="return confirm('Remove document?');">
+                                                                    <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
+                                                                </form>
+                                                            </div>
+                                                            {% else %}
+                                                            <div class="text-center py-4 text-muted">No documents attached to this round.</div>
+                                                            {% endfor %}
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <div class="tab-pane fade" id="r-docs-{{ r.id }}">
-                                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <h6 class="fw-bold text-dark mb-0 fs-5">Documents & Results</h6>
-                                                        <button class="btn btn-success fw-bold shadow-sm" data-bs-toggle="collapse" data-bs-target="#formArt{{ r.id }}"><i class="fas fa-paperclip me-2"></i> Attach Link</button>
-                                                    </div>
-
-                                                    <div class="collapse mb-4" id="formArt{{ r.id }}">
-                                                        <div class="card card-body p-4 border-success bg-success bg-opacity-10 shadow-sm">
-                                                            <form action="{{ url_for('add_round_artifact', round_id=r.id) }}" method="POST" class="row g-3">
-                                                                <div class="col-md-5"><input type="text" name="document_name" class="form-control fw-bold" placeholder="e.g. Seat Matrix, Result PDF" required></div>
-                                                                <div class="col-md-5"><input type="url" name="document_link" class="form-control" placeholder="URL Link" required></div>
-                                                                <div class="col-md-2"><button type="submit" class="btn btn-success w-100 fw-bold">Save</button></div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="bg-white rounded border shadow-sm p-2">
-                                                        {% for art in r.artifacts %}
-                                                        <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
-                                                            <a href="{{ art.document_link }}" target="_blank" class="text-decoration-none fw-bold text-success fs-5 hover-lift">
-                                                                <i class="fas fa-link me-3 text-danger"></i>{{ art.document_name }}
-                                                            </a>
-                                                            <form action="{{ url_for('delete_round_artifact', artifact_id=art.id) }}" method="POST" onsubmit="return confirm('Remove document?');">
-                                                                <button type="submit" class="btn btn-outline-danger shadow-sm"><i class="fas fa-trash"></i></button>
-                                                            </form>
-                                                        </div>
-                                                        {% else %}
-                                                        <div class="text-center py-4 text-muted">No documents attached to this round.</div>
-                                                        {% endfor %}
-                                                    </div>
+                                                <div class="mt-5 text-end border-top pt-4">
+                                                    <form action="/admissions/delete_round/{{ r.id }}" method="POST" class="d-inline" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete {{ r.round_number }} and all its data?');">
+                                                        <button type="submit" class="btn btn-danger fw-bold shadow-sm"><i class="fas fa-trash-alt me-2"></i>Delete Entire Round</button>
+                                                    </form>
                                                 </div>
-                                            </div>
 
-                                            <div class="mt-5 text-end border-top pt-4">
-                                                <form action="/admissions/delete_round/{{ r.id }}" method="POST" class="d-inline" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete {{ r.round_number }} and all its data?');">
-                                                    <button type="submit" class="btn btn-danger fw-bold shadow-sm"><i class="fas fa-trash-alt me-2"></i>Delete Entire Round</button>
-                                                </form>
                                             </div>
-
                                         </div>
                                     </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
+                                {% else %}
+                                <div class="text-center py-5 text-muted bg-white rounded border shadow-sm">
+                                    <i class="fas fa-layer-group fs-1 mb-3 opacity-25 d-block"></i>
+                                    <span class="fs-5 fw-bold">No rounds created yet.</span>
+                                </div>
+                                {% endif %}
                             </div>
-                            {% else %}
-                            <div class="text-center py-5 text-muted bg-white rounded border shadow-sm">
-                                <i class="fas fa-layer-group fs-1 mb-3 opacity-25 d-block"></i>
-                                <span class="fs-5 fw-bold">No rounds created yet.</span>
-                            </div>
-                            {% endif %}
                         </div>
-                    </div>
 
-                </div>
-            </div>    </div>
-</div>
+                    </div>
+                </div>    </div>
+    </div>
+    {% endfor %}
 
 <div class="modal fade" id="editCounsellingModal{{ c.id }}" tabindex="-1">
     <div class="modal-dialog">
