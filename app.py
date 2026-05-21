@@ -1422,6 +1422,7 @@ from sqlalchemy import or_  # Make sure you have 'or_' imported at the top!
 def college_database():
     search_query = request.args.get('search', '').strip()
     state_filter = request.args.get('state', '').strip()
+    counselling_filter = request.args.get('counselling', '')
     course_filter = request.args.get('course', '').strip()
     type_filter = request.args.get('type', '').strip()
 
@@ -1448,9 +1449,14 @@ def college_database():
     if type_filter:
         query = query.filter(College.college_type == type_filter)
 
+    if counselling_filter:
+        query = query.join(College.counselling).filter(Counselling.name == counselling_filter)
+
     # Get dynamic lists for the dropdown filters based on live database records
     all_states = State.query.order_by(State.name).all()
     all_courses = Course.query.order_by(Course.name).all()
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
 
     unique_types_query = db.session.query(College.college_type).distinct().filter(College.college_type != None,
                                                                                   College.college_type != 'Unknown').order_by(
@@ -1481,7 +1487,9 @@ def college_database():
                            search_query=search_query,
                            state_filter=state_filter,
                            course_filter=course_filter,
-                           type_filter=type_filter)
+                           type_filter=type_filter,
+                           all_counsellings=all_counsellings,
+                           counselling_filter=counselling_filter)
 
 @app.route('/student/<int:id>/export')
 @login_required

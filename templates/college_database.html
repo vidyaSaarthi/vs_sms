@@ -17,11 +17,20 @@
         </div>
         <div class="card-body p-4">
             <form method="GET" action="{{ url_for('college_database') }}" class="row g-3 align-items-center">
-                <div class="col-lg-4 col-md-12">
+                <div class="col-lg-3 col-md-6">
                     <div class="input-group input-group-lg shadow-sm" style="border-radius: 12px; overflow: hidden;">
                         <span class="input-group-text bg-white border-0" style="color: #cc0000;"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control border-0 bg-white" placeholder="Search Name, City, District..." value="{{ search_query }}" autofocus style="box-shadow: none; font-size: 0.95rem;">
+                        <input type="text" name="search" class="form-control border-0 bg-white" placeholder="Search Colleges..." value="{{ search_query }}" autofocus style="box-shadow: none; font-size: 0.95rem;">
                     </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <select name="counselling" class="form-select form-select-lg shadow-sm border-0 fw-bold text-secondary" style="border-radius: 12px; background-color: #fff; font-size: 0.9rem;">
+                        <option value="">All Counsellings</option>
+                        {% for c in all_counsellings %}
+                            <option value="{{ c.name }}" {% if counselling_filter == c.name %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="col-lg-2 col-md-4">
@@ -51,9 +60,9 @@
                     </select>
                 </div>
 
-                <div class="col-lg-2 col-md-12">
+                <div class="col-12 mt-3">
                     <button type="submit" class="btn btn-lg w-100 shadow-sm fw-bold text-white" style="border-radius: 12px; background-color: #cc0000; border: none; font-size: 1.05rem; padding-top: 0.6rem; padding-bottom: 0.6rem; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(204,0,0,0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)';">
-                        Explore <i class="fas fa-arrow-right ms-1"></i>
+                        Explore Database <i class="fas fa-arrow-right ms-1"></i>
                     </button>
                 </div>
             </form>
