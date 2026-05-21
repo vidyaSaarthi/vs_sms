@@ -110,13 +110,20 @@
                                 </div>
                                 <div class="text-end">
 
-                                    {% if college.counselling %}
-                                        <div class="small fw-bold text-uppercase text-warning mb-1">
-                                            <i class="fas fa-sitemap me-1"></i>{{ college.counselling.name }}
+                                    <div class="mb-2">
+                                    {% if college.counselling_id %}
+                                        <div class="d-inline-block px-3 py-1 shadow-sm" style="background-color: var(--brand-yellow); border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
+                                            <span class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                                <i class="fas fa-sitemap me-1 text-danger"></i>
+                                                {{ college.counselling.name if college.counselling else 'Counselling ID: ' ~ college.counselling_id }}
+                                            </span>
                                         </div>
+                                    {% else %}
+                                        <span class="badge bg-light border text-muted"><i class="fas fa-exclamation-triangle text-warning me-1"></i>No Counselling Tagged</span>
                                     {% endif %}
+                                    </div>
 
-                                    <div class="text-muted small">
+                                    <div class="text-muted small mt-1">
                                         Code: {{ college.college_code }}
                                     </div>
 

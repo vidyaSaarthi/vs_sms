@@ -246,7 +246,7 @@ try:
 
         # 🚨 2. THE X-RAY PRINT
         print(f"\n--- 🔍 VARIABLES FOR: {current_college_processing} ---")
-        print(json.dumps(college_data, indent=4))
+        # print(json.dumps(college_data, indent=4))
 
         # 🚨 3. EXECUTE SQL QUERY
         columns = ", ".join(college_data.keys())
@@ -289,11 +289,11 @@ try:
             category_val = clean_value(row.get('Allotted Category')) or 'General'
 
             raw_cutoff_sql = f"""
-                INSERT INTO college_cutoffs (college_id, allotted_category, cutoff_data)
-                VALUES ({college_id}, {sql_val(f"{quota_val} - {category_val}")}, '{cutoff_json}')
+                INSERT INTO college_cutoffs (college_id, allotted_quota, allotted_category, cutoff_data)
+                VALUES ({college_id}, '{quota_val}' , '{category_val}', '{cutoff_json}')
             """
             print(f"\n--- Running Cutoff Insert for: {true_name} ---")
-            print(raw_cutoff_sql.strip())
+            # print(raw_cutoff_sql.strip())
 
             session.execute(text(raw_cutoff_sql))
             cutoff_count += 1
