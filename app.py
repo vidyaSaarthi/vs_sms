@@ -107,14 +107,14 @@ with app.app_context():
         print(f"⚠️ Rules migration skipped or already applied: {e}")
 
         # Add this to your database migration block in app.py
-        try:
-            db.session.execute(text('ALTER TABLE colleges ADD COLUMN IF NOT EXISTS counselling_id INTEGER'))
-            db.session.execute(text(
-                'ALTER TABLE colleges ADD CONSTRAINT fk_counselling FOREIGN KEY (counselling_id) REFERENCES counselling(id)'))
-            db.session.commit()
-            print("✅ Added counselling_id to colleges table.")
-        except Exception as e:
-            db.session.rollback()
+    try:
+        db.session.execute(text('ALTER TABLE colleges ADD COLUMN IF NOT EXISTS counselling_id INTEGER'))
+        db.session.execute(text(
+            'ALTER TABLE colleges ADD CONSTRAINT fk_counselling FOREIGN KEY (counselling_id) REFERENCES counselling(id)'))
+        db.session.commit()
+        print("✅ Added counselling_id to colleges table.")
+    except Exception as e:
+        db.session.rollback()
 
         # Phase 2: College Database Expansion Migration
     try:
