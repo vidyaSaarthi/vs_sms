@@ -812,6 +812,7 @@ def delete_form_event(event_id):
 def dashboard():
     today = date.today()
 
+    # --- EXISTING DEADLINE LOGIC ---
     master_exams_sorted = Exam.query.filter(
         (Exam.exam_date >= today) |
         (Exam.exam_end_date >= today) |
@@ -846,26 +847,90 @@ def dashboard():
         or_(FormEvent.end_date >= today, FormEvent.end_date == None)
     ).order_by(FormEvent.end_date.asc()).all()
 
-    # Fetch upcoming Actionable Round Activities
     upcoming_round_deadlines = RoundActivity.query.filter(
         RoundActivity.is_actionable == True,
         RoundActivity.end_date >= datetime.utcnow()
     ).order_by(RoundActivity.end_date.asc()).limit(10).all()
 
-    # Fetch upcoming Global Activities
     upcoming_global_deadlines = CounsellingActivity.query.filter(
         CounsellingActivity.end_date >= datetime.utcnow()
     ).order_by(CounsellingActivity.end_date.asc()).limit(5).all()
 
+    # --- NEW: COUNSELLING TRACKER LOGIC ---
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+    selected_couns_id = request.args.get('counselling_id')
+
+    selected_couns = None
+    students = []
+    report_data = {'columns': [], 'matrix': {}}
+    global_pending_alerts = []
+
+    if selected_couns_id:
+        selected_couns = Counselling.query.get(selected_couns_id)
+        if selected_couns:
+            # 1. Fetch Students
+            students = Student.query.filter(Student.counsellings.contains(selected_couns)).all()
+
+            # 2. Build Columns (Global Phase + Round Actions)
+            for act in selected_couns.global_activities:
+                report_data['columns'].append(
+                    {'id': act.id, 'name': act.activity_name, 'due': act.end_date, 'type': 'global'})
+
+            for r in selected_couns.rounds:
+                for act in r.activities:
+                    if act.is_actionable:
+                        report_data['columns'].append(
+                            {'id': act.id, 'name': act.activity_name, 'due': act.end_date, 'type': 'round'})
+
+            # 3. Build Status Matrix
+            for student in students:
+                report_data['matrix'][student.id] = {}
+                for col in report_data['columns']:
+                    col_key = f"{col['type']}_{col['id']}"
+
+                    if col['type'] == 'global':
+                        status = StudentGlobalActivityStatus.query.filter_by(student_id=student.id,
+                                                                             activity_id=col['id']).first()
+                    else:
+                        status = StudentRoundActivityStatus.query.filter_by(student_id=student.id,
+                                                                            activity_id=col['id']).first()
+
+                    report_data['matrix'][student.id][col_key] = status.is_completed if status else False
+
+    else:
+        # Build Global Action Center
+        all_students = Student.query.all()
+        for student in all_students:
+            for couns in student.counsellings:
+                for r in couns.rounds:
+                    for act in r.activities:
+                        if act.is_actionable:
+                            status = StudentRoundActivityStatus.query.filter_by(student_id=student.id,
+                                                                                activity_id=act.id).first()
+                            if not status or not status.is_completed:
+                                global_pending_alerts.append({
+                                    'student': student,
+                                    'counselling': couns,
+                                    'round': r,
+                                    'activity': act,
+                                    'due': act.end_date
+                                })
+
+        # Sort alerts by due date (closest deadlines first)
+        global_pending_alerts.sort(key=lambda x: (x['due'] is None, x['due']))
 
     return render_template('dashboard.html',
                            master_exams=master_exams_sorted,
                            upcoming_exam_forms=upcoming_exam_forms,
                            counselling_grouped=counselling_grouped,
                            upcoming_activities=upcoming_activities,
-                           upcoming_round_deadlines=upcoming_round_deadlines,  # 🚨 Added
-                           upcoming_global_deadlines=upcoming_global_deadlines)  # 🚨 Added
-
+                           upcoming_round_deadlines=upcoming_round_deadlines,
+                           upcoming_global_deadlines=upcoming_global_deadlines,
+                           all_counsellings=all_counsellings,
+                           selected_couns=selected_couns,
+                           students=students,
+                           report_data=report_data,
+                           global_pending_alerts=global_pending_alerts)
 
 # ==========================================
 # STUDENT PIPELINE
@@ -1417,71 +1482,72 @@ def view_student(id):
 from sqlalchemy import or_  # Make sure you have 'or_' imported at the top!
 
 
-@app.route('/college-database', methods=['GET'])
-@login_required
+@app.route('/college-database')
 def college_database():
-    search_query = request.args.get('search', '').strip()
-    state_filter = request.args.get('state', '').strip()
-    course_filter = request.args.get('course', '').strip()
-    type_filter = request.args.get('type', '').strip()
+    search_query = request.args.get('search', '')
+    state_filter = request.args.get('state', '')
+    course_filter = request.args.get('course', '')
+    type_filter = request.args.get('type', '')
+    counselling_filter = request.args.get('counselling', '')
 
-    # Base query
     query = College.query
 
     if search_query:
-        # Search by name, true name, city, or district
         query = query.filter(
-            or_(
+            db.or_(
                 College.name.ilike(f'%{search_query}%'),
-                College.true_college_name.ilike(f'%{search_query}%'),
                 College.city.ilike(f'%{search_query}%'),
-                College.district.ilike(f'%{search_query}%')
+                College.district.ilike(f'%{search_query}%'),
+                College.college_code.ilike(f'%{search_query}%')
             )
         )
-
     if state_filter:
-        query = query.join(State).filter(State.name == state_filter)
-
+        query = query.join(College.state).filter(State.name == state_filter)
     if course_filter:
-        query = query.join(Course).filter(Course.name == course_filter)
-
+        query = query.join(College.course).filter(Course.name == course_filter)
     if type_filter:
         query = query.filter(College.college_type == type_filter)
+    if counselling_filter:
+        query = query.join(College.counselling).filter(Counselling.name == counselling_filter)
 
-    # Get dynamic lists for the dropdown filters based on live database records
-    all_states = State.query.order_by(State.name).all()
-    all_courses = Course.query.order_by(Course.name).all()
+    try:
+        colleges = query.order_by(College.name.asc()).all()
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ DB Error: {e}")
+        colleges = []
 
-    unique_types_query = db.session.query(College.college_type).distinct().filter(College.college_type != None,
-                                                                                  College.college_type != 'Unknown').order_by(
-        College.college_type).all()
-    all_types = [t[0] for t in unique_types_query]
+    # 🚨 NEW: Grouping Logic for the UI Tabs
+    counselling_tabs = {}
 
-    # If the user searched or filtered, return results. Otherwise, empty list.
-    # Force all colleges to load by default on initial page visit
-    colleges = query.order_by(College.state_rank.asc()).all()
+    # Only group into tabs if the user selected a State, but did NOT select a specific Counselling
+    if state_filter and not counselling_filter:
+        for c in colleges:
+            # Group by the counselling name, or 'Other / Not Tagged' if missing
+            c_name = c.counselling.name if c.counselling else "Other / Not Tagged"
+            if c_name not in counselling_tabs:
+                counselling_tabs[c_name] = []
+            counselling_tabs[c_name].append(c)
 
-    # Parse Cutoffs JSON
-    import json
-    for college in colleges:
-        for cutoff in college.cutoffs:
-            if cutoff.cutoff_data:
-                try:
-                    cutoff.parsed_data = json.loads(cutoff.cutoff_data)
-                except:
-                    cutoff.parsed_data = {}
-            else:
-                cutoff.parsed_data = {}
+    all_states = State.query.order_by(State.name.asc()).all()
+    all_courses = Course.query.order_by(Course.name.asc()).all()
+    all_types = db.session.query(College.college_type).distinct().filter(College.college_type.isnot(None)).order_by(
+        College.college_type.asc()).all()
+    all_types = [t[0] for t in all_types]
+    all_counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
 
     return render_template('college_database.html',
                            colleges=colleges,
-                           all_states=all_states,
-                           all_courses=all_courses,
-                           all_types=all_types,
+                           counselling_tabs=counselling_tabs,  # Pass the grouped dictionary to Jinja
                            search_query=search_query,
                            state_filter=state_filter,
                            course_filter=course_filter,
-                           type_filter=type_filter)
+                           type_filter=type_filter,
+                           counselling_filter=counselling_filter,
+                           all_states=all_states,
+                           all_courses=all_courses,
+                           all_types=all_types,
+                           all_counsellings=all_counsellings)
 
 @app.route('/student/<int:id>/export')
 @login_required

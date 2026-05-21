@@ -33,6 +33,11 @@
                 <i class="fas fa-tasks me-2"></i>Activity Deadlines
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0 {% if selected_couns %}active{% endif %}" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tab-tracker" type="button" role="tab" style="border-top: 3px solid #10b981; color: #333;">
+                <i class="fas fa-clipboard-check me-2"></i>Counselling Tracker
+            </button>
+        </li>
     </ul>
 
     <!-- TAB CONTENT -->
@@ -259,8 +264,145 @@
         </div>
     </div>
 </div>
-        </div>
+        </div> <div class="tab-pane fade {% if selected_couns %}show active{% endif %}" id="tab-tracker" role="tabpanel">
 
-    </div>
-</div>
-{% endblock %}
+            <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; background: linear-gradient(to right, #f8f9fa, #ffffff);">
+                <div class="card-body p-4">
+                    <form action="{{ url_for('dashboard') }}" method="GET" class="d-flex gap-3 align-items-end">
+                        <div class="flex-grow-1" style="max-width: 500px;">
+                            <label class="form-label fw-bold text-dark mb-2">Select Counselling Process to Audit:</label>
+                            <select name="counselling_id" class="form-select form-select-lg border-primary shadow-sm" onchange="this.form.submit()">
+                                <option value="">-- Choose a Process --</option>
+                                {% for c in all_counsellings %}
+                                    <option value="{{ c.id }}" {% if selected_couns and selected_couns.id == c.id %}selected{% endif %}>
+                                        {{ c.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if selected_couns %}
+                {% if students %}
+                    <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+                        <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-users text-warning me-2"></i>{{ selected_couns.name }} Cohort ({{ students|length }} Students)</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered align-middle mb-0" style="min-width: 1000px;">
+                                    <thead class="bg-light sticky-top">
+                                        <tr>
+                                            <th class="ps-4 py-3 bg-light" style="width: 250px; z-index: 2;">Student Name</th>
+                                            {% for col in report_data.columns %}
+                                                <th class="text-center bg-light py-3" style="min-width: 180px;">
+                                                    {% if col.type == 'global' %}
+                                                        <span class="badge bg-primary mb-1">Global Phase</span><br>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark mb-1">Action Required</span><br>
+                                                    {% endif %}
+                                                    <strong class="text-dark d-block" style="font-size: 0.9rem;">{{ col.name }}</strong>
+                                                    <small class="text-danger fw-bold" style="font-size: 0.75rem;">
+                                                        Due: {{ col.due.strftime('%d %b, %I:%M %p') if col.due else 'TBA' }}
+                                                    </small>
+                                                </th>
+                                            {% endfor %}
+                                            <th class="bg-light"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in students %}
+                                        <tr>
+                                            <td class="ps-4 py-3 bg-white fw-bold" style="border-right: 2px solid #dee2e6; position: sticky; left: 0; z-index: 1;">
+                                                <a href="{{ url_for('view_student', id=student.id, tab='couns') }}" target="_blank" class="text-decoration-none text-dark d-flex align-items-center">
+                                                    <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                                        {{ student.full_name[0] }}
+                                                    </div>
+                                                    {{ student.full_name }}
+                                                </a>
+                                                <div class="small text-muted mt-1 ms-5"><i class="fas fa-phone-alt me-1"></i>{{ student.mobile_number or 'No Mobile' }}</div>
+                                            </td>
+
+                                            {% for col in report_data.columns %}
+                                                {% set col_key = col.type + '_' + col.id|string %}
+                                                {% set is_done = report_data.matrix[student.id][col_key] %}
+                                                <td class="text-center align-middle" style="{% if is_done %}background-color: #f0fdf4;{% else %}background-color: #fff1f2;{% endif %}">
+                                                    {% if is_done %}
+                                                        <i class="fas fa-check-circle text-success fs-4 mb-1"></i><br>
+                                                        <span class="badge bg-success">Completed</span>
+                                                    {% else %}
+                                                        <i class="fas fa-times-circle text-danger fs-4 mb-1 opacity-50"></i><br>
+                                                        <span class="badge bg-danger">Pending</span>
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                            <td></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted bg-white rounded border border-dashed shadow-sm">
+                        <i class="fas fa-users-slash fs-1 mb-3 text-secondary opacity-50"></i>
+                        <h4 class="fw-bold text-dark">No Students Found</h4>
+                        <p class="mb-0">There are currently no students registered for "{{ selected_couns.name }}".</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
+                    <div class="card-header bg-danger text-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-circle text-warning me-2"></i>Global Action Center</h5>
+                        <span class="badge bg-white text-danger fw-bold rounded-pill">{{ global_pending_alerts|length }} Pending Tasks</span>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if global_pending_alerts %}
+                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light sticky-top">
+                                    <tr>
+                                        <th class="ps-4 bg-light w-25">Student</th>
+                                        <th class="bg-light w-25">Counselling Process</th>
+                                        <th class="bg-light">Pending Action</th>
+                                        <th class="bg-light text-danger">Deadline</th>
+                                        <th class="text-end pe-4 bg-light">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in global_pending_alerts %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold">
+                                            <a href="{{ url_for('view_student', id=alert.student.id, tab='couns') }}" target="_blank" class="text-decoration-none text-dark">{{ alert.student.full_name }}</a>
+                                        </td>
+                                        <td>
+                                            <span class="d-block fw-bold text-dark">{{ alert.counselling.name }}</span>
+                                            <span class="badge bg-dark text-white">{{ alert.round.round_number }}</span>
+                                        </td>
+                                        <td class="fw-bold text-primary">{{ alert.activity.activity_name }}</td>
+                                        <td class="text-danger fw-bold">
+                                            {{ alert.due.strftime('%d %b, %I:%M %p') if alert.due else 'TBA' }}
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ url_for('view_student', id=alert.student.id, tab='couns') }}" target="_blank" class="btn btn-sm btn-danger fw-bold shadow-sm">Resolve <i class="fas fa-arrow-right ms-1"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted bg-white">
+                            <i class="fas fa-glass-cheers fs-1 mb-3 text-success opacity-75"></i>
+                            <h4 class="fw-bold text-dark">Zero Pending Actions!</h4>
+                            <p class="mb-0">All registered students have completed their required tasks across all active processes.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div> </div> </div> {% endblock %}

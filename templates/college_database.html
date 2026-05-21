@@ -17,11 +17,20 @@
         </div>
         <div class="card-body p-4">
             <form method="GET" action="{{ url_for('college_database') }}" class="row g-3 align-items-center">
-                <div class="col-lg-4 col-md-12">
+                <div class="col-lg-3 col-md-6">
                     <div class="input-group input-group-lg shadow-sm" style="border-radius: 12px; overflow: hidden;">
                         <span class="input-group-text bg-white border-0" style="color: #cc0000;"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control border-0 bg-white" placeholder="Search Name, City, District..." value="{{ search_query }}" autofocus style="box-shadow: none; font-size: 0.95rem;">
+                        <input type="text" name="search" class="form-control border-0 bg-white" placeholder="Search Colleges..." value="{{ search_query }}" autofocus style="box-shadow: none; font-size: 0.95rem;">
                     </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <select name="counselling" class="form-select form-select-lg shadow-sm border-0 fw-bold text-secondary" style="border-radius: 12px; background-color: #fff; font-size: 0.9rem;">
+                        <option value="">All Counsellings</option>
+                        {% for c in all_counsellings %}
+                            <option value="{{ c.name }}" {% if counselling_filter == c.name %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="col-lg-2 col-md-4">
@@ -51,16 +60,16 @@
                     </select>
                 </div>
 
-                <div class="col-lg-2 col-md-12">
+                <div class="col-12 mt-3">
                     <button type="submit" class="btn btn-lg w-100 shadow-sm fw-bold text-white" style="border-radius: 12px; background-color: #cc0000; border: none; font-size: 1.05rem; padding-top: 0.6rem; padding-bottom: 0.6rem; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(204,0,0,0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)';">
-                        Explore <i class="fas fa-arrow-right ms-1"></i>
+                        Explore Database <i class="fas fa-arrow-right ms-1"></i>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    {% if not search_query and not state_filter and not course_filter and not type_filter %}
+    {% if not search_query and not state_filter and not course_filter and not type_filter and not counselling_filter %}
         <div class="text-center py-5 mt-4">
             <div class="d-inline-block p-4 rounded-circle shadow-sm mb-4" style="background-color: #f6e89e;">
                 <i class="fas fa-university fa-4x text-dark"></i>
@@ -76,321 +85,69 @@
         </div>
     {% else %}
 
-        <div class="row">
-            {% for college in colleges %}
-            <div class="col-12 mb-5">
-                <div class="card shadow-lg border-0 college-card" style="border-radius: 20px; overflow: hidden; transition: transform 0.3s ease;">
+        {% if counselling_tabs %}
 
-                    <div class="card-header text-white p-4 border-0 position-relative" style="background: linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%);">
-                        <div class="position-absolute" style="top: -20px; right: -20px; font-size: 150px; opacity: 0.05; transform: rotate(-15deg); pointer-events: none;">
-                            <i class="fas fa-university"></i>
-                        </div>
+            <ul class="nav nav-tabs nav-fill mb-4 border-bottom-0 shadow-sm rounded overflow-hidden" id="counsellingTabs" role="tablist" style="background-color: #fff;">
+                {% for c_name, c_colleges in counselling_tabs.items() %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if loop.first %}active{% endif %} fw-bold py-3 border-0"
+                            id="tab-btn-{{ loop.index }}"
+                            data-bs-toggle="tab"
+                            data-bs-target="#pane-{{ loop.index }}"
+                            type="button" role="tab"
+                            style="color: {% if loop.first %}#cc0000{% else %}#1e3c72{% endif %}; {% if loop.first %}border-bottom: 3px solid #cc0000 !important;{% endif %}"
+                            onclick="updateTabStyling(this)">
+                        {{ c_name }} <span class="badge rounded-pill ms-2" style="background-color: {% if loop.first %}#cc0000{% else %}#e2e8f0{% endif %}; color: {% if loop.first %}#fff{% else %}#1e3c72{% endif %};">{{ c_colleges|length }}</span>
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
 
-                        <div class="position-relative z-index-1">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <div class="d-flex align-items-center flex-wrap gap-3 mb-2">
-                                        <h2 class="fw-bold mb-0 text-white" style="letter-spacing: -0.5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">{{ college.true_college_name }}</h2>
-
-                                        <div class="d-inline-block px-3 py-1 shadow-sm" style="background-color: #ffffff; border-radius: 8px; border: 2px solid #cc0000;">
-                                            <span class="fw-bold" style="color: #1e3c72; font-size: 0.9rem;">
-                                                <i class="fas fa-user-md me-1" style="color: #cc0000;"></i>
-                                                {{ college.course.name if college.course else 'Unknown Course' }} • {{ college.college_type or 'Unknown Type' }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <p class="mb-2 text-light opacity-75 fw-bold"><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ college.city }}, {{ college.state.name if college.state else 'Unknown State' }}</p>
-
-                                    {% if college.university_name and college.university_name != 'None' and college.university_name != 'Unknown' %}
-                                    <span class="badge shadow-sm" style="background-color: rgba(246, 232, 158, 0.15); color: #f6e89e; border: 1px solid rgba(246, 232, 158, 0.4); font-size: 0.8rem; padding: 0.4em 0.8em;">
-                                        <i class="fas fa-graduation-cap me-1"></i> Affiliated: {{ college.university_name }}
-                                    </span>
-                                    {% endif %}
-                                </div>
-                                <div class="text-end">
-
-                                    <div class="mb-2">
-                                    {% if college.counselling_id %}
-                                        <div class="d-inline-block px-3 py-1 shadow-sm" style="background-color: var(--brand-yellow); border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
-                                            <span class="fw-bold text-dark" style="font-size: 0.85rem;">
-                                                <i class="fas fa-sitemap me-1 text-danger"></i>
-                                                {{ college.counselling.name if college.counselling else 'Counselling ID: ' ~ college.counselling_id }}
-                                            </span>
-                                        </div>
-                                    {% else %}
-                                        <span class="badge bg-light border text-muted"><i class="fas fa-exclamation-triangle text-warning me-1"></i>No Counselling Tagged</span>
-                                    {% endif %}
-                                    </div>
-
-                                    <div class="text-muted small mt-1">
-                                        Code: {{ college.college_code }}
-                                    </div>
-
-                                    {% if college.college_code %}
-                                        <div class="d-inline-block px-3 py-2 shadow-sm mb-2" style="background-color: #f6e89e; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2);">
-                                            <span class="fw-bold text-dark" style="font-family: monospace; font-size: 1.1rem;">
-                                                <i class="fas fa-barcode text-secondary me-2"></i>{{ college.college_code }}
-                                            </span>
-                                        </div>
-                                    {% endif %}
-
-                                    <div class="mt-2">
-                                        <a href="{{ url_for('edit_college', college_id=college.id) }}" class="btn btn-sm btn-light fw-bold shadow-sm" style="border-radius: 8px; color: #1e3c72;">
-                                            <i class="fas fa-edit me-1 text-danger"></i> Live Edit
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {% if college.counselor_one_liner and college.counselor_one_liner != 'None' %}
-                            <div class="mt-4 p-3 shadow-sm" style="background-color: rgba(255,255,255,0.1); border-left: 5px solid #f6e89e; border-radius: 0 10px 10px 0; backdrop-filter: blur(5px);">
-                                <strong style="color: #f6e89e;"><i class="fas fa-quote-left me-2"></i>Counselor Intel:</strong>
-                                <span class="fst-italic text-white lh-lg">{{ college.counselor_one_liner }}</span>
-                            </div>
-                            {% endif %}
-                        </div>
+            <div class="tab-content" id="counsellingTabsContent">
+                {% for c_name, c_colleges in counselling_tabs.items() %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="pane-{{ loop.index }}" role="tabpanel">
+                    <div class="row">
+                        {% for college in c_colleges %}
+                            {% include 'includes/_college_card.html' %}
+                        {% endfor %}
                     </div>
-
-                    <div class="card-body p-0 bg-white border-bottom">
-                        <div class="row g-0">
-
-                            <div class="col-md-6 p-4 border-end" style="background-color: #fafbfc;">
-                                <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                                    <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-3" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-rupee-sign"></i>
-                                    </div>
-                                    <h5 class="fw-bold text-dark mb-0">Fees & Connectivity</h5>
-                                </div>
-
-                                <div class="mb-4">
-                                    <span class="text-uppercase text-muted fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Annual Fee Structure</span>
-                                    <div class="text-dark mt-2 p-3 bg-white shadow-sm border" style="white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; border-radius: 10px; font-family: 'Courier New', Courier, monospace;">{{ college.fees or 'Fee details not available.' }}</div>
-                                </div>
-
-                                {% if college.hidden_fees_warning and college.hidden_fees_warning != 'None' %}
-                                <div class="alert shadow-sm p-3 mb-4" role="alert" style="background-color: #fff5f5; border-left: 4px solid #cc0000; border-radius: 8px;">
-                                    <div class="d-flex">
-                                        <i class="fas fa-exclamation-triangle text-danger mt-1 me-2"></i>
-                                        <div>
-                                            <strong class="text-danger d-block mb-1" style="font-size: 0.85rem;">Hidden Fees Alert</strong>
-                                            <span class="text-dark small">{{ college.hidden_fees_warning }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
-
-                                <div class="row g-3 mb-2">
-                                    <div class="col-lg-4 col-sm-6">
-                                        <div class="p-3 bg-white shadow-sm border rounded text-center h-100">
-                                            <span class="text-muted d-block fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase;">Service Bond</span>
-                                            <div class="fw-bold text-dark" style="white-space: pre-wrap; font-size: 0.85rem;">{{ college.service_bond or 'None' }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4 col-sm-6">
-                                        <div class="p-3 bg-white shadow-sm border rounded text-center h-100">
-                                            <span class="text-muted d-block fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase;">Disc. Penalty</span>
-                                            <div class="fw-bold text-danger" style="white-space: pre-wrap; font-size: 0.85rem;">{{ college.discontinued_bond or 'None' }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4 col-sm-12">
-                                        <div class="p-3 bg-white shadow-sm border rounded h-100">
-                                            <span class="text-muted d-block fw-bold mb-2 pb-2 border-bottom" style="font-size: 0.7rem; text-transform: uppercase;"><i class="fas fa-map-marked-alt text-primary me-2"></i>Connectivity</span>
-                                            <p class="small mb-2 text-dark" style="font-size: 0.8rem;"><i class="fas fa-train text-secondary me-2"></i>{{ college.nearby_train_station or 'N/A' }}</p>
-                                            <p class="small mb-0 text-dark" style="font-size: 0.8rem;"><i class="fas fa-plane text-secondary me-2"></i>{{ college.nearby_airport or 'N/A' }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 p-4 bg-white">
-                                <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                                    <div class="bg-danger text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm me-3" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-search-location"></i>
-                                    </div>
-                                    <h5 class="fw-bold text-dark mb-0">Reality Check</h5>
-                                </div>
-
-                                <div class="row g-3 mb-4">
-                                    {% if college.top_3_strengths and college.top_3_strengths != 'None' %}
-                                    <div class="col-lg-6">
-                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #10b981 !important;">
-                                            <span class="d-block small text-uppercase fw-bold mb-2" style="color: #10b981;"><i class="fas fa-arrow-up me-1"></i> Key Strengths</span>
-                                            <div class="small text-dark lh-base" style="white-space: pre-wrap;">{{ college.top_3_strengths | replace(' | ', '\n\n') }}</div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-
-                                    {% if college.top_3_red_flags and college.top_3_red_flags != 'None' %}
-                                    <div class="col-lg-6">
-                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #cc0000 !important;">
-                                            <span class="d-block small text-uppercase fw-bold mb-2" style="color: #cc0000;"><i class="fas fa-flag me-1"></i> Red Flags</span>
-                                            <div class="small fw-bold lh-base" style="color: #cc0000; white-space: pre-wrap;">{{ college.top_3_red_flags | replace(' | ', '\n\n') }}</div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="row g-3">
-                                    {% if college.strictness_discipline and college.strictness_discipline != 'None' %}
-                                    <div class="col-lg-6">
-                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #f6e89e !important;">
-                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-gavel me-1" style="color: #d4af37;"></i> Strictness</span>
-                                            <span class="small text-dark fw-semibold lh-sm" style="white-space: pre-wrap;">{{ college.strictness_discipline }}</span>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-
-                                    {% if college.gender_rules and college.gender_rules != 'None' %}
-                                    <div class="col-lg-6">
-                                        <div class="bg-white p-3 rounded shadow-sm border border-start border-4 h-100" style="border-left-color: #ccdfed !important;">
-                                            <span class="d-block small text-muted text-uppercase fw-bold mb-2"><i class="fas fa-venus-mars me-1" style="color: #5a9bd4;"></i> Gender Rules</span>
-                                            <span class="small text-dark fw-semibold lh-sm" style="white-space: pre-wrap;">{{ college.gender_rules }}</span>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-light border-bottom">
-                        <div class="row g-4">
-
-                            <div class="col-md-6">
-                                <h5 class="fw-bold text-primary mb-4 pb-2 border-bottom border-primary"><i class="fas fa-user-md me-2"></i>Academics & Clinical Exposure</h5>
-
-                                {% if college.academics_summary and college.academics_summary != 'None' %}
-                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">Academics Environment</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.academics_summary }}</p>
-                                </div>
-                                {% endif %}
-
-                                {% if college.faculty_mentorship_summary and college.faculty_mentorship_summary != 'None' %}
-                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">Faculty & Mentorship</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.faculty_mentorship_summary }}</p>
-                                </div>
-                                {% endif %}
-
-                                {% if college.patient_flow_hospital_summary and college.patient_flow_hospital_summary != 'None' %}
-                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">Patient Flow & Hospital</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.patient_flow_hospital_summary }}</p>
-                                </div>
-                                {% endif %}
-
-                                {% if college.pg_prospects_summary and college.pg_prospects_summary != 'None' %}
-                                <div class="mb-3 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-primary text-white mb-2 px-3 py-2 shadow-sm">PG Prospects / Internal Quota</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.pg_prospects_summary }}</p>
-                                </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6">
-                                <h5 class="fw-bold text-success mb-4 pb-2 border-bottom border-success"><i class="fas fa-tree me-2"></i>Campus & Living Experience</h5>
-
-                                {% if college.campus_life_summary and college.campus_life_summary != 'None' %}
-                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-success text-white mb-2 px-3 py-2 shadow-sm">Campus Life</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.campus_life_summary }}</p>
-                                </div>
-                                {% endif %}
-
-                                {% if college.hostel_summary and college.hostel_summary != 'None' %}
-                                <div class="mb-4 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-success text-white mb-2 px-3 py-2 shadow-sm">Hostel Infrastructure</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.hostel_summary }}</p>
-                                </div>
-                                {% endif %}
-
-                                {% if college.mess_summary and college.mess_summary != 'None' %}
-                                <div class="mb-3 bg-white p-3 rounded shadow-sm border">
-                                    <span class="badge bg-success text-white mb-2 px-3 py-2 shadow-sm">Mess & Food Quality</span>
-                                    <p class="small text-dark lh-lg mb-0" style="white-space: pre-wrap;">{{ college.mess_summary }}</p>
-                                </div>
-                                {% endif %}
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div style="background-color: #f1f5f9; border-radius: 0 0 20px 20px;">
-                        <button class="btn w-100 py-3 d-flex justify-content-between align-items-center fw-bold text-dark border-0" type="button" data-bs-toggle="collapse" data-bs-target="#cutoffs-{{ loop.index }}" aria-expanded="false" style="border-radius: 0 0 20px 20px; font-size: 1.05rem;">
-                            <span><i class="fas fa-chart-line text-primary me-2 shadow-sm p-2 bg-white rounded-circle"></i>View Last Year Cutoffs</span>
-                            <i class="fas fa-chevron-down toggle-icon text-muted"></i>
-                        </button>
-
-                        <div class="collapse" id="cutoffs-{{ loop.index }}">
-                            <div class="p-4 bg-white border-top" style="border-radius: 0 0 20px 20px;">
-                                {% if college.cutoffs %}
-                                <div class="table-responsive shadow-sm border" style="border-radius: 10px; overflow: hidden;">
-                                    <table class="table table-hover align-middle mb-0 text-center">
-                                        {% set ns = namespace(all_rounds=[]) %}
-                                        {% for cutoff in college.cutoffs %}
-                                            {% for r_name in cutoff.parsed_data.keys() %}
-                                                {% if r_name not in ns.all_rounds %}
-                                                    {% set ns.all_rounds = ns.all_rounds + [r_name] %}
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endfor %}
-                                        {% set sorted_rounds = ns.all_rounds | sort %}
-
-                                        <thead style="background-color: #ccdfed;">
-                                            <tr>
-                                                <th class="text-start py-3 ps-4 text-dark fw-bold border-0">Quota & Category</th>
-                                                {% for round_name in sorted_rounds %}
-                                                    <th class="py-3 text-dark fw-bold border-0">{{ round_name }}</th>
-                                                {% endfor %}
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white">
-                                            {% for cutoff in college.cutoffs %}
-                                            <tr>
-                                                <td class="text-start ps-4">
-                                                    <span class="badge" style="background-color: #1e3c72; color: #ffffff; padding: 0.5em 0.8em; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(30,60,114,0.2);">
-                                                        {{ cutoff.allotted_quota or '' }}
-                                                    </span>
-
-                                                    <span class="badge ms-1" style="background-color: #f6e89e; color: #1e3c72; border: 1px solid rgba(30,60,114,0.1); padding: 0.5em 0.8em; font-size: 0.8rem;">
-                                                        {{ cutoff.allotted_category or '' }}
-                                                    </span>
-                                                </td>
-                                                {% for round_name in sorted_rounds %}
-                                                    <td>
-                                                        {% if cutoff.parsed_data.get(round_name) %}
-                                                            <span class="badge bg-light text-dark border p-2 shadow-sm" style="font-family: monospace; font-size: 0.95rem;">
-                                                                {{ cutoff.parsed_data.get(round_name) | replace('.0', '') }}
-                                                            </span>
-                                                        {% else %}
-                                                            <span class="text-muted opacity-50">-</span>
-                                                        {% endif %}
-                                                    </td>
-                                                {% endfor %}
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <div class="text-center p-5 bg-light rounded border border-dashed">
-                                    <i class="fas fa-chart-line fa-2x text-muted opacity-25 mb-3"></i>
-                                    <p class="text-muted fw-bold mb-0">No cutoff history available.</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
+
+        {% else %}
+            <div class="row">
+                {% for college in colleges %}
+                    {% include 'includes/_college_card.html' %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
     {% endif %}
 
 </div>
+
+<script>
+    // Simple script to update the tab colors when clicked so it feels like a native app
+    function updateTabStyling(clickedTab) {
+        // Reset all tabs
+        const allTabs = document.querySelectorAll('#counsellingTabs .nav-link');
+        allTabs.forEach(tab => {
+            tab.style.color = '#1e3c72';
+            tab.style.borderBottom = 'none';
+            const badge = tab.querySelector('.badge');
+            badge.style.backgroundColor = '#e2e8f0';
+            badge.style.color = '#1e3c72';
+        });
+
+        // Style the active tab
+        clickedTab.style.color = '#cc0000';
+        clickedTab.style.borderBottom = '3px solid #cc0000';
+        const activeBadge = clickedTab.querySelector('.badge');
+        activeBadge.style.backgroundColor = '#cc0000';
+        activeBadge.style.color = '#ffffff';
+    }
+</script>
 
 <style>
     /* Subtle hover effect for the college cards */

@@ -45,10 +45,10 @@ def check_mandatory_columns(df, required_columns, file_name):
 
 
 print("1. Loading Excel Files...")
-location = r'H:\My Drive\Business\Vidya Saarthi\2026\Counsellings\NEET UG\Colleges Study - Perplexity\Haryana_Colleges_Study\\'
+location = r'H:\My Drive\Business\Vidya Saarthi\2026\Counsellings\NEET UG\Colleges Study - Perplexity\AIQ_Colleges_Study\\'
 
-df1 = pd.read_excel(location + 'basic_haryana.xlsx', sheet_name="Sheet1")
-df2 = pd.read_excel(location + 'cutoffs_haryana.xlsx', sheet_name="Sheet1")
+df1 = pd.read_excel(location + 'basic_mcc.xlsx', sheet_name="Sheet1")
+df2 = pd.read_excel(location + 'cutoffs_mcc.xlsx', sheet_name="Sheet1")
 df3 = pd.read_excel(location + 'College_Database.xlsx')
 
 print("\n--- 🛡️ MANDATORY COLUMN CHECKS ---")
@@ -73,9 +73,9 @@ df3_required = [
     'top_3_red_flags', 'counselor_one_liner'
 ]
 
-check_mandatory_columns(df1, df1_required, "basic_haryana.xlsx (df1)")
-check_mandatory_columns(df2, df2_required, "cutoffs_haryana.xlsx (df2)")
-check_mandatory_columns(df3, df3_required, "College_Database.xlsx (df3)")
+check_mandatory_columns(df1, df1_required, "df1")
+check_mandatory_columns(df2, df2_required, "df2")
+check_mandatory_columns(df3, df3_required, "df3")
 
 print("\n--- 🧹 NORMALIZING & CHECKING STATES ---")
 
@@ -245,7 +245,7 @@ try:
         }
 
         # 🚨 2. THE X-RAY PRINT
-        print(f"\n--- 🔍 VARIABLES FOR: {current_college_processing} ---")
+        # print(f"\n--- 🔍 VARIABLES FOR: {current_college_processing} ---")
         # print(json.dumps(college_data, indent=4))
 
         # 🚨 3. EXECUTE SQL QUERY
