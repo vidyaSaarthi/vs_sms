@@ -81,11 +81,14 @@ print("3. Executing Strict Database Import...")
 college_id_map = {}
 cutoff_count = 0
 current_college_processing = "Unknown"
+rows_skipped = 0 # Track skipped rows
 
 try:
     for index, row in merged_df.iterrows():
         current_college_processing = clean_value(row.get('Cleaned College Name'))
         if not current_college_processing:
+            rows_skipped += 1
+            print(f"⚠️ Row {index} SKIPPED: Could not find a valid 'Cleaned College Name'.")
             continue
 
         state_name = clean_value(row.get('State_x')) or clean_value(row.get('state'))

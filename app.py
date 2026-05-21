@@ -1441,8 +1441,8 @@ def college_database():
     all_types = [t[0] for t in unique_types_query]
 
     # If the user searched or filtered, return results. Otherwise, empty list.
-    colleges = query.order_by(College.state_rank.asc()).all() if (
-                search_query or state_filter or course_filter or type_filter) else []
+    # Force all colleges to load by default on initial page visit
+    colleges = query.order_by(College.state_rank.asc()).all()
 
     # Parse Cutoffs JSON
     import json
