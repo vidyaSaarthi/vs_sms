@@ -116,6 +116,13 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
 
+    try:
+        # Add this inside your database migration try/except block in app.py
+        db.session.execute(text('ALTER TABLE college_cutoffs ADD COLUMN IF NOT EXISTS allotted_quota VARCHAR(100)'))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+
         # Phase 2: College Database Expansion Migration
     try:
         columns_to_add = [
