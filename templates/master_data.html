@@ -896,24 +896,17 @@
                                                 </div>
 
                                             </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
                                 </div>
-                                {% else %}
-                                <div class="text-center py-5 text-muted bg-white rounded border shadow-sm">
-                                    <i class="fas fa-layer-group fs-1 mb-3 opacity-25 d-block"></i>
-                                    <span class="fs-5 fw-bold">No rounds created yet.</span>
-                                </div>
-                                {% endif %}
                             </div>
+                            {% endfor %} </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted bg-white rounded border shadow-sm">
+                            <i class="fas fa-layer-group fs-1 mb-3 opacity-25 d-block"></i>
+                            <span class="fs-5 fw-bold">No rounds created yet.</span>
                         </div>
-
+                        {% endif %}
                     </div>
-                </div>    </div>
-    </div>
-
-<div class="modal fade" id="editCounsellingModal{{ c.id }}" tabindex="-1">
+                </div> </div> </div> </div> </div> <div class="modal fade" id="editCounsellingModal{{ c.id }}" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="/admissions/edit_counselling/{{ c.id }}" method="POST">
