@@ -501,6 +501,10 @@ class College(db.Model):
     joining_documents = db.Column(db.Text, nullable=True)
     document_source_file = db.Column(db.Text, nullable=True)
 
+    # 🚨 ADD THESE TWO LINES 🚨
+    counselling_id = db.Column(db.Integer, db.ForeignKey('counselling.id'), nullable=True)
+    counselling = db.relationship('Counselling', backref=db.backref('colleges', lazy=True))
+
 
 class CollegeCutoff(db.Model):
     __tablename__ = 'college_cutoffs'
