@@ -868,8 +868,12 @@ def dashboard():
     if selected_couns_id:
         selected_couns = Counselling.query.get(selected_couns_id)
         if selected_couns:
-            # 1. Fetch Students
-            students = Student.query.filter(Student.counsellings.contains(selected_couns)).all()
+            # 1. Fetch Students (Using the proper association model)
+            registrations = StudentCounsellingRegistration.query.filter(
+                StudentCounsellingRegistration.counselling_id == selected_couns.id,
+                StudentCounsellingRegistration.registration_status != 'Exited'  # Excludes dropped students
+            ).all()
+            students = [reg.student for reg in registrations]
 
             # 2. Build Columns (Global Phase + Round Actions)
             for act in selected_couns.global_activities:
