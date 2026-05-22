@@ -882,42 +882,50 @@ def dashboard():
                         report_data['columns'].append(
                             {'id': act.id, 'name': act.activity_name, 'due': act.end_date, 'type': 'round'})
 
-            # 3. Build Status Matrix
-            for student in students:
-                report_data['matrix'][student.id] = {}
-                for col in report_data['columns']:
-                    col_key = f"{col['type']}_{col['id']}"
+                        # 3. Build Status Matrix
+                        for student in students:
+                            report_data['matrix'][student.id] = {}
+                            for col in report_data['columns']:
+                                col_key = f"{col['type']}_{col['id']}"
 
-                    if col['type'] == 'global':
-                        status = StudentGlobalActivityStatus.query.filter_by(student_id=student.id,
-                                                                             activity_id=col['id']).first()
-                    else:
-                        status = StudentRoundActivityStatus.query.filter_by(student_id=student.id,
-                                                                            activity_id=col['id']).first()
+                                # 🚨 FIXED: Using the unified StudentActivityStatus model
+                                if col['type'] == 'global':
+                                    status = StudentActivityStatus.query.filter_by(student_id=student.id,
+                                                                                   global_activity_id=col['id']).first()
+                                else:
+                                    status = StudentActivityStatus.query.filter_by(student_id=student.id,
+                                                                                   round_activity_id=col['id']).first()
 
-                    report_data['matrix'][student.id][col_key] = status.is_completed if status else False
+                                report_data['matrix'][student.id][col_key] = status.is_completed if status else False
 
-    else:
-        # Build Global Action Center
-        all_students = Student.query.all()
-        for student in all_students:
-            for couns in student.counsellings:
-                for r in couns.rounds:
-                    for act in r.activities:
-                        if act.is_actionable:
-                            status = StudentRoundActivityStatus.query.filter_by(student_id=student.id,
-                                                                                activity_id=act.id).first()
+                else:
+                    # Build Global Action Center (Optimized)
+                    all_actionable_acts = RoundActivity.query.filter_by(is_actionable=True).all()
+
+                    for act in all_actionable_acts:
+                        # Find all students actively registered for this activity's parent counselling process
+                        couns_id = act.round.counselling_id
+                        active_regs = StudentCounsellingRegistration.query.filter(
+                            StudentCounsellingRegistration.counselling_id == couns_id,
+                            StudentCounsellingRegistration.registration_status != 'Exited'
+                        ).all()
+
+                        for reg in active_regs:
+                            # 🚨 FIXED: Using the unified StudentActivityStatus model
+                            status = StudentActivityStatus.query.filter_by(student_id=reg.student_id,
+                                                                           round_activity_id=act.id).first()
+
                             if not status or not status.is_completed:
                                 global_pending_alerts.append({
-                                    'student': student,
-                                    'counselling': couns,
-                                    'round': r,
+                                    'student': reg.student,
+                                    'counselling': act.round.counselling,
+                                    'round': act.round,
                                     'activity': act,
                                     'due': act.end_date
                                 })
 
-        # Sort alerts by due date (closest deadlines first)
-        global_pending_alerts.sort(key=lambda x: (x['due'] is None, x['due']))
+                    # Sort alerts by due date (closest deadlines first)
+                    global_pending_alerts.sort(key=lambda x: (x['due'] is None, x['due']))
 
     return render_template('dashboard.html',
                            master_exams=master_exams_sorted,
