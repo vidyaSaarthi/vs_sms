@@ -141,7 +141,11 @@
                                 </td>
                                 <td>
                                     <span class="d-block fw-bold text-dark">{{ alert.counselling.name }}</span>
-                                    <span class="badge bg-dark text-white">{{ alert.round.round_number }}</span>
+                                    {% if alert.round %}
+                                        <span class="badge bg-dark text-white">R{{ alert.round.round_number }}</span>
+                                    {% else %}
+                                        <span class="badge bg-info text-white">Global Phase</span>
+                                    {% endif %}
                                 </td>
                                 <td class="fw-bold text-primary">
                                     {{ alert.activity.activity_name }}
