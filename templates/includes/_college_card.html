@@ -250,7 +250,8 @@
                                     <table class="table table-hover align-middle mb-0 text-center">
                                         {% set ns = namespace(all_rounds=[]) %}
                                         {% for cutoff in college.cutoffs %}
-                                            {% for r_name in cutoff.parsed_data.keys() %}
+                                            {% set parsed_dict = cutoff.cutoff_data | from_json %}
+                                            {% for r_name in parsed_dict.keys() %}
                                                 {% if r_name not in ns.all_rounds %}
                                                     {% set ns.all_rounds = ns.all_rounds + [r_name] %}
                                                 {% endif %}
@@ -268,21 +269,22 @@
                                         </thead>
                                         <tbody class="bg-white">
                                             {% for cutoff in college.cutoffs %}
+                                            {% set row_data = cutoff.cutoff_data | from_json %}
                                             <tr>
                                                 <td class="text-start ps-4">
                                                     <span class="badge" style="background-color: #1e3c72; color: #ffffff; padding: 0.5em 0.8em; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(30,60,114,0.2);">
-                                                        {{ cutoff.allotted_quota or '' }}
+                                                        {{ cutoff.allotted_quota or 'Not Specified' }}
                                                     </span>
 
                                                     <span class="badge ms-1" style="background-color: #f6e89e; color: #1e3c72; border: 1px solid rgba(30,60,114,0.1); padding: 0.5em 0.8em; font-size: 0.8rem;">
-                                                        {{ cutoff.allotted_category or '' }}
+                                                        {{ cutoff.allotted_category or 'General' }}
                                                     </span>
                                                 </td>
                                                 {% for round_name in sorted_rounds %}
                                                     <td>
-                                                        {% if cutoff.parsed_data.get(round_name) %}
+                                                        {% if row_data.get(round_name) %}
                                                             <span class="badge bg-light text-dark border p-2 shadow-sm" style="font-family: monospace; font-size: 0.95rem;">
-                                                                {{ cutoff.parsed_data.get(round_name) | replace('.0', '') }}
+                                                                {{ row_data.get(round_name) | replace('.0', '') }}
                                                             </span>
                                                         {% else %}
                                                             <span class="text-muted opacity-50">-</span>
