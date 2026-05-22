@@ -902,33 +902,87 @@ def dashboard():
 
                                 report_data['matrix'][student.id][col_key] = status.is_completed if status else False
 
-                else:
-                    # Build Global Action Center (Optimized)
-                    all_actionable_acts = RoundActivity.query.filter_by(is_actionable=True).all()
 
-                    for act in all_actionable_acts:
-                        # Find all students actively registered for this activity's parent counselling process
+                else:
+
+                    # Build Global Action Center: Scan BOTH Round and Global Activities
+
+                    # 1. SCAN ROUND ACTIVITIES
+
+                    all_round_acts = RoundActivity.query.filter_by(is_actionable=True).all()
+
+                    for act in all_round_acts:
+
+                        # Find all students actively registered for this round's parent counselling process
+
                         couns_id = act.round.counselling_id
+
                         active_regs = StudentCounsellingRegistration.query.filter(
+
                             StudentCounsellingRegistration.counselling_id == couns_id,
+
                             StudentCounsellingRegistration.registration_status != 'Exited'
+
                         ).all()
 
                         for reg in active_regs:
-                            # 🚨 FIXED: Using the unified StudentActivityStatus model
+
                             status = StudentActivityStatus.query.filter_by(student_id=reg.student_id,
                                                                            round_activity_id=act.id).first()
 
                             if not status or not status.is_completed:
                                 global_pending_alerts.append({
+
                                     'student': reg.student,
+
                                     'counselling': act.round.counselling,
+
                                     'round': act.round,
-                                    'activity': act,
+
+                                    'activity': act,  # Note: this is a RoundActivity object
+
                                     'due': act.end_date
+
                                 })
 
-                    # Sort alerts by due date (closest deadlines first)
+                    # 2. SCAN GLOBAL COUNSELLING ACTIVITIES
+
+                    all_global_acts = CounsellingActivity.query.all()
+
+                    for act in all_global_acts:
+
+                        couns_id = act.counselling_id
+
+                        active_regs = StudentCounsellingRegistration.query.filter(
+
+                            StudentCounsellingRegistration.counselling_id == couns_id,
+
+                            StudentCounsellingRegistration.registration_status != 'Exited'
+
+                        ).all()
+
+                        for reg in active_regs:
+
+                            status = StudentActivityStatus.query.filter_by(student_id=reg.student_id,
+                                                                           global_activity_id=act.id).first()
+
+                            if not status or not status.is_completed:
+                                global_pending_alerts.append({
+
+                                    'student': reg.student,
+
+                                    'counselling': act.counselling,
+
+                                    'round': None,  # Global acts have no round
+
+                                    'activity': act,  # Note: this is a CounsellingActivity object
+
+                                    'due': act.end_date
+
+                                })
+
+                    # Sort all combined alerts by due date
+
                     global_pending_alerts.sort(key=lambda x: (x['due'] is None, x['due']))
 
     return render_template('dashboard.html',

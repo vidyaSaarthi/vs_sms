@@ -380,9 +380,16 @@
                                         </td>
                                         <td>
                                             <span class="d-block fw-bold text-dark">{{ alert.counselling.name }}</span>
-                                            <span class="badge bg-dark text-white">{{ alert.round.round_number }}</span>
+                                            {% if alert.round %}
+                                                <span class="badge bg-dark text-white">R{{ alert.round.round_number }}</span>
+                                            {% endif %}
                                         </td>
-                                        <td class="fw-bold text-primary">{{ alert.activity.activity_name }}</td>
+                                        <td class="fw-bold text-primary">
+                                            {{ alert.activity.activity_name if alert.activity.activity_name else alert.activity.activity_name }}
+                                            {% if not alert.round %}
+                                                <span class="badge bg-info text-white ms-2">Global</span>
+                                            {% endif %}
+                                        </td>
                                         <td class="text-danger fw-bold">
                                             {{ alert.due.strftime('%d %b, %I:%M %p') if alert.due else 'TBA' }}
                                         </td>
