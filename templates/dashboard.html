@@ -330,12 +330,20 @@
                                                 {% set is_done = report_data.matrix[student.id][col_key] %}
                                                 <td class="text-center align-middle" style="{% if is_done %}background-color: #f0fdf4;{% else %}background-color: #fff1f2;{% endif %}">
                                                     {% if is_done %}
-                                                        <i class="fas fa-check-circle text-success fs-4 mb-1"></i><br>
-                                                        <span class="badge bg-success">Completed</span>
-                                                    {% else %}
-                                                        <i class="fas fa-times-circle text-danger fs-4 mb-1 opacity-50"></i><br>
-                                                        <span class="badge bg-danger">Pending</span>
-                                                    {% endif %}
+                                                <i class="fas fa-check-circle text-success fs-4 mb-1"></i><br>
+                                                <span class="badge bg-success">Completed</span>
+                                            {% else %}
+                                                <form action="{{ url_for('toggle_student_activity', student_id=student.id) }}" method="POST" class="m-0">
+                                                    <input type="hidden" name="activity_type" value="{{ col.type }}">
+                                                    <input type="hidden" name="activity_id" value="{{ col.id }}">
+                                                    <input type="hidden" name="source" value="dashboard">
+                                                    <input type="hidden" name="counselling_id" value="{{ selected_couns.id }}">
+                                                    <button type="submit" class="btn btn-link p-0 border-0 text-decoration-none" title="Click to mark as complete" onclick="return confirm('Mark this requirement as completed?');">
+                                                        <i class="fas fa-times-circle text-danger fs-4 mb-1 opacity-75 hover-success"></i><br>
+                                                        <span class="badge bg-danger hover-success-bg">Pending</span>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
                                                 </td>
                                             {% endfor %}
                                             <td></td>
@@ -394,7 +402,14 @@
                                             {{ alert.due.strftime('%d %b, %I:%M %p') if alert.due else 'TBA' }}
                                         </td>
                                         <td class="text-end pe-4">
-                                            <a href="{{ url_for('view_student', id=alert.student.id, tab='couns') }}" target="_blank" class="btn btn-sm btn-danger fw-bold shadow-sm">Resolve <i class="fas fa-arrow-right ms-1"></i></a>
+                                            <form action="{{ url_for('toggle_student_activity', student_id=alert.student.id) }}" method="POST" class="m-0">
+                                                <input type="hidden" name="activity_type" value="{% if alert.round %}round{% else %}global{% endif %}">
+                                                <input type="hidden" name="activity_id" value="{{ alert.activity.id }}">
+                                                <input type="hidden" name="source" value="dashboard">
+                                                <button type="submit" class="btn btn-sm btn-success fw-bold shadow-sm" onclick="return confirm('Mark this action as completed for {{ alert.student.full_name }}?');">
+                                                    <i class="fas fa-check me-1"></i> Resolve
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -412,4 +427,17 @@
                 </div>
             {% endif %}
 
-        </div> </div> </div> {% endblock %}
+        </div> </div> </div>
+
+    <style>
+        /* Makes the pending cross turn into a green check on hover */
+        .hover-success:hover {
+            color: #198754 !important; /* Bootstrap success green */
+        }
+        .hover-success-bg:hover {
+            background-color: #198754 !important;
+            color: white !important;
+        }
+    </style>
+
+{% endblock %}
