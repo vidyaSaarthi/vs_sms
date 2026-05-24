@@ -3214,18 +3214,24 @@ def edit_dynamic_rule():
 @app.route('/bonds-information')
 @login_required
 def bonds_information():
+    # Get parameters as strings
     state_filter = request.args.get('state_id', '')
     course_filter = request.args.get('course_id', '')
     type_filter = request.args.get('type', '')
 
     query = StateBond.query
 
-    if state_filter: query = query.filter(StateBond.state_id == state_filter)
-    if course_filter: query = query.filter(StateBond.course_id == course_filter)
-    if type_filter: query = query.filter(StateBond.college_type == type_filter)
+    # ONLY apply the filter if the value exists and is numeric
+    if state_filter and state_filter.isdigit():
+        query = query.filter(StateBond.state_id == int(state_filter))
 
-    # Sort alphabetically by state name
-    bonds = query.join(State).order_by(State.name.asc()).all()
+    if course_filter and course_filter.isdigit():
+        query = query.filter(StateBond.course_id == int(course_filter))
+
+    if type_filter:
+        query = query.filter(StateBond.college_type == type_filter)
+
+    bonds = query.join(State, isouter=True).order_by(State.name.asc()).all()
 
     # Dropdown data
     states = State.query.order_by(State.name.asc()).all()
