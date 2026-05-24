@@ -708,3 +708,19 @@ class ImportantLink(db.Model):
 
     counselling = db.relationship('Counselling',
                                   backref=db.backref('important_links', lazy=True, cascade="all, delete-orphan"))
+
+
+class StateBond(db.Model):
+    __tablename__ = 'state_bonds'
+
+    id = db.Column(db.Integer, primary_key=True)
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
+    college_type = db.Column(db.String(100), nullable=True)
+
+    service_bond = db.Column(db.Text, nullable=True)
+    discontinuation_bond = db.Column(db.Text, nullable=True)
+
+    # Relationships
+    state = db.relationship('State', backref=db.backref('bonds', lazy=True))
+    course = db.relationship('Course', backref=db.backref('bonds', lazy=True))

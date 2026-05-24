@@ -1,4 +1,4 @@
-import os
+import os, csv, io
 import re
 import json
 from datetime import datetime, date
@@ -15,7 +15,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
     Counselling, Form, CounsellingRound, College, StudentCounsellingRegistration, StudentRoundResult, \
     Course, StudentExamResult, Task, FormEvent, FinanceRecord, StudentFormSubmission, CounsellingActivity, RoundActivity, RoundArtifact, \
-    StudentActivityStatus, ImportantLink
+    StudentActivityStatus, ImportantLink, StateBond
 
 app = Flask(__name__)
 
@@ -3198,6 +3198,110 @@ def edit_dynamic_rule():
     return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
 
 
+# ==========================================
+# BONDS INFORMATION HUB
+# ==========================================
+@app.route('/bonds-information')
+@login_required
+def bonds_information():
+    state_filter = request.args.get('state_id', '')
+    course_filter = request.args.get('course_id', '')
+    type_filter = request.args.get('type', '')
+
+    query = StateBond.query
+
+    if state_filter: query = query.filter(StateBond.state_id == state_filter)
+    if course_filter: query = query.filter(StateBond.course_id == course_filter)
+    if type_filter: query = query.filter(StateBond.college_type == type_filter)
+
+    # Sort alphabetically by state name
+    bonds = query.join(State).order_by(State.name.asc()).all()
+
+    # Dropdown data
+    states = State.query.order_by(State.name.asc()).all()
+    courses = Course.query.order_by(Course.name.asc()).all()
+
+    # Get distinct college types for the dropdown
+    types = db.session.query(StateBond.college_type).distinct().filter(StateBond.college_type.isnot(None)).all()
+    types = sorted([t[0] for t in types if t[0]])
+
+    return render_template('bonds_information.html',
+                           bonds=bonds, states=states, courses=courses, types=types,
+                           state_filter=state_filter, course_filter=course_filter, type_filter=type_filter)
+
+
+@app.route('/admin/upload-bonds', methods=['POST'])
+@login_required
+def upload_bonds():
+    if current_user.role != 'admin':
+        return "Unauthorized", 403
+
+    if 'file' not in request.files:
+        flash("No file selected.", "error")
+        return redirect(url_for('bonds_information'))
+
+    file = request.files['file']
+    if file.filename == '':
+        flash("No selected file", "error")
+        return redirect(url_for('bonds_information'))
+
+    if file:
+        try:
+            # Parse the CSV
+            stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+            csv_input = csv.DictReader(stream)
+
+            count = 0
+            for row in csv_input:
+                state_name = row.get('State', '').strip()
+                course_name = row.get('Course', '').strip()
+                college_type = row.get('College Type', '').strip()
+
+                # Automatically Link or Create the State
+                state_obj = State.query.filter(State.name.ilike(state_name)).first() if state_name else None
+                if not state_obj and state_name:
+                    state_obj = State(name=state_name)
+                    db.session.add(state_obj)
+                    db.session.flush()
+
+                # Automatically Link or Create the Course
+                course_obj = Course.query.filter(Course.name.ilike(course_name)).first() if course_name else None
+                if not course_obj and course_name:
+                    course_obj = Course(name=course_name)
+                    db.session.add(course_obj)
+                    db.session.flush()
+
+                # Smart Update: If a rule for this State+Course+Type already exists, update it. Otherwise, create new.
+                existing_bond = StateBond.query.filter_by(
+                    state_id=state_obj.id if state_obj else None,
+                    course_id=course_obj.id if course_obj else None,
+                    college_type=college_type
+                ).first()
+
+                if existing_bond:
+                    existing_bond.service_bond = row.get('Service Bond', '').strip()
+                    existing_bond.discontinuation_bond = row.get('Discontinuation Bond', '').strip()
+                else:
+                    new_bond = StateBond(
+                        state_id=state_obj.id if state_obj else None,
+                        course_id=course_obj.id if course_obj else None,
+                        college_type=college_type,
+                        service_bond=row.get('Service Bond', '').strip(),
+                        discontinuation_bond=row.get('Discontinuation Bond', '').strip()
+                    )
+                    db.session.add(new_bond)
+
+                count += 1
+
+            db.session.commit()
+            flash(f"Successfully processed {count} bond records!", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(
+                f"Error processing CSV. Please ensure columns exactly match: State, Service Bond, Discontinuation Bond, Course, College Type. Details: {str(e)}",
+                "error")
+
+    return redirect(url_for('bonds_information'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
