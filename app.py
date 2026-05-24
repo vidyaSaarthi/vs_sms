@@ -32,7 +32,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'vidyasaarthi_fallback_k
 app.config['ADMIN_PIN'] = os.environ.get('ADMIN_PIN', '8888')
 
 # Smart Database Routing (Pure Python pg8000 driver)
-db_url = os.environ.get('DATABASE_URL', 'sqlite:///vidyasaarthi.db')
+db_url = "postgresql://postgres:IbjWncmCmbGfvXmdHhchGhtCljcqsXXZ@shuttle.proxy.rlwy.net:59162/railway"
+
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
 elif db_url.startswith("postgresql://"):
@@ -3229,79 +3230,6 @@ def bonds_information():
                            bonds=bonds, states=states, courses=courses, types=types,
                            state_filter=state_filter, course_filter=course_filter, type_filter=type_filter)
 
-
-@app.route('/admin/upload-bonds', methods=['POST'])
-@login_required
-def upload_bonds():
-    if current_user.role != 'admin':
-        return "Unauthorized", 403
-
-    if 'file' not in request.files:
-        flash("No file selected.", "error")
-        return redirect(url_for('bonds_information'))
-
-    file = request.files['file']
-    if file.filename == '':
-        flash("No selected file", "error")
-        return redirect(url_for('bonds_information'))
-
-    if file:
-        try:
-            # Parse the CSV
-            stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
-            csv_input = csv.DictReader(stream)
-
-            count = 0
-            for row in csv_input:
-                state_name = row.get('State', '').strip()
-                course_name = row.get('Course', '').strip()
-                college_type = row.get('College Type', '').strip()
-
-                # Automatically Link or Create the State
-                state_obj = State.query.filter(State.name.ilike(state_name)).first() if state_name else None
-                if not state_obj and state_name:
-                    state_obj = State(name=state_name)
-                    db.session.add(state_obj)
-                    db.session.flush()
-
-                # Automatically Link or Create the Course
-                course_obj = Course.query.filter(Course.name.ilike(course_name)).first() if course_name else None
-                if not course_obj and course_name:
-                    course_obj = Course(name=course_name)
-                    db.session.add(course_obj)
-                    db.session.flush()
-
-                # Smart Update: If a rule for this State+Course+Type already exists, update it. Otherwise, create new.
-                existing_bond = StateBond.query.filter_by(
-                    state_id=state_obj.id if state_obj else None,
-                    course_id=course_obj.id if course_obj else None,
-                    college_type=college_type
-                ).first()
-
-                if existing_bond:
-                    existing_bond.service_bond = row.get('Service Bond', '').strip()
-                    existing_bond.discontinuation_bond = row.get('Discontinuation Bond', '').strip()
-                else:
-                    new_bond = StateBond(
-                        state_id=state_obj.id if state_obj else None,
-                        course_id=course_obj.id if course_obj else None,
-                        college_type=college_type,
-                        service_bond=row.get('Service Bond', '').strip(),
-                        discontinuation_bond=row.get('Discontinuation Bond', '').strip()
-                    )
-                    db.session.add(new_bond)
-
-                count += 1
-
-            db.session.commit()
-            flash(f"Successfully processed {count} bond records!", "success")
-        except Exception as e:
-            db.session.rollback()
-            flash(
-                f"Error processing CSV. Please ensure columns exactly match: State, Service Bond, Discontinuation Bond, Course, College Type. Details: {str(e)}",
-                "error")
-
-    return redirect(url_for('bonds_information'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
