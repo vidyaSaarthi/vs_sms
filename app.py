@@ -1566,9 +1566,18 @@ def college_database():
             )
         )
     if state_filter:
-        query = query.join(College.state).filter(State.name == state_filter)
+        # Cast the filter to int explicitly if it's a numeric ID
+        if state_filter.isdigit():
+            query = query.filter(College.state_id == int(state_filter))
+        else:
+            query = query.join(College.state).filter(State.name == state_filter)
+
     if course_filter:
-        query = query.join(College.course).filter(Course.name == course_filter)
+        if course_filter.isdigit():
+            query = query.filter(College.course_id == int(course_filter))
+        else:
+            query = query.join(College.course).filter(Course.name == course_filter)
+
     if type_filter:
         query = query.filter(College.college_type == type_filter)
     if counselling_filter:
