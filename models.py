@@ -513,9 +513,11 @@ class CollegeCutoff(db.Model):
     college_id = db.Column(db.Integer, db.ForeignKey('colleges.id'), nullable=False)
     college = db.relationship('College', backref=db.backref('cutoffs', lazy=True, cascade="all, delete-orphan"))
 
-    allotted_category = db.Column(db.Text, nullable=False)  # Now TEXT
-    cutoff_data = db.Column(db.Text, nullable=True)
+    # 🚨 ADDED: Now SQLAlchemy knows to read this from the database!
+    allotted_quota = db.Column(db.String(100), nullable=True)
 
+    allotted_category = db.Column(db.Text, nullable=False)
+    cutoff_data = db.Column(db.Text, nullable=True)
 # ==========================================
 # 6. STUDENT JOURNEY (Junction Tables)
 # ==========================================
