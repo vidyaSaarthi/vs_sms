@@ -289,13 +289,20 @@
                     <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
                         <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 fw-bold"><i class="fas fa-users text-warning me-2"></i>{{ selected_couns.name }} Cohort ({{ students|length }} Students)</h5>
+
+                            <button id="bulkResolveGridBtn" class="btn btn-sm btn-light fw-bold shadow-sm" style="color: #2c3e50;" onclick="resolveSelectedTasks()">
+                                <i class="fas fa-check-double me-1"></i> Resolve Selected
+                            </button>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover table-bordered align-middle mb-0" style="min-width: 1000px;">
                                     <thead class="bg-light sticky-top">
                                         <tr>
-                                            <th class="ps-4 py-3 bg-light" style="width: 250px; z-index: 2;">Student Name</th>
+                                            <th class="ps-4 py-3 bg-light" style="width: 250px; z-index: 2;">
+                                                <input class="form-check-input shadow-sm border-secondary me-2" type="checkbox" id="selectAllGridTasks" onclick="toggleAllTasks(this)">
+                                                Student Name
+                                            </th>
                                             {% for col in report_data.columns %}
                                                 <th class="text-center bg-light py-3" style="min-width: 180px;">
                                                     {% if col.type == 'global' %}
@@ -328,12 +335,19 @@
                                             {% for col in report_data.columns %}
                                                 {% set col_key = col.type + '_' + col.id|string %}
                                                 {% set is_done = report_data.matrix[student.id][col_key] %}
-                                                <td class="text-center align-middle" style="{% if is_done %}background-color: #f0fdf4;{% else %}background-color: #fff1f2;{% endif %}">
+                                                <td class="text-center align-middle position-relative" style="{% if is_done %}background-color: #f0fdf4;{% else %}background-color: #fff1f2;{% endif %}">
                                                     {% if is_done %}
                                                 <i class="fas fa-check-circle text-success fs-4 mb-1"></i><br>
                                                 <span class="badge bg-success">Completed</span>
                                             {% else %}
-                                                <form action="{{ url_for('toggle_student_activity', student_id=student.id) }}" method="POST" class="m-0">
+                                                <div class="position-absolute top-0 start-0 p-1">
+                                                    <input class="form-check-input shadow-sm border-secondary task-checkbox" type="checkbox"
+                                                           data-student-id="{{ student.id }}"
+                                                           data-activity-type="{{ col.type }}"
+                                                           data-activity-id="{{ col.id }}"
+                                                           data-counselling-id="{{ selected_couns.id }}">
+                                                </div>
+                                                <form action="{{ url_for('toggle_student_activity', student_id=student.id) }}" method="POST" class="m-0 mt-2">
                                                     <input type="hidden" name="activity_type" value="{{ col.type }}">
                                                     <input type="hidden" name="activity_id" value="{{ col.id }}">
                                                     <input type="hidden" name="source" value="dashboard">
@@ -439,5 +453,73 @@
             color: white !important;
         }
     </style>
+
+<script>
+        function toggleAllTasks(source) {
+            const checkboxes = document.querySelectorAll('.task-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        function resolveSelectedTasks() {
+            const checkboxes = document.querySelectorAll('.task-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Please select at least one task to resolve.');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to resolve ${checkboxes.length} selected tasks?`)) {
+                return;
+            }
+
+            // Target the correct button depending on which view we are in
+            const btn = document.getElementById('bulkResolveBtn') || document.getElementById('bulkResolveGridBtn');
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Resolving...';
+                btn.disabled = true;
+            }
+
+            const requests = [];
+            let activeCounsellingId = null;
+
+            // Build a separate POST request for each selected task
+            checkboxes.forEach(cb => {
+                const studentId = cb.dataset.studentId;
+                const activityType = cb.dataset.activityType;
+                const activityId = cb.dataset.activityId;
+
+                // Capture counselling_id to ensure we stay on the same grid view after reload
+                if (cb.dataset.counsellingId) {
+                    activeCounsellingId = cb.dataset.counsellingId;
+                }
+
+                const formData = new FormData();
+                formData.append('activity_type', activityType);
+                formData.append('activity_id', activityId);
+                formData.append('source', 'dashboard');
+
+                const url = `/student/${studentId}/toggle_activity`;
+
+                requests.push(fetch(url, {
+                    method: 'POST',
+                    body: formData
+                }));
+            });
+
+            // Execute all requests securely in parallel, then reload the page
+            Promise.all(requests)
+                .then(() => {
+                    if (activeCounsellingId) {
+                        window.location.href = `{{ url_for('dashboard') }}?counselling_id=${activeCounsellingId}`;
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error resolving tasks:', err);
+                    alert('An error occurred while resolving some tasks. The page will now refresh.');
+                    window.location.reload();
+                });
+        }
+    </script>
 
 {% endblock %}
