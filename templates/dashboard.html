@@ -452,11 +452,26 @@
             background-color: #198754 !important;
             color: white !important;
         }
+
+        .task-checkbox {
+        position: relative;
+        z-index: 10;
+        cursor: pointer;
+    }
+
+    /* If the sticky header is hiding the checkbox, ensure it has higher z-index */
+    .sticky-top {
+        z-index: 5 !important;
+    }
+
     </style>
 
 <script>
         function toggleAllTasks(source) {
-            const checkboxes = document.querySelectorAll('.task-checkbox');
+            // Find the closest table to the source checkbox
+            const table = source.closest('table');
+            // Only select checkboxes within this specific table
+            const checkboxes = table.querySelectorAll('.task-checkbox');
             checkboxes.forEach(cb => cb.checked = source.checked);
         }
 
