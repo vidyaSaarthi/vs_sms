@@ -3072,6 +3072,9 @@ def edit_college(college_id):
             college.college_code = request.form.get('college_code')
             college.college_type = request.form.get('college_type')
 
+            college.city = request.form.get('city')
+            college.established_year = request.form.get('established_year')
+
             course_id_val = request.form.get('course_id')
             college.course_id = int(course_id_val) if course_id_val else None
 
