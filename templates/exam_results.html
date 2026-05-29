@@ -16,6 +16,36 @@
         </div>
     </div>
 
+    <!-- 🚨 JEE / NEET SEPARATION TABS -->
+    <ul class="nav nav-tabs mb-4 border-bottom-0" style="border-bottom: 2px solid #dee2e6 !important;">
+        <li class="nav-item">
+            <a class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0 {% if active_tab == 'all' %}active{% endif %}"
+               href="{{ url_for('all_exam_results', tab='all', sort=current_sort, order=current_order) }}"
+               style="color: #333; {% if active_tab == 'all' %}border-top: 3px solid #1e3c72;{% endif %}">
+                <i class="fas fa-users me-2"></i>All Students
+                <span class="badge bg-secondary ms-2 rounded-pill">{{ all_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0 {% if active_tab == 'jee' %}active{% endif %}"
+               href="{{ url_for('all_exam_results', tab='jee', sort=current_sort, order=current_order) }}"
+               style="color: #333; {% if active_tab == 'jee' %}border-top: 3px solid #f6e89e;{% endif %}">
+                <i class="fas fa-laptop-code text-warning me-2"></i>JEE Students
+                <span class="badge bg-warning text-dark ms-2 rounded-pill">{{ jee_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold px-4 py-3 shadow-sm border-bottom-0 {% if active_tab == 'neet' %}active{% endif %}"
+               href="{{ url_for('all_exam_results', tab='neet', sort=current_sort, order=current_order) }}"
+               style="color: #333; {% if active_tab == 'neet' %}border-top: 3px solid #cc0000;{% endif %}">
+                <i class="fas fa-user-md text-danger me-2"></i>NEET Students
+                <span class="badge bg-danger ms-2 rounded-pill">{{ neet_count }}</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- DATA TABLE -->
+
     <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px; overflow: hidden; background-color: #ffffff;">
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">

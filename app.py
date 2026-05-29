@@ -3251,24 +3251,28 @@ def bonds_information():
 # ==========================================
 # GLOBAL EXAM RESULTS LEDGER
 # ==========================================
-# ==========================================
-# GLOBAL EXAM RESULTS LEDGER
-# ==========================================
 @app.route('/exam-results')
 @login_required
 def all_exam_results():
     sort_by = request.args.get('sort', 'date')
     order = request.args.get('order', 'desc')
+    active_tab = request.args.get('tab', 'all')
 
-    # Base query joining Student and Exam for sorting access
-    query = StudentExamResult.query.join(Student).outerjoin(Exam).filter(
-        db.or_(
-            StudentExamResult.score != None,
-            StudentExamResult.percentile != None,
-            StudentExamResult.all_india_rank != None,
-            StudentExamResult.state_rank != None
-        )
+    base_condition = db.or_(
+        StudentExamResult.score != None,
+        StudentExamResult.percentile != None,
+        StudentExamResult.all_india_rank != None,
+        StudentExamResult.state_rank != None
     )
+
+    # Base query joining Student and Exam
+    query = StudentExamResult.query.join(Student).outerjoin(Exam).filter(base_condition)
+
+    # 🚨 Filter by Student Exam Type (JEE vs NEET)
+    if active_tab == 'jee':
+        query = query.filter(Student.exam_type == 'JEE')
+    elif active_tab == 'neet':
+        query = query.filter(Student.exam_type == 'NEET')
 
     # Dynamic Sorting Logic
     if sort_by == 'name':
@@ -3276,13 +3280,23 @@ def all_exam_results():
     elif sort_by == 'exam':
         query = query.order_by(Exam.name.desc() if order == 'desc' else Exam.name.asc())
     else:
-        # Default fallback
         query = query.order_by(StudentExamResult.id.desc())
 
     exam_results = query.all()
 
-    return render_template('exam_results.html', exam_results=exam_results, current_sort=sort_by, current_order=order)
+    # 🚨 Count totals for the UI badges
+    all_count = StudentExamResult.query.filter(base_condition).count()
+    jee_count = StudentExamResult.query.join(Student).filter(Student.exam_type == 'JEE', base_condition).count()
+    neet_count = StudentExamResult.query.join(Student).filter(Student.exam_type == 'NEET', base_condition).count()
 
+    return render_template('exam_results.html',
+                           exam_results=exam_results,
+                           current_sort=sort_by,
+                           current_order=order,
+                           active_tab=active_tab,
+                           all_count=all_count,
+                           jee_count=jee_count,
+                           neet_count=neet_count)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
