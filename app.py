@@ -3248,6 +3248,24 @@ def bonds_information():
                            bonds=bonds, states=states, courses=courses, types=types,
                            state_filter=state_filter, course_filter=course_filter, type_filter=type_filter)
 
+# ==========================================
+# GLOBAL EXAM RESULTS LEDGER
+# ==========================================
+@app.route('/exam-results')
+@login_required
+def all_exam_results():
+    # Fetch all exam results that have at least some data filled in (ignoring completely blank ones)
+    exam_results = StudentExamResult.query.join(Student).filter(
+        db.or_(
+            StudentExamResult.score != None,
+            StudentExamResult.percentile != None,
+            StudentExamResult.all_india_rank != None,
+            StudentExamResult.state_rank != None
+        )
+    ).order_by(StudentExamResult.id.desc()).all()
+
+    return render_template('exam_results.html', exam_results=exam_results)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)

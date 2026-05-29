@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container-fluid pt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #1e3c72;">
+                <i class="fas fa-trophy text-danger me-2"></i>Global Exam Results
+            </h2>
+            <p class="text-muted mb-0">Master repository for all student entrance exam scores, percentiles, and ranks.</p>
+        </div>
+        <div>
+            <span class="badge rounded-pill shadow-sm fs-6" style="background-color: #ccdfed; color: #1e3c72; border: 1px solid rgba(30, 60, 114, 0.2); padding: 0.6em 1.2em;">
+                <i class="fas fa-users text-primary me-1"></i> {{ exam_results|length }} Results Tracked
+            </span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-5" style="border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="sticky-top" style="background-color: #f8f9fa; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 10;">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Student Name</th>
+                            <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Entrance Exam</th>
+                            <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Score / %ile</th>
+                            <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Rank (AIR / State)</th>
+                            <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Comments</th>
+                            <th class="py-3 pe-4 text-end text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for res in exam_results %}
+                        <tr style="transition: background-color 0.2s ease;">
+                            <td class="ps-4 py-3" style="width: 25%;">
+                                <a href="{{ url_for('view_student', id=res.student.id) }}" class="text-decoration-none d-flex align-items-center" style="color: #1e3c72;">
+                                    <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 38px; height: 38px; font-weight: bold;">
+                                        {{ res.student.full_name[0] }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold fs-6">{{ res.student.full_name }}</div>
+                                        <div class="small text-muted"><i class="fas fa-phone-alt me-1"></i>{{ res.student.mobile_number or 'N/A' }}</div>
+                                    </div>
+                                </a>
+                            </td>
+                            <td style="width: 15%;">
+                                <span class="badge shadow-sm px-3 py-2" style="background-color: #f6e89e; color: #1e3c72; border: 1px solid rgba(30,60,114,0.1); font-size: 0.85rem;">
+                                    <i class="fas fa-pen-alt me-1 text-danger"></i> {{ res.exam.name if res.exam else 'Unknown Exam' }}
+                                </span>
+                            </td>
+                            <td style="width: 20%;">
+                                <div class="p-2 rounded bg-light border border-white shadow-sm" style="display: inline-block;">
+                                    {% if res.score %}
+                                        <span class="d-block fw-bold text-dark" style="font-size: 0.9rem;">Score: <span style="color: #cc0000;">{{ res.score|round(2) }}</span></span>
+                                    {% endif %}
+                                    {% if res.percentile %}
+                                        <span class="d-block fw-bold text-dark" style="font-size: 0.9rem;">%ile: <span class="text-primary">{{ res.percentile|round(4) }}</span></span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td style="width: 15%;">
+                                {% if res.all_india_rank or res.state_rank %}
+                                    <div class="fw-bold" style="color: #333; font-size: 0.9rem;">
+                                        {% if res.all_india_rank %}<div class="mb-1"><span class="badge bg-dark text-white me-1">AIR</span>{{ res.all_india_rank }}</div>{% endif %}
+                                        {% if res.state_rank %}<div><span class="badge text-dark me-1" style="background-color: #ccdfed;">State</span>{{ res.state_rank }}</div>{% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small">No Ranks Logged</span>
+                                {% endif %}
+                            </td>
+                            <td style="width: 15%;">
+                                <div class="text-muted small p-2" style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background-color: #f8f9fa; border-radius: 6px;" title="{{ res.comments }}">
+                                    {{ res.comments or '...' }}
+                                </div>
+                            </td>
+                            <td class="text-end pe-4" style="width: 10%;">
+                                <a href="{{ url_for('view_student', id=res.student.id) }}" class="btn btn-sm fw-bold shadow-sm" style="background-color: #ffffff; color: #cc0000; border: 1px solid #cc0000; border-radius: 8px;">
+                                    Profile <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted bg-white">
+                                <i class="fas fa-trophy fa-3x text-secondary opacity-25 mb-3"></i>
+                                <h5 class="fw-bold">No exam results logged yet.</h5>
+                                <p class="mb-0 small">As students complete exams and their profiles are updated, their scores will appear here.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

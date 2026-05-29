@@ -319,6 +319,12 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a href="{{ url_for('all_exam_results') }}" class="nav-link fw-bold shadow-sm mb-2 {% if request.endpoint == 'all_exam_results' %}bg-primary text-white{% else %}text-dark{% endif %}" style="border-radius: 8px;">
+                            <i class="fas fa-trophy me-2 {% if request.endpoint == 'all_exam_results' %}text-warning{% else %}text-danger{% endif %}"></i> Exam Results
+                        </a>
+                    </li>
+
                     <li class="nav-item mb-2">
                         <a href="{{ url_for('all_allotments') }}" class="nav-link text-dark fw-bold shadow-sm" style="transition: 0.2s;">
                             <i class="fas fa-award me-2" style="width: 20px;"></i>Allotments
