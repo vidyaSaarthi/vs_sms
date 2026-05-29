@@ -22,8 +22,18 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="sticky-top" style="background-color: #f8f9fa; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 10;">
                         <tr>
-                            <th class="ps-4 py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Student Name</th>
-                            <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Entrance Exam</th>
+                            <th class="ps-4 py-3 text-uppercase border-0" style="font-size: 0.8rem; letter-spacing: 1px;">
+                                <a href="{{ url_for('all_exam_results', sort='name', order='desc' if current_sort == 'name' and current_order == 'asc' else 'asc') }}" class="text-decoration-none d-flex align-items-center {% if current_sort == 'name' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+                                    Student Name
+                                    <i class="fas fa-sort{% if current_sort == 'name' %}-{{ 'alpha-up' if current_order == 'asc' else 'alpha-down' }}{% endif %} ms-2 {% if current_sort != 'name' %}opacity-25{% endif %}"></i>
+                                </a>
+                            </th>
+                            <th class="py-3 text-uppercase border-0" style="font-size: 0.8rem; letter-spacing: 1px;">
+                                <a href="{{ url_for('all_exam_results', sort='exam', order='desc' if current_sort == 'exam' and current_order == 'asc' else 'asc') }}" class="text-decoration-none d-flex align-items-center {% if current_sort == 'exam' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+                                    Entrance Exam
+                                    <i class="fas fa-sort{% if current_sort == 'exam' %}-{{ 'alpha-up' if current_order == 'asc' else 'alpha-down' }}{% endif %} ms-2 {% if current_sort != 'exam' %}opacity-25{% endif %}"></i>
+                                </a>
+                            </th>
                             <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Score / %ile</th>
                             <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Rank (AIR / State)</th>
                             <th class="py-3 text-uppercase text-secondary border-0" style="font-size: 0.8rem; letter-spacing: 1px;">Comments</th>

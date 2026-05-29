@@ -3251,20 +3251,37 @@ def bonds_information():
 # ==========================================
 # GLOBAL EXAM RESULTS LEDGER
 # ==========================================
+# ==========================================
+# GLOBAL EXAM RESULTS LEDGER
+# ==========================================
 @app.route('/exam-results')
 @login_required
 def all_exam_results():
-    # Fetch all exam results that have at least some data filled in (ignoring completely blank ones)
-    exam_results = StudentExamResult.query.join(Student).filter(
+    sort_by = request.args.get('sort', 'date')
+    order = request.args.get('order', 'desc')
+
+    # Base query joining Student and Exam for sorting access
+    query = StudentExamResult.query.join(Student).outerjoin(Exam).filter(
         db.or_(
             StudentExamResult.score != None,
             StudentExamResult.percentile != None,
             StudentExamResult.all_india_rank != None,
             StudentExamResult.state_rank != None
         )
-    ).order_by(StudentExamResult.id.desc()).all()
+    )
 
-    return render_template('exam_results.html', exam_results=exam_results)
+    # Dynamic Sorting Logic
+    if sort_by == 'name':
+        query = query.order_by(Student.full_name.desc() if order == 'desc' else Student.full_name.asc())
+    elif sort_by == 'exam':
+        query = query.order_by(Exam.name.desc() if order == 'desc' else Exam.name.asc())
+    else:
+        # Default fallback
+        query = query.order_by(StudentExamResult.id.desc())
+
+    exam_results = query.all()
+
+    return render_template('exam_results.html', exam_results=exam_results, current_sort=sort_by, current_order=order)
 
 
 if __name__ == '__main__':
