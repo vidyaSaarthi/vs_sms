@@ -1029,8 +1029,19 @@
 
 <script>
     // JS required for Master Counselling dropdown logic
-    const statesData = [ {% for s in states %}{ id: {{ s.id }}, name: "{{ s.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
-    const unisData = [ {% for u in universities %}{ id: {{ u.id }}, name: "{{ u.name }}" }{% if not loop.last %},{% endif %}{% endfor %} ];
+    // Build secure JSON objects to prevent quote-breaking errors
+    const statesData = [
+        {% for s in states %}
+            { id: {{ s.id }}, name: {{ s.name | tojson | safe }} }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const unisData = [
+        {% for u in universities %}
+            { id: {{ u.id }}, name: {{ u.name | tojson | safe }} }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
     const examCourseMap = {{ exam_course_mapping | tojson | safe }};
 
     function updateCourseDropdown(examSelectId, courseSelectId) {
