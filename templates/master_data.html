@@ -1099,8 +1099,19 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const modalId = urlParams.get('open_modal');
 
+    // 1. Force the correct background tab to open
+    const tabId = urlParams.get('tab');
+    if (tabId) {
+        const tabBtn = document.getElementById(tabId);
+        if (tabBtn) {
+            let tab = new bootstrap.Tab(tabBtn);
+            tab.show();
+        }
+    }
+
+    // 2. Open the specific counselling modal
+    const modalId = urlParams.get('open_modal');
     if (modalId) {
         var modalElement = document.getElementById('manageRoundsModal' + modalId);
         if (modalElement) {
