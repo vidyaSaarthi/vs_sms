@@ -2821,6 +2821,26 @@ def add_counselling_rule(counselling_id):
 
     return redirect(url_for('master_data', tab='master-couns-tab', open_modal=counselling_id))
 
+@app.route('/admissions/counselling/delete_rule/<int:counselling_id>', methods=['POST'])
+@login_required
+def delete_counselling_rule(counselling_id):
+    counselling = Counselling.query.get_or_404(counselling_id)
+    rule_title = request.form.get('rule_title')  # Passed safely via form, not URL
+
+    try:
+        current_rules = json.loads(counselling.rules_data) if isinstance(counselling.rules_data, str) else counselling.rules_data
+        if current_rules and rule_title in current_rules:
+            del current_rules[rule_title]
+            counselling.rules_data = current_rules
+            flag_modified(counselling, "rules_data")
+            db.session.commit()
+            flash("Global Rule deleted.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting rule: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=counselling.id))
+
 
 # NOTE: delete_counselling_rule ALREADY HAS IT. Skip.
 
