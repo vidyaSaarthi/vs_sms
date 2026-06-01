@@ -2880,6 +2880,179 @@ def add_round_rule(round_id):
     return redirect(url_for('master_data', tab='master-couns-tab', open_modal=c_round.counselling_id))
 
 
+# ==========================================
+# 🚨 FLEXIBLE COUNSELLING WORKFLOWS (TIMELINES)
+# ==========================================
+
+@app.route('/admissions/counselling/<int:counselling_id>/add_global_activity', methods=['POST'])
+@login_required
+def add_counselling_activity(counselling_id):
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        new_activity = CounsellingActivity(
+            counselling_id=counselling_id,
+            activity_name=request.form.get('activity_name'),
+            start_date=datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None,
+            activity_link=request.form.get('activity_link')
+        )
+        db.session.add(new_activity)
+        db.session.commit()
+        flash("Global activity added to timeline!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding activity: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=counselling_id))
+
+
+@app.route('/admissions/delete_counselling_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def delete_counselling_activity(activity_id):
+    activity = CounsellingActivity.query.get_or_404(activity_id)
+    couns_id = activity.counselling_id
+    try:
+        db.session.delete(activity)
+        db.session.commit()
+        flash("Activity removed.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Error removing activity.", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
+
+
+@app.route('/admissions/round/<int:round_id>/add_activity', methods=['POST'])
+@login_required
+def add_round_activity(round_id):
+    round_obj = CounsellingRound.query.get_or_404(round_id)
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        new_activity = RoundActivity(
+            round_id=round_id,
+            activity_name=request.form.get('activity_name'),
+            start_date=datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None,
+            end_date=datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None,
+            is_actionable=request.form.get('is_actionable') == 'on'
+        )
+        db.session.add(new_activity)
+        db.session.commit()
+        flash("Round activity added!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding round activity: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=round_obj.counselling_id))
+
+
+@app.route('/admissions/edit_counselling_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def edit_counselling_activity(activity_id):
+    activity = CounsellingActivity.query.get_or_404(activity_id)
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        activity.activity_name = request.form.get('activity_name')
+        activity.start_date = datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None
+        activity.end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None
+        activity.activity_link = request.form.get('activity_link')
+
+        db.session.commit()
+        flash("Global activity updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating activity: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=activity.counselling_id))
+
+
+@app.route('/admissions/edit_round_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def edit_round_activity(activity_id):
+    activity = RoundActivity.query.get_or_404(activity_id)
+    couns_id = activity.round.counselling_id
+    try:
+        start_str = request.form.get('start_date')
+        end_str = request.form.get('end_date')
+
+        activity.activity_name = request.form.get('activity_name')
+        activity.start_date = datetime.strptime(start_str, '%Y-%m-%dT%H:%M') if start_str else None
+        activity.end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M') if end_str else None
+        activity.is_actionable = request.form.get('is_actionable') == 'on'
+
+        db.session.commit()
+        flash("Round activity updated successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating round activity: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
+
+
+@app.route('/admissions/delete_round_activity/<int:activity_id>', methods=['POST'])
+@login_required
+def delete_round_activity(activity_id):
+    activity = RoundActivity.query.get_or_404(activity_id)
+    couns_id = activity.round.counselling_id
+    try:
+        db.session.delete(activity)
+        db.session.commit()
+        flash("Activity removed.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error removing activity.", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
+
+
+@app.route('/admissions/round/<int:round_id>/add_artifact', methods=['POST'])
+@login_required
+def add_round_artifact(round_id):
+    round_obj = CounsellingRound.query.get_or_404(round_id)
+    try:
+        new_artifact = RoundArtifact(
+            round_id=round_id,
+            document_name=request.form.get('document_name'),
+            document_link=request.form.get('document_link'),
+            artifact_type=request.form.get('artifact_type')
+        )
+        db.session.add(new_artifact)
+        db.session.commit()
+        flash("Artifact linked to round successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error adding artifact: {str(e)}", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=round_obj.counselling_id))
+
+
+@app.route('/admissions/delete_round_artifact/<int:artifact_id>', methods=['POST'])
+@login_required
+def delete_round_artifact(artifact_id):
+    artifact = RoundArtifact.query.get_or_404(artifact_id)
+    couns_id = artifact.round.counselling_id
+    try:
+        db.session.delete(artifact)
+        db.session.commit()
+        flash("Artifact removed.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Error removing artifact.", "error")
+
+    return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
+
+
+# ==========================================
+# 🚨 DYNAMIC KNOWLEDGE BASE ROUTES (LINKS & RULES)
+# ==========================================
+# (Keep your existing add_counselling_rule here...)
+
+
 @app.route('/colleges/edit/<int:college_id>', methods=['GET', 'POST'])
 @login_required
 def edit_college(college_id):
