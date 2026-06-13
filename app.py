@@ -1857,13 +1857,39 @@ def add_round_result(student_id):
 @app.route('/allotments')
 @login_required
 def all_allotments():
-    # Fetch all round results where allotted_institute is NOT null and NOT empty
-    allotments = StudentRoundResult.query.join(Student).filter(
+    counselling_id = request.args.get('counselling_id')
+    round_id = request.args.get('round_id')
+
+    # Base query: Fetch all round results where an institute is allotted
+    query = StudentRoundResult.query.join(Student).filter(
         StudentRoundResult.allotted_institute != None,
         StudentRoundResult.allotted_institute != ''
-    ).order_by(StudentRoundResult.id.desc()).all()
+    )
 
-    return render_template('allotments.html', allotments=allotments)
+    # Filter by Counselling Process
+    if counselling_id and counselling_id.isdigit():
+        query = query.join(CounsellingRound).filter(CounsellingRound.counselling_id == int(counselling_id))
+
+    # Filter by Specific Round
+    if round_id and round_id.isdigit():
+        query = query.filter(StudentRoundResult.round_id == int(round_id))
+
+    allotments = query.order_by(StudentRoundResult.id.desc()).all()
+
+    # Provide data for the dropdowns
+    counsellings = Counselling.query.order_by(Counselling.name.asc()).all()
+
+    # Pre-calculate round mappings to build the cascading secondary dropdown safely via JS
+    round_mapping = {}
+    for c in counsellings:
+        round_mapping[c.id] = [{'id': r.id, 'name': r.round_number} for r in c.rounds]
+
+    return render_template('allotments.html',
+                           allotments=allotments,
+                           counsellings=counsellings,
+                           round_mapping=round_mapping,
+                           selected_couns_id=counselling_id,
+                           selected_round_id=round_id)
 
 
 @app.route('/colleges')

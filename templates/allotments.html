@@ -16,6 +16,31 @@
         </div>
     </div>
     
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; background-color: #f8f9fa;">
+        <div class="card-body p-3">
+            <form action="{{ url_for('all_allotments') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold text-dark small mb-1">Filter by Process</label>
+                    <select name="counselling_id" id="counsellingSelect" class="form-select shadow-sm border-0 fw-bold" style="color: #1e3c72;" onchange="updateRoundsDropdown(); this.form.submit();">
+                        <option value="">All Counselling Processes</option>
+                        {% for c in counsellings %}
+                            <option value="{{ c.id }}" {% if selected_couns_id == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-dark small mb-1">Filter by Round</label>
+                    <select name="round_id" id="roundSelect" class="form-select shadow-sm border-0 fw-bold" style="color: #1e3c72;" onchange="this.form.submit()" {% if not selected_couns_id %}disabled{% endif %}>
+                        <option value="">All Rounds</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('all_allotments') }}" class="btn btn-outline-secondary w-100 fw-bold shadow-sm">Reset View</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
         <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
             <table class="table table-hover align-middle mb-0" id="allotmentsTable">
@@ -190,4 +215,45 @@ function sortTable(n) {
         transition: background-color 0.2s ease;
     }
 </style>
+
+<script>
+    // Injects the Python dictionary safely as a JavaScript Object
+    const roundMapping = {{ round_mapping | tojson | safe }};
+    const selectedRoundId = "{{ selected_round_id }}";
+
+    function updateRoundsDropdown() {
+        const counsSelect = document.getElementById('counsellingSelect');
+        const roundSelect = document.getElementById('roundSelect');
+
+        const selectedCounsId = counsSelect.value;
+
+        // Reset the dropdown
+        roundSelect.innerHTML = '<option value="">All Rounds</option>';
+
+        if (selectedCounsId && roundMapping[selectedCounsId]) {
+            // Enable and populate
+            roundSelect.disabled = false;
+
+            roundMapping[selectedCounsId].forEach(r => {
+                let option = document.createElement('option');
+                option.value = r.id;
+                option.text = r.name;
+
+                // Keep the current round selected if it matches
+                if (selectedRoundId && selectedRoundId == r.id) {
+                    option.selected = true;
+                }
+
+                roundSelect.appendChild(option);
+            });
+        } else {
+            // Disable if empty or no rounds exist
+            roundSelect.disabled = true;
+        }
+    }
+
+    // Run this function immediately when the page loads to restore state
+    document.addEventListener("DOMContentLoaded", updateRoundsDropdown);
+</script>
+
 {% endblock %}
