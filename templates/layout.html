@@ -339,6 +339,19 @@
                     </li>
 
                     <li class="nav-item mt-3 mb-1">
+                        <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Tools</span>
+                    </li>
+
+
+                    <li class="nav-item mt-1">
+                        <a href="{{ url_for('college_predictor') }}" class="nav-link fw-bold shadow-sm px-3 py-2 d-flex align-items-center {% if request.endpoint == 'college_predictor' %}bg-primary text-white{% else %}text-dark hover-brand{% endif %}" style="border-radius: 8px; transition: all 0.2s ease;">
+                            <i class="fas fa-magic me-3 {% if request.endpoint == 'college_predictor' %}text-warning{% else %}text-primary{% endif %}" style="font-size: 1.1rem; width: 20px; text-align: center;"></i>
+                            <span>College Predictor</span>
+                            <span class="badge bg-danger ms-auto shadow-sm" style="font-size: 0.65rem;">NEW</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mt-3 mb-1">
                         <span class="ms-3 small text-muted fw-bold text-uppercase" style="letter-spacing: 1px;">Database</span>
                     </li>
 
