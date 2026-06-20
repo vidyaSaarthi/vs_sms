@@ -51,6 +51,14 @@ login_manager.login_view = 'login'
 # 🚀 AUTOMATIC CLOUD DATABASE BUILDER
 # 🚀 AUTOMATIC CLOUD DATABASE BUILDER & TEAM INJECTION
 with app.app_context():
+    # 🚨 TEMPORARY FIX: Drop the old predictor table so it rebuilds with Course and Domicile
+    try:
+        db.session.execute(text('DROP TABLE IF EXISTS predictor_cutoffs CASCADE'))
+        db.session.commit()
+        print("✅ Dropped old predictor table to rebuild with new columns.")
+    except Exception as e:
+        db.session.rollback()
+
     db.create_all()
 
     try:
