@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<div class="container-fluid pt-4 pb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #cc0000;">
+                <i class="fas fa-magic me-2"></i>AI College Predictor
+            </h2>
+            <p class="text-muted mb-0 fw-bold">Predict allotments based on historical cutoff data.</p>
+        </div>
+        
+        <form action="{{ url_for('upload_cutoffs') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
+            <input type="file" name="file" class="form-control form-control-sm border-danger" accept=".csv" required title="Please save your Excel file as CSV before uploading.">
+            <button type="submit" class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: #cc0000;" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Processing...';">
+                <i class="fas fa-upload me-1"></i> Upload Cutoffs CSV
+            </button>
+        </form>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4" style="background-color: #ccdfed; border-radius: 12px;">
+        <div class="card-body p-4">
+            <form id="predictorForm" class="row g-3 align-items-end" onsubmit="event.preventDefault(); runPrediction();">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold text-dark">Student Rank <span class="text-danger">*</span></label>
+                    <input type="number" id="rankInput" class="form-control fw-bold border-0 shadow-sm" placeholder="e.g. 25000" required min="1">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold text-dark">State</label>
+                    <select id="stateFilter" class="form-select border-0 shadow-sm">
+                        <option value="">All States</option>
+                        {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold text-dark">College Type</label>
+                    <select id="typeFilter" class="form-select border-0 shadow-sm">
+                        <option value="">All Types</option>
+                        {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold text-dark">Quota</label>
+                    <select id="quotaFilter" class="form-select border-0 shadow-sm">
+                        <option value="">All Quotas</option>
+                        {% for q in quotas %}<option value="{{ q }}">{{ q }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold text-dark">Category</label>
+                    <select id="categoryFilter" class="form-select border-0 shadow-sm">
+                        <option value="">All Categories</option>
+                        {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" id="predictBtn" class="btn w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580;">
+                        <i class="fas fa-search me-1"></i> Predict Options
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0" style="border-radius: 12px; overflow: hidden; display: none;" id="resultsCard">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold" style="color: #1e3c72;">
+                Predicted Options: <span id="resultCount" class="text-danger">0</span>
+            </h5>
+            <button onclick="downloadPDF()" class="btn btn-sm btn-dark fw-bold shadow-sm">
+                <i class="fas fa-file-pdf text-danger me-1"></i> Download PDF Report
+            </button>
+        </div>
+
+        <div id="pdfContent" class="p-0 bg-white">
+            <div class="table-responsive" style="max-height: 60vh;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="position: sticky; top: 0; background-color: #f8f9fa;">
+                        <tr>
+                            <th class="ps-4 py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">State</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Type</th>
+                            <th class="py-3 text-secondary text-uppercase" style="width: 35%; font-size: 0.8rem;">College Name</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Quota</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Category</th>
+                            <th class="py-3 pe-4 text-danger text-end text-uppercase" style="font-size: 0.8rem;">Closing Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function runPrediction() {
+    const rank = document.getElementById('rankInput').value;
+    const btn = document.getElementById('predictBtn');
+    const originalBtnText = btn.innerHTML;
+
+    if (!rank || rank <= 0) {
+        alert('Please enter a valid student rank to predict colleges.');
+        return;
+    }
+
+    // UX: Show loading state
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Predicting...';
+    btn.disabled = true;
+
+    // Gather active filters
+    const payload = {
+        rank: rank,
+        state: document.getElementById('stateFilter').value,
+        type: document.getElementById('typeFilter').value,
+        quota: document.getElementById('quotaFilter').value,
+        category: document.getElementById('categoryFilter').value
+    };
+
+    try {
+        const response = await fetch("{{ url_for('get_predictions') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        const tbody = document.getElementById('resultsBody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted fw-bold">No colleges found within this rank range based on the selected filters. Try broadening your search.</td></tr>';
+        } else {
+            data.forEach(college => {
+                // Ensure ranks format with commas (e.g. 25,000)
+                const formattedRank = college.closing_rank > 0 ? college.closing_rank.toLocaleString() : 'N/A';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">${college.state || '-'}</td>
+                        <td><span class="badge bg-secondary opacity-75">${college.college_type || '-'}</span></td>
+                        <td class="fw-bold" style="color: #cc0000; font-size: 0.95rem;">${college.college_name || 'Unknown College'}</td>
+                        <td class="text-muted fw-bold small">${college.quota || '-'}</td>
+                        <td><span class="badge shadow-sm" style="background-color: #ccdfed; color: #1e3c72; border: 1px solid rgba(30,60,114,0.1);">${college.category || '-'}</span></td>
+                        <td class="pe-4 text-end fw-bold text-danger fs-6">${formattedRank}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Update UI
+        document.getElementById('resultCount').innerText = data.length.toLocaleString();
+        document.getElementById('resultsCard').style.display = 'block';
+
+    } catch (error) {
+        console.error('Error fetching predictions:', error);
+        alert('An error occurred while generating predictions. Please check your connection.');
+    } finally {
+        // Reset button
+        btn.innerHTML = originalBtnText;
+        btn.disabled = false;
+    }
+}
+
+function downloadPDF() {
+    const element = document.getElementById('pdfContent');
+    const rank = document.getElementById('rankInput').value;
+
+    // Create a temporary header for the PDF report
+    const headerHtml = `
+        <div style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px;">
+            <h2 style="color: #cc0000; font-family: sans-serif; margin:0;">VidyaSaarthi College Predictions</h2>
+            <p style="color: #666; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0;">Report Generated for Rank: ${rank}</p>
+        </div>
+    `;
+
+    // Clone the table, remove max-height so all rows print, and inject the header
+    const clone = element.cloneNode(true);
+    clone.querySelector('.table-responsive').style.maxHeight = 'none';
+    clone.insertAdjacentHTML('afterbegin', headerHtml);
+
+    const opt = {
+      margin:       0.5,
+      filename:     `VidyaSaarthi_College_Predictions_Rank_${rank}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+    };
+
+    // Generate PDF
+    html2pdf().set(opt).from(clone).save();
+}
+</script>
+{% endblock %}

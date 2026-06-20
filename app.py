@@ -2,7 +2,7 @@ import os, csv, io
 import re
 import json
 from datetime import datetime, date
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, ProgrammingError
@@ -15,7 +15,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from models import db, Staff, Student, Document, State, StateCategory, University, UniversityCategory, Exam, \
     Counselling, Form, CounsellingRound, College, StudentCounsellingRegistration, StudentRoundResult, \
     Course, StudentExamResult, Task, FormEvent, FinanceRecord, StudentFormSubmission, CounsellingActivity, RoundActivity, RoundArtifact, \
-    StudentActivityStatus, ImportantLink, StateBond
+    StudentActivityStatus, ImportantLink, StateBond, PredictorCutoff
 
 app = Flask(__name__)
 
@@ -756,6 +756,10 @@ def add_counselling_round(counselling_id):
 @login_required
 def delete_counselling_round(round_id):
     c_round = CounsellingRound.query.get_or_404(round_id)
+
+    # 🚨 FIX: Save the parent ID before we delete the round object!
+    couns_id = c_round.counselling_id
+
     try:
         db.session.delete(c_round)
         db.session.commit()
@@ -763,6 +767,7 @@ def delete_counselling_round(round_id):
     except IntegrityError:
         db.session.rollback()
         flash("⚠️ Cannot delete this round because students already have seat allotments saved under it.", "error")
+
     return redirect(url_for('master_data', tab='master-couns-tab', open_modal=couns_id))
 
 @app.route('/admissions/form/<int:form_id>/add_event', methods=['POST'])
@@ -3336,6 +3341,106 @@ def all_exam_results():
                            all_count=all_count,
                            jee_count=jee_count,
                            neet_count=neet_count)
+
+
+# ==========================================
+# COLLEGE PREDICTOR ROUTES
+# ==========================================
+@app.route('/predictor', methods=['GET'])
+@login_required
+def college_predictor():
+    # Fetch unique values for the dropdown filters, ignoring empty ones
+    states = db.session.query(PredictorCutoff.state).distinct().filter(PredictorCutoff.state != '').order_by(
+        PredictorCutoff.state).all()
+    types = db.session.query(PredictorCutoff.college_type).distinct().filter(
+        PredictorCutoff.college_type != '').order_by(PredictorCutoff.college_type).all()
+    quotas = db.session.query(PredictorCutoff.quota).distinct().filter(PredictorCutoff.quota != '').order_by(
+        PredictorCutoff.quota).all()
+    categories = db.session.query(PredictorCutoff.category).distinct().filter(PredictorCutoff.category != '').order_by(
+        PredictorCutoff.category).all()
+
+    return render_template('predictor.html',
+                           states=[s[0] for s in states if s[0]],
+                           types=[t[0] for t in types if t[0]],
+                           quotas=[q[0] for q in quotas if q[0]],
+                           categories=[c[0] for c in categories if c[0]])
+
+
+@app.route('/predictor/upload', methods=['POST'])
+@login_required
+def upload_cutoffs():
+    if 'file' not in request.files:
+        flash("No file uploaded.", "error")
+        return redirect(url_for('college_predictor'))
+
+    file = request.files['file']
+    if file.filename == '':
+        flash("No selected file.", "error")
+        return redirect(url_for('college_predictor'))
+
+    if file and file.filename.endswith('.csv'):
+        stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+        csv_input = csv.DictReader(stream)
+
+        # Clear the old PREDICTOR data so we start fresh with the new CSV
+        db.session.query(PredictorCutoff).delete()
+
+        count = 0
+        for row in csv_input:
+            try:
+                # Use .get() safely and default empty ranks to 0
+                opening = row.get('Opening Rank', '0').strip()
+                closing = row.get('Closing Rank', '0').strip()
+
+                opening_rank = int(float(opening)) if opening and opening.replace('.', '', 1).isdigit() else 0
+                closing_rank = int(float(closing)) if closing and closing.replace('.', '', 1).isdigit() else 0
+
+                cutoff = PredictorCutoff(
+                    state=row.get('State', '').strip(),
+                    college_type=row.get('Type', '').strip(),
+                    college_name=row.get('College Name', '').strip(),
+                    quota=row.get('Quota Description', '').strip(),
+                    category=row.get('Allotted Category Description', '').strip(),
+                    opening_rank=opening_rank,
+                    closing_rank=closing_rank
+                )
+                db.session.add(cutoff)
+                count += 1
+            except Exception as e:
+                continue
+
+        db.session.commit()
+        flash(f"Success! Uploaded {count} cutoff records into the predictor engine.", "success")
+    else:
+        flash("Please upload a valid CSV file.", "error")
+
+    return redirect(url_for('college_predictor'))
+
+
+@app.route('/predictor/results', methods=['POST'])
+@login_required
+def get_predictions():
+    data = request.json
+    student_rank = int(data.get('rank', 0))
+
+    query = PredictorCutoff.query
+
+    # 🚨 PREDICTION LOGIC:
+    # The student's rank must be LESS THAN OR EQUAL TO the closing rank of the college.
+    if student_rank > 0:
+        query = query.filter(PredictorCutoff.closing_rank >= student_rank)
+
+    # Apply standard text filters
+    if data.get('state'): query = query.filter(PredictorCutoff.state == data.get('state'))
+    if data.get('type'): query = query.filter(PredictorCutoff.college_type == data.get('type'))
+    if data.get('quota'): query = query.filter(PredictorCutoff.quota == data.get('quota'))
+    if data.get('category'): query = query.filter(PredictorCutoff.category == data.get('category'))
+
+    # Order the results so the closest / most likely colleges appear at the top
+    results = query.order_by(PredictorCutoff.closing_rank.asc()).limit(500).all()
+
+    return jsonify([r.to_dict() for r in results])
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)
