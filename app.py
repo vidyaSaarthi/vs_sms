@@ -3349,21 +3349,27 @@ def all_exam_results():
 @app.route('/predictor', methods=['GET'])
 @login_required
 def college_predictor():
-    # Fetch unique values for the dropdown filters, ignoring empty ones
+    # Fetch unique values for the dropdown filters
     states = db.session.query(PredictorCutoff.state).distinct().filter(PredictorCutoff.state != '').order_by(
         PredictorCutoff.state).all()
+    courses = db.session.query(PredictorCutoff.course).distinct().filter(PredictorCutoff.course != '').order_by(
+        PredictorCutoff.course).all()
     types = db.session.query(PredictorCutoff.college_type).distinct().filter(
         PredictorCutoff.college_type != '').order_by(PredictorCutoff.college_type).all()
     quotas = db.session.query(PredictorCutoff.quota).distinct().filter(PredictorCutoff.quota != '').order_by(
         PredictorCutoff.quota).all()
     categories = db.session.query(PredictorCutoff.category).distinct().filter(PredictorCutoff.category != '').order_by(
         PredictorCutoff.category).all()
+    domiciles = db.session.query(PredictorCutoff.domicile).distinct().filter(PredictorCutoff.domicile != '').order_by(
+        PredictorCutoff.domicile).all()
 
     return render_template('predictor.html',
                            states=[s[0] for s in states if s[0]],
+                           courses=[c[0] for c in courses if c[0]],
                            types=[t[0] for t in types if t[0]],
                            quotas=[q[0] for q in quotas if q[0]],
-                           categories=[c[0] for c in categories if c[0]])
+                           categories=[c[0] for c in categories if c[0]],
+                           domiciles=[d[0] for d in domiciles if d[0]])
 
 
 @app.route('/predictor/upload', methods=['POST'])
@@ -3382,25 +3388,38 @@ def upload_cutoffs():
         stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
         csv_input = csv.DictReader(stream)
 
-        # Clear the old PREDICTOR data so we start fresh with the new CSV
-        db.session.query(PredictorCutoff).delete()
+        # Clear the old data
+        db.session.execute(text('DROP TABLE IF EXISTS predictor_cutoffs CASCADE'))
+        db.session.commit()
+        db.create_all()
 
         count = 0
         for row in csv_input:
             try:
-                # Use .get() safely and default empty ranks to 0
-                opening = row.get('Opening Rank', '0').strip()
-                closing = row.get('Closing Rank', '0').strip()
+                # 🚨 SMART RANK PARSER: Look through all columns to find the numbers (Rounds)
+                ranks = []
+                # Columns we know are NOT numbers
+                exclude_cols = ['State', 'Course', 'Type', 'Quota', 'Quota Description', 'College Name',
+                                'Allotted Category', 'Allotted Category Description', 'Domicile']
 
-                opening_rank = int(float(opening)) if opening and opening.replace('.', '', 1).isdigit() else 0
-                closing_rank = int(float(closing)) if closing and closing.replace('.', '', 1).isdigit() else 0
+                for key, value in row.items():
+                    if key and value and key not in exclude_cols:
+                        clean_val = str(value).replace(',', '').strip()
+                        if clean_val.isdigit():
+                            ranks.append(int(clean_val))
+
+                # The "Closing Rank" is the highest rank achieved across all rounds
+                closing_rank = max(ranks) if ranks else 0
+                opening_rank = min(ranks) if ranks else 0
 
                 cutoff = PredictorCutoff(
                     state=row.get('State', '').strip(),
+                    course=row.get('Course', '').strip(),  # Added Course
                     college_type=row.get('Type', '').strip(),
                     college_name=row.get('College Name', '').strip(),
                     quota=row.get('Quota Description', '').strip(),
                     category=row.get('Allotted Category Description', '').strip(),
+                    domicile=row.get('Domicile', '').strip(),  # Added Domicile
                     opening_rank=opening_rank,
                     closing_rank=closing_rank
                 )
@@ -3425,22 +3444,20 @@ def get_predictions():
 
     query = PredictorCutoff.query
 
-    # 🚨 PREDICTION LOGIC:
-    # The student's rank must be LESS THAN OR EQUAL TO the closing rank of the college.
     if student_rank > 0:
         query = query.filter(PredictorCutoff.closing_rank >= student_rank)
 
-    # Apply standard text filters
+    # Apply all filters
     if data.get('state'): query = query.filter(PredictorCutoff.state == data.get('state'))
+    if data.get('course'): query = query.filter(PredictorCutoff.course == data.get('course'))
     if data.get('type'): query = query.filter(PredictorCutoff.college_type == data.get('type'))
     if data.get('quota'): query = query.filter(PredictorCutoff.quota == data.get('quota'))
     if data.get('category'): query = query.filter(PredictorCutoff.category == data.get('category'))
+    if data.get('domicile'): query = query.filter(PredictorCutoff.domicile == data.get('domicile'))
 
-    # Order the results so the closest / most likely colleges appear at the top
     results = query.order_by(PredictorCutoff.closing_rank.asc()).limit(500).all()
 
     return jsonify([r.to_dict() for r in results])
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=5000)

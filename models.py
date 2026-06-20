@@ -729,25 +729,30 @@ class StateBond(db.Model):
 
 
 # 🚨 NEW: Dedicated table for the College Predictor CSV Uploads
+# 🚨 Dedicated table for the College Predictor CSV Uploads
 class PredictorCutoff(db.Model):
     __tablename__ = 'predictor_cutoffs'
 
     id = db.Column(db.Integer, primary_key=True)
     state = db.Column(db.String(100))
+    course = db.Column(db.String(100))  # Added Course
     college_type = db.Column(db.String(100))
     college_name = db.Column(db.String(500))
     quota = db.Column(db.String(100))
     category = db.Column(db.String(100))
+    domicile = db.Column(db.String(100))  # Added Domicile
     opening_rank = db.Column(db.Integer)
     closing_rank = db.Column(db.Integer)
 
     def to_dict(self):
         return {
             'state': self.state,
+            'course': self.course,  # Added Course
             'college_type': self.college_type,
             'college_name': self.college_name,
             'quota': self.quota,
             'category': self.category,
+            'domicile': self.domicile,  # Added Domicile
             'opening_rank': self.opening_rank,
             'closing_rank': self.closing_rank
         }
