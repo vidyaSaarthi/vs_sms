@@ -75,14 +75,17 @@
                         </select>
                     </div>
 
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <label class="filter-label">Category / Categories</label>
                         <select id="categoryFilter" multiple class="form-control">
                             {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+                        <button type="button" onclick="clearFilters()" class="btn btn-white fw-bold shadow-sm" style="border: 1px solid #ced4da; height: 45px; color: #6c757d;" title="Reset all filters">
+                            <i class="fas fa-undo"></i>
+                        </button>
                         <button type="submit" id="predictBtn" class="btn w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580; height: 45px;">
                             <i class="fas fa-search me-1"></i> Predict
                         </button>
@@ -182,6 +185,28 @@ document.getElementById('quotaFilter').addEventListener('change', () => triggerC
 document.getElementById('categoryFilter').addEventListener('change', () => triggerCascade('category'));
 document.getElementById('domicileFilter').addEventListener('change', () => triggerCascade('domicile'));
 
+
+// 🚨 NEW: Function to instantly wipe all selections and fetch the original dropdown options
+function clearFilters() {
+    // Clear rank input
+    document.getElementById('rankInput').value = '';
+
+    // Wipe selections from the Choices.js instances
+    cCourse.removeActiveItems();
+    cState.removeActiveItems();
+    cType.removeActiveItems();
+    cQuota.removeActiveItems();
+    cCat.removeActiveItems();
+    cDom.removeActiveItems();
+
+    // Hide the results table
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('resultsBody').innerHTML = '';
+    document.getElementById('resultCount').innerText = '0';
+
+    // Trigger the backend to repopulate all dropdowns back to their full, unfiltered default lists
+    triggerCascade(null);
+}
 
 // 3. Prediction Engine
 async function runPrediction() {
