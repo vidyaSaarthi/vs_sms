@@ -140,37 +140,39 @@ const choiceConfig = { removeItemButton: true, searchEnabled: true, placeholderV
 const cCourse = new Choices('#courseFilter', choiceConfig);
 const cState = new Choices('#stateFilter', choiceConfig);
 const cType = new Choices('#typeFilter', choiceConfig);
+const cDom = new Choices('#domicileFilter', choiceConfig);
 const cQuota = new Choices('#quotaFilter', choiceConfig);
 const cCat = new Choices('#categoryFilter', choiceConfig);
-const cDom = new Choices('#domicileFilter', choiceConfig);
+
+// Define the strict top-down hierarchy
+const hierarchy = ['course', 'state', 'type', 'domicile', 'quota', 'category'];
+const instances = {
+    'course': cCourse, 'state': cState, 'type': cType,
+    'domicile': cDom, 'quota': cQuota, 'category': cCat
+};
 
 // Function to instantly wipe all selections
 function clearFilters() {
     document.getElementById('rankInput').value = '';
 
-    cCourse.removeActiveItems();
-    cState.removeActiveItems();
-    cType.removeActiveItems();
-    cQuota.removeActiveItems();
-    cCat.removeActiveItems();
-    cDom.removeActiveItems();
+    Object.values(instances).forEach(inst => inst.removeActiveItems());
 
     document.getElementById('resultsCard').style.display = 'none';
     document.getElementById('resultsBody').innerHTML = '';
     document.getElementById('resultCount').innerText = '0';
 
-    triggerCascade(null);
+    triggerCascade(null); // Passing null tells it to reset all dropdowns
 }
 
-// 2. Cascading Logic
+// 2. Strict Top-Down Cascading Logic
 async function triggerCascade(changedTrigger) {
     const payload = {
         course: cCourse.getValue(true),
         state: cState.getValue(true),
         type: cType.getValue(true),
+        domicile: cDom.getValue(true),
         quota: cQuota.getValue(true),
-        category: cCat.getValue(true),
-        domicile: cDom.getValue(true)
+        category: cCat.getValue(true)
     };
 
     const res = await fetch("{{ url_for('get_predictor_options') }}", {
@@ -187,24 +189,47 @@ async function triggerCascade(changedTrigger) {
         const mappedOpts = newOptions.map(opt => ({
             value: opt,
             label: opt,
+            // Keep it selected if it is still a valid option in the new list
             selected: currentVals.includes(opt)
         }));
         instance.setChoices(mappedOpts, 'value', 'label', true);
     }
 
-    if (changedTrigger !== 'state') updateInstance(cState, data.states);
-    if (changedTrigger !== 'type') updateInstance(cType, data.types);
-    if (changedTrigger !== 'quota') updateInstance(cQuota, data.quotas);
-    if (changedTrigger !== 'category') updateInstance(cCat, data.categories);
-    if (changedTrigger !== 'domicile') updateInstance(cDom, data.domiciles);
+    // 🚨 Only update fields that are BELOW the changed trigger in the hierarchy
+    let shouldUpdate = false;
+    if (!changedTrigger) shouldUpdate = true; // If cleared, update everything
+
+    for (let i = 0; i < hierarchy.length; i++) {
+        const field = hierarchy[i];
+
+        if (shouldUpdate) {
+            let newOptions = [];
+            if (field === 'course') newOptions = data.courses;
+            if (field === 'state') newOptions = data.states;
+            if (field === 'type') newOptions = data.types;
+            if (field === 'domicile') newOptions = data.domiciles;
+            if (field === 'quota') newOptions = data.quotas;
+            if (field === 'category') newOptions = data.categories;
+
+            updateInstance(instances[field], newOptions);
+        }
+
+        // Once we hit the field that triggered the change, we flag to update everything BELOW it
+        if (field === changedTrigger) {
+            shouldUpdate = true;
+        }
+    }
 }
 
+// Attach event listeners for cascade
 document.getElementById('courseFilter').addEventListener('change', () => triggerCascade('course'));
 document.getElementById('stateFilter').addEventListener('change', () => triggerCascade('state'));
 document.getElementById('typeFilter').addEventListener('change', () => triggerCascade('type'));
+document.getElementById('domicileFilter').addEventListener('change', () => triggerCascade('domicile'));
 document.getElementById('quotaFilter').addEventListener('change', () => triggerCascade('quota'));
 document.getElementById('categoryFilter').addEventListener('change', () => triggerCascade('category'));
-document.getElementById('domicileFilter').addEventListener('change', () => triggerCascade('domicile'));
+
+// 3. Prediction Engine (Keep your existing runPrediction and downloadPDF functions below here...)
 
 // 3. Prediction Engine
 async function runPrediction() {

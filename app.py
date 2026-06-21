@@ -3453,42 +3453,33 @@ def upload_cutoffs():
     return redirect(url_for('college_predictor'))
 
 # 🚨 NEW: API to fetch Dynamic Cascading Options
+# 🚨 NEW: Strict Hierarchical Cascading API
 @app.route('/predictor/options', methods=['POST'])
 @login_required
 def get_predictor_options():
     data = request.json
-    query = PredictorCutoff.query
 
-    # Helper function to apply IN array filters
     def apply_in(q, col, vals):
         if vals and isinstance(vals, list) and len(vals) > 0:
             return q.filter(col.in_(vals))
         return q
 
-    # Apply current filters
-    query = apply_in(query, PredictorCutoff.course, data.get('course', []))
-    query = apply_in(query, PredictorCutoff.state, data.get('state', []))
-    query = apply_in(query, PredictorCutoff.college_type, data.get('type', []))
-    query = apply_in(query, PredictorCutoff.quota, data.get('quota', []))
-    query = apply_in(query, PredictorCutoff.category, data.get('category', []))
-    query = apply_in(query, PredictorCutoff.domicile, data.get('domicile', []))
+    # 1. Enforce strict top-down cascading: Course -> State -> Type -> Domicile -> Quota -> Category
+    q_course = PredictorCutoff.query
+    q_state = apply_in(q_course, PredictorCutoff.course, data.get('course', []))
+    q_type = apply_in(q_state, PredictorCutoff.state, data.get('state', []))
+    q_domicile = apply_in(q_type, PredictorCutoff.college_type, data.get('type', []))
+    q_quota = apply_in(q_domicile, PredictorCutoff.domicile, data.get('domicile', []))
+    q_category = apply_in(q_quota, PredictorCutoff.quota, data.get('quota', []))
 
-    # Fetch distinct combinations based on the filters applied so far
-    valid_records = query.with_entities(
-        PredictorCutoff.state,
-        PredictorCutoff.college_type,
-        PredictorCutoff.quota,
-        PredictorCutoff.category,
-        PredictorCutoff.domicile
-    ).distinct().all()
-
-    # Package the isolated lists back to the frontend
+    # 2. Return isolated lists, safely checking for empty values
     return jsonify({
-        'states': sorted(list(set([r.state for r in valid_records if r.state]))),
-        'types': sorted(list(set([r.college_type for r in valid_records if r.college_type]))),
-        'quotas': sorted(list(set([r.quota for r in valid_records if r.quota]))),
-        'categories': sorted(list(set([r.category for r in valid_records if r.category]))),
-        'domiciles': sorted(list(set([r.domicile for r in valid_records if r.domicile])))
+        'courses': sorted(list(set([r.course for r in q_course.with_entities(PredictorCutoff.course).distinct().all() if r.course]))),
+        'states': sorted(list(set([r.state for r in q_state.with_entities(PredictorCutoff.state).distinct().all() if r.state]))),
+        'types': sorted(list(set([r.college_type for r in q_type.with_entities(PredictorCutoff.college_type).distinct().all() if r.college_type]))),
+        'domiciles': sorted(list(set([r.domicile for r in q_domicile.with_entities(PredictorCutoff.domicile).distinct().all() if r.domicile]))),
+        'quotas': sorted(list(set([r.quota for r in q_quota.with_entities(PredictorCutoff.quota).distinct().all() if r.quota]))),
+        'categories': sorted(list(set([r.category for r in q_category.with_entities(PredictorCutoff.category).distinct().all() if r.category])))
     })
 
 
