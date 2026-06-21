@@ -12,10 +12,38 @@
     .choices[data-type*="select-multiple"] .choices__button { border-left: 1px solid rgba(255,255,255,0.3); }
     .filter-label { font-size: 0.85rem; text-transform: uppercase; color: #1e3c72; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 5px;}
 
-    /* Ensure the table expands fully when generating PDF */
+    /* 🚨 BULLETPROOF PDF EXPORT STYLES */
+    .pdf-export-mode {
+        width: 1100px !important; /* Force a strict Landscape A4 width */
+        max-width: 1100px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: white !important;
+    }
     .pdf-export-mode .table-responsive {
         max-height: none !important;
         overflow: visible !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    .pdf-export-mode .table {
+        table-layout: fixed !important; /* Force strict column widths */
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
+    }
+    .pdf-export-mode th,
+    .pdf-export-mode td {
+        white-space: normal !important; /* Allow text wrapping */
+        word-wrap: break-word !important;
+        vertical-align: middle !important;
+        font-size: 0.8rem !important; /* Shrink font slightly for PDF */
+        padding: 10px 8px !important;
+    }
+    /* Lock specific column widths so College Name doesn't get squished */
+    .pdf-export-mode th:nth-child(4),
+    .pdf-export-mode td:nth-child(4) {
+        width: 25% !important;
     }
 </style>
 
@@ -116,14 +144,14 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 10;">
                         <tr>
-                            <th class="ps-4 py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">State</th>
-                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Course</th>
-                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Type</th>
-                            <th class="py-3 text-secondary text-uppercase" style="width: 25%; font-size: 0.8rem;">College Name</th>
-                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Quota</th>
-                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Category</th>
-                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Domicile</th>
-                            <th class="py-3 pe-4 text-danger text-end text-uppercase" style="font-size: 0.8rem;">Cutoff & Round</th>
+                            <th class="ps-4 py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 10%;">State</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 8%;">Course</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 10%;">Type</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 25%;">College Name</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 12%;">Quota</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 12%;">Category</th>
+                            <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem; width: 10%;">Domicile</th>
+                            <th class="py-3 pe-4 text-danger text-end text-uppercase" style="font-size: 0.8rem; width: 13%;">Cutoff & Round</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody">
@@ -154,14 +182,11 @@ const instances = {
 // Function to instantly wipe all selections
 function clearFilters() {
     document.getElementById('rankInput').value = '';
-
     Object.values(instances).forEach(inst => inst.removeActiveItems());
-
     document.getElementById('resultsCard').style.display = 'none';
     document.getElementById('resultsBody').innerHTML = '';
     document.getElementById('resultCount').innerText = '0';
-
-    triggerCascade(null); // Passing null tells it to reset all dropdowns
+    triggerCascade(null);
 }
 
 // 2. Strict Top-Down Cascading Logic
@@ -189,19 +214,16 @@ async function triggerCascade(changedTrigger) {
         const mappedOpts = newOptions.map(opt => ({
             value: opt,
             label: opt,
-            // Keep it selected if it is still a valid option in the new list
             selected: currentVals.includes(opt)
         }));
         instance.setChoices(mappedOpts, 'value', 'label', true);
     }
 
-    // 🚨 Only update fields that are BELOW the changed trigger in the hierarchy
     let shouldUpdate = false;
-    if (!changedTrigger) shouldUpdate = true; // If cleared, update everything
+    if (!changedTrigger) shouldUpdate = true;
 
     for (let i = 0; i < hierarchy.length; i++) {
         const field = hierarchy[i];
-
         if (shouldUpdate) {
             let newOptions = [];
             if (field === 'course') newOptions = data.courses;
@@ -210,26 +232,20 @@ async function triggerCascade(changedTrigger) {
             if (field === 'domicile') newOptions = data.domiciles;
             if (field === 'quota') newOptions = data.quotas;
             if (field === 'category') newOptions = data.categories;
-
             updateInstance(instances[field], newOptions);
         }
-
-        // Once we hit the field that triggered the change, we flag to update everything BELOW it
         if (field === changedTrigger) {
             shouldUpdate = true;
         }
     }
 }
 
-// Attach event listeners for cascade
 document.getElementById('courseFilter').addEventListener('change', () => triggerCascade('course'));
 document.getElementById('stateFilter').addEventListener('change', () => triggerCascade('state'));
 document.getElementById('typeFilter').addEventListener('change', () => triggerCascade('type'));
 document.getElementById('domicileFilter').addEventListener('change', () => triggerCascade('domicile'));
 document.getElementById('quotaFilter').addEventListener('change', () => triggerCascade('quota'));
 document.getElementById('categoryFilter').addEventListener('change', () => triggerCascade('category'));
-
-// 3. Prediction Engine (Keep your existing runPrediction and downloadPDF functions below here...)
 
 // 3. Prediction Engine
 async function runPrediction() {
@@ -300,60 +316,48 @@ async function runPrediction() {
     }
 }
 
-// 🚨 BULLETPROOF PDF GENERATOR
-// 🚨 BULLETPROOF PDF GENERATOR
+// 🚨 PDF GENERATOR WITH STRICT ALIGNMENT
 function downloadPDF() {
-    // 1. Loading State
-    const btn = document.querySelector('button[onclick="downloadPDF()"]');
+    const btn = document.getElementById('downloadPdfBtn');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-danger me-1"></i> Generating...';
     btn.disabled = true;
 
     const rank = document.getElementById('rankInput').value;
-
-    // We target the live element on the page, NOT a clone
     const element = document.getElementById('pdfContent');
 
-    // Temporarily add a class that removes max-height and scrolling
+    // Activate strict PDF CSS rules
     element.classList.add('pdf-export-mode');
 
-    // Create a temporary header div and prepend it to the live element
+    // Inject temporary PDF header
     const headerDiv = document.createElement('div');
     headerDiv.id = 'tempPdfHeader';
     headerDiv.innerHTML = `
-        <div style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px; background-color: white;">
-            <h2 style="color: #cc0000; font-family: sans-serif; margin:0;">VidyaSaarthi College Predictions</h2>
-            <p style="color: #666; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0;">Report Generated for Rank: ${rank}</p>
+        <div style="padding: 20px 30px; text-align: left; border-bottom: 3px solid #cc0000; margin-bottom: 20px; background-color: #f8f9fa;">
+            <h2 style="color: #cc0000; font-family: sans-serif; font-weight: bold; margin:0;">VidyaSaarthi College Options</h2>
+            <p style="color: #1e3c72; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0; font-size: 1.1rem;">Predicted Allotments for Rank: <span style="color: #cc0000;">${rank}</span></p>
         </div>
     `;
     element.insertBefore(headerDiv, element.firstChild);
 
-    // Configure PDF settings
+    // PDF Configuration - Enforce strict zero-scroll, strict width
     const opt = {
-      margin:       0.5,
+      margin:       0.2, // Tiny margin so the table utilizes the whole page
       filename:     `VidyaSaarthi_Predictions_Rank_${rank}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      // windowWidth ensures the canvas renders wide enough to prevent cutoff
-      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 1200 },
+      image:        { type: 'jpeg', quality: 1.0 },
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 1100 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
     };
 
-    // Generate and save
     html2pdf().set(opt).from(element).save().then(() => {
-        // CLEANUP: After generation, remove the temporary class to restore scrolling
+        // Cleanup UI
         element.classList.remove('pdf-export-mode');
-
-        // Remove the temporary header from the UI
         const tempHeader = document.getElementById('tempPdfHeader');
-        if (tempHeader) {
-            tempHeader.remove();
-        }
-
-        // Reset the download button
+        if (tempHeader) tempHeader.remove();
         btn.innerHTML = originalText;
         btn.disabled = false;
     }).catch(err => {
-        console.error("PDF Generation Error:", err);
+        console.error("PDF Error:", err);
         element.classList.remove('pdf-export-mode');
         const tempHeader = document.getElementById('tempPdfHeader');
         if (tempHeader) tempHeader.remove();
