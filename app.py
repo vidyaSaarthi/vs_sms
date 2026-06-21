@@ -3393,7 +3393,7 @@ def upload_cutoffs():
         return redirect(url_for('college_predictor'))
 
     if file and file.filename.endswith('.csv'):
-        stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+        stream = io.StringIO(file.stream.read().decode("utf-8-sig"), newline=None)
         csv_input = csv.DictReader(stream)
 
         # Clear the old data
