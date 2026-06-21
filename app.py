@@ -3357,11 +3357,11 @@ def all_exam_results():
 @app.route('/predictor', methods=['GET'])
 @login_required
 def college_predictor():
-    # Fetch unique values for the dropdown filters
-    states = db.session.query(PredictorCutoff.state).distinct().filter(PredictorCutoff.state != '').order_by(
-        PredictorCutoff.state).all()
+    # Initial load sends all options. JS will handle the cascading logic.
     courses = db.session.query(PredictorCutoff.course).distinct().filter(PredictorCutoff.course != '').order_by(
         PredictorCutoff.course).all()
+    states = db.session.query(PredictorCutoff.state).distinct().filter(PredictorCutoff.state != '').order_by(
+        PredictorCutoff.state).all()
     types = db.session.query(PredictorCutoff.college_type).distinct().filter(
         PredictorCutoff.college_type != '').order_by(PredictorCutoff.college_type).all()
     quotas = db.session.query(PredictorCutoff.quota).distinct().filter(PredictorCutoff.quota != '').order_by(
@@ -3372,8 +3372,8 @@ def college_predictor():
         PredictorCutoff.domicile).all()
 
     return render_template('predictor.html',
-                           states=[s[0] for s in states if s[0]],
                            courses=[c[0] for c in courses if c[0]],
+                           states=[s[0] for s in states if s[0]],
                            types=[t[0] for t in types if t[0]],
                            quotas=[q[0] for q in quotas if q[0]],
                            categories=[c[0] for c in categories if c[0]],
@@ -3393,10 +3393,10 @@ def upload_cutoffs():
         return redirect(url_for('college_predictor'))
 
     if file and file.filename.endswith('.csv'):
+        # using utf-8-sig to automatically remove Excel's invisible BOM characters
         stream = io.StringIO(file.stream.read().decode("utf-8-sig"), newline=None)
         csv_input = csv.DictReader(stream)
 
-        # Clear the old data
         db.session.execute(text('DROP TABLE IF EXISTS predictor_cutoffs CASCADE'))
         db.session.commit()
         db.create_all()
@@ -3404,9 +3404,7 @@ def upload_cutoffs():
         count = 0
         for row in csv_input:
             try:
-                # 🚨 SMART RANK PARSER: Look through all columns to find the numbers (Rounds)
                 ranks = []
-                # Columns we know are NOT numbers
                 exclude_cols = ['State', 'Course', 'Type', 'Quota', 'Quota Description', 'College Name',
                                 'Allotted Category', 'Allotted Category Description', 'Domicile']
 
@@ -3416,18 +3414,17 @@ def upload_cutoffs():
                         if clean_val.isdigit():
                             ranks.append(int(clean_val))
 
-                # The "Closing Rank" is the highest rank achieved across all rounds
                 closing_rank = max(ranks) if ranks else 0
                 opening_rank = min(ranks) if ranks else 0
 
                 cutoff = PredictorCutoff(
                     state=row.get('State', '').strip(),
-                    course=row.get('Course', '').strip(),  # Added Course
+                    course=row.get('Course', '').strip(),
                     college_type=row.get('Type', '').strip(),
                     college_name=row.get('College Name', '').strip(),
                     quota=row.get('Quota Description', '').strip(),
                     category=row.get('Allotted Category Description', '').strip(),
-                    domicile=row.get('Domicile', '').strip(),  # Added Domicile
+                    domicile=row.get('Domicile', '').strip(),
                     opening_rank=opening_rank,
                     closing_rank=closing_rank
                 )
@@ -3444,6 +3441,46 @@ def upload_cutoffs():
     return redirect(url_for('college_predictor'))
 
 
+# 🚨 NEW: API to fetch Dynamic Cascading Options
+@app.route('/predictor/options', methods=['POST'])
+@login_required
+def get_predictor_options():
+    data = request.json
+    query = PredictorCutoff.query
+
+    # Helper function to apply IN array filters
+    def apply_in(q, col, vals):
+        if vals and isinstance(vals, list) and len(vals) > 0:
+            return q.filter(col.in_(vals))
+        return q
+
+    # Apply current filters
+    query = apply_in(query, PredictorCutoff.course, data.get('course', []))
+    query = apply_in(query, PredictorCutoff.state, data.get('state', []))
+    query = apply_in(query, PredictorCutoff.college_type, data.get('type', []))
+    query = apply_in(query, PredictorCutoff.quota, data.get('quota', []))
+    query = apply_in(query, PredictorCutoff.category, data.get('category', []))
+    query = apply_in(query, PredictorCutoff.domicile, data.get('domicile', []))
+
+    # Fetch distinct combinations based on the filters applied so far
+    valid_records = query.with_entities(
+        PredictorCutoff.state,
+        PredictorCutoff.college_type,
+        PredictorCutoff.quota,
+        PredictorCutoff.category,
+        PredictorCutoff.domicile
+    ).distinct().all()
+
+    # Package the isolated lists back to the frontend
+    return jsonify({
+        'states': sorted(list(set([r.state for r in valid_records if r.state]))),
+        'types': sorted(list(set([r.college_type for r in valid_records if r.college_type]))),
+        'quotas': sorted(list(set([r.quota for r in valid_records if r.quota]))),
+        'categories': sorted(list(set([r.category for r in valid_records if r.category]))),
+        'domiciles': sorted(list(set([r.domicile for r in valid_records if r.domicile])))
+    })
+
+
 @app.route('/predictor/results', methods=['POST'])
 @login_required
 def get_predictions():
@@ -3455,13 +3492,18 @@ def get_predictions():
     if student_rank > 0:
         query = query.filter(PredictorCutoff.closing_rank >= student_rank)
 
-    # Apply all filters
-    if data.get('state'): query = query.filter(PredictorCutoff.state == data.get('state'))
-    if data.get('course'): query = query.filter(PredictorCutoff.course == data.get('course'))
-    if data.get('type'): query = query.filter(PredictorCutoff.college_type == data.get('type'))
-    if data.get('quota'): query = query.filter(PredictorCutoff.quota == data.get('quota'))
-    if data.get('category'): query = query.filter(PredictorCutoff.category == data.get('category'))
-    if data.get('domicile'): query = query.filter(PredictorCutoff.domicile == data.get('domicile'))
+    def apply_in(q, col, vals):
+        if vals and isinstance(vals, list) and len(vals) > 0:
+            return q.filter(col.in_(vals))
+        return q
+
+    # 🚨 NOW SUPPORTS ARRAYS (Multi-Select)
+    query = apply_in(query, PredictorCutoff.course, data.get('course', []))
+    query = apply_in(query, PredictorCutoff.state, data.get('state', []))
+    query = apply_in(query, PredictorCutoff.college_type, data.get('type', []))
+    query = apply_in(query, PredictorCutoff.quota, data.get('quota', []))
+    query = apply_in(query, PredictorCutoff.category, data.get('category', []))
+    query = apply_in(query, PredictorCutoff.domicile, data.get('domicile', []))
 
     results = query.order_by(PredictorCutoff.closing_rank.asc()).limit(500).all()
 

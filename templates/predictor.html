@@ -2,9 +2,19 @@
 
 {% block content %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<style>
+    /* Styling for Multi-Select Elements to match Brand */
+    .choices__inner { border-radius: 8px; border-color: #dee2e6; background-color: #fff; min-height: 45px;}
+    .choices__list--multiple .choices__item { background-color: #cc0000; border: 1px solid #a30000; border-radius: 4px; }
+    .choices[data-type*="select-multiple"] .choices__button { border-left: 1px solid rgba(255,255,255,0.3); }
+    .filter-label { font-size: 0.85rem; text-transform: uppercase; color: #1e3c72; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 5px;}
+</style>
 
 <div class="container-fluid pt-4 pb-5">
-    
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0" style="color: #cc0000;">
@@ -12,9 +22,9 @@
             </h2>
             <p class="text-muted mb-0 fw-bold">Predict allotments based on historical cutoff data.</p>
         </div>
-        
+
         <form action="{{ url_for('upload_cutoffs') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
-            <input type="file" name="file" class="form-control form-control-sm border-danger" accept=".csv" required title="Please save your Excel file as CSV before uploading.">
+            <input type="file" name="file" class="form-control form-control-sm border-danger" accept=".csv" required>
             <button type="submit" class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: #cc0000;" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Processing...';">
                 <i class="fas fa-upload me-1"></i> Upload Cutoffs CSV
             </button>
@@ -23,64 +33,60 @@
 
     <div class="card shadow-sm border-0 mb-4" style="background-color: #ccdfed; border-radius: 12px;">
         <div class="card-body p-4">
-            <form id="predictorForm" class="row g-3 align-items-end" onsubmit="event.preventDefault(); runPrediction();">
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">Student Rank <span class="text-danger">*</span></label>
-                    <input type="number" id="rankInput" class="form-control fw-bold border-0 shadow-sm" placeholder="e.g. 25000" required min="1">
-                </div>
+            <form id="predictorForm" onsubmit="event.preventDefault(); runPrediction();">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="filter-label">Student Rank <span class="text-danger">*</span></label>
+                        <input type="number" id="rankInput" class="form-control fw-bold border-0 shadow-sm" style="height: 45px; font-size: 1.1rem; color: #cc0000;" placeholder="e.g. 25000" required min="1">
+                    </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">Course</label>
-                    <select id="courseFilter" class="form-select border-0 shadow-sm">
-                        <option value="">All Courses</option>
-                        {% for c in courses %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-                    </select>
-                </div>
+                    <div class="col-md-9">
+                        <label class="filter-label">Course(s)</label>
+                        <select id="courseFilter" multiple class="form-control">
+                            {% for c in courses %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">State</label>
-                    <select id="stateFilter" class="form-select border-0 shadow-sm">
-                        <option value="">All States</option>
-                        {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
-                    </select>
-                </div>
+                    <div class="col-md-4">
+                        <label class="filter-label">State(s)</label>
+                        <select id="stateFilter" multiple class="form-control">
+                            {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">College Type</label>
-                    <select id="typeFilter" class="form-select border-0 shadow-sm">
-                        <option value="">All Types</option>
-                        {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
-                    </select>
-                </div>
+                    <div class="col-md-4">
+                        <label class="filter-label">College Type(s)</label>
+                        <select id="typeFilter" multiple class="form-control">
+                            {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">Quota</label>
-                    <select id="quotaFilter" class="form-select border-0 shadow-sm">
-                        <option value="">All Quotas</option>
-                        {% for q in quotas %}<option value="{{ q }}">{{ q }}</option>{% endfor %}
-                    </select>
-                </div>
+                    <div class="col-md-4">
+                        <label class="filter-label">Domicile(s)</label>
+                        <select id="domicileFilter" multiple class="form-control">
+                            {% for d in domiciles %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">Category</label>
-                    <select id="categoryFilter" class="form-select border-0 shadow-sm">
-                        <option value="">All Categories</option>
-                        {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-                    </select>
-                </div>
+                    <div class="col-md-5">
+                        <label class="filter-label">Quota(s)</label>
+                        <select id="quotaFilter" multiple class="form-control">
+                            {% for q in quotas %}<option value="{{ q }}">{{ q }}</option>{% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold text-dark">Domicile</label>
-                    <select id="domicileFilter" class="form-select border-0 shadow-sm">
-                        <option value="">All Domiciles</option>
-                        {% for d in domiciles %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
-                    </select>
-                </div>
+                    <div class="col-md-5">
+                        <label class="filter-label">Category / Categories</label>
+                        <select id="categoryFilter" multiple class="form-control">
+                            {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-2">
-                    <button type="submit" id="predictBtn" class="btn w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580;">
-                        <i class="fas fa-search me-1"></i> Predict
-                    </button>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" id="predictBtn" class="btn w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580; height: 45px;">
+                            <i class="fas fa-search me-1"></i> Predict
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -99,7 +105,7 @@
         <div id="pdfContent" class="p-0 bg-white">
             <div class="table-responsive" style="max-height: 60vh;">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="position: sticky; top: 0; background-color: #f8f9fa;">
+                    <thead style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 10;">
                         <tr>
                             <th class="ps-4 py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">State</th>
                             <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Course</th>
@@ -120,6 +126,64 @@
 </div>
 
 <script>
+// 1. Initialize Multi-Select Libraries
+const choiceConfig = { removeItemButton: true, searchEnabled: true, placeholderValue: 'Select...' };
+const cCourse = new Choices('#courseFilter', choiceConfig);
+const cState = new Choices('#stateFilter', choiceConfig);
+const cType = new Choices('#typeFilter', choiceConfig);
+const cQuota = new Choices('#quotaFilter', choiceConfig);
+const cCat = new Choices('#categoryFilter', choiceConfig);
+const cDom = new Choices('#domicileFilter', choiceConfig);
+
+// 2. Cascading Logic
+async function triggerCascade(changedTrigger) {
+    const payload = {
+        course: cCourse.getValue(true),
+        state: cState.getValue(true),
+        type: cType.getValue(true),
+        quota: cQuota.getValue(true),
+        category: cCat.getValue(true),
+        domicile: cDom.getValue(true)
+    };
+
+    const res = await fetch("{{ url_for('get_predictor_options') }}", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    // Helper to gracefully replace options while keeping valid selections
+    function updateInstance(instance, newOptions) {
+        const currentVals = instance.getValue(true);
+        instance.clearStore();
+        const mappedOpts = newOptions.map(opt => ({
+            value: opt,
+            label: opt,
+            selected: currentVals.includes(opt)
+        }));
+        instance.setChoices(mappedOpts, 'value', 'label', true);
+    }
+
+    // Do not update the field that triggered the change!
+    if (changedTrigger !== 'state') updateInstance(cState, data.states);
+    if (changedTrigger !== 'type') updateInstance(cType, data.types);
+    if (changedTrigger !== 'quota') updateInstance(cQuota, data.quotas);
+    if (changedTrigger !== 'category') updateInstance(cCat, data.categories);
+    if (changedTrigger !== 'domicile') updateInstance(cDom, data.domiciles);
+}
+
+// Attach event listeners for cascade
+document.getElementById('courseFilter').addEventListener('change', () => triggerCascade('course'));
+document.getElementById('stateFilter').addEventListener('change', () => triggerCascade('state'));
+document.getElementById('typeFilter').addEventListener('change', () => triggerCascade('type'));
+document.getElementById('quotaFilter').addEventListener('change', () => triggerCascade('quota'));
+document.getElementById('categoryFilter').addEventListener('change', () => triggerCascade('category'));
+document.getElementById('domicileFilter').addEventListener('change', () => triggerCascade('domicile'));
+
+
+// 3. Prediction Engine
 async function runPrediction() {
     const rank = document.getElementById('rankInput').value;
     const btn = document.getElementById('predictBtn');
@@ -132,12 +196,12 @@ async function runPrediction() {
 
     const payload = {
         rank: rank,
-        state: document.getElementById('stateFilter').value,
-        course: document.getElementById('courseFilter').value,
-        type: document.getElementById('typeFilter').value,
-        quota: document.getElementById('quotaFilter').value,
-        category: document.getElementById('categoryFilter').value,
-        domicile: document.getElementById('domicileFilter').value
+        course: cCourse.getValue(true),
+        state: cState.getValue(true),
+        type: cType.getValue(true),
+        quota: cQuota.getValue(true),
+        category: cCat.getValue(true),
+        domicile: cDom.getValue(true)
     };
 
     try {
