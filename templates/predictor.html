@@ -117,7 +117,7 @@
                             <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Quota</th>
                             <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Category</th>
                             <th class="py-3 text-secondary text-uppercase" style="font-size: 0.8rem;">Domicile</th>
-                            <th class="py-3 pe-4 text-danger text-end text-uppercase" style="font-size: 0.8rem;">Closing Rank</th>
+                            <th class="py-3 pe-4 text-danger text-end text-uppercase" style="font-size: 0.8rem;">Cutoff & Round</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody">
@@ -245,6 +245,7 @@ async function runPrediction() {
         } else {
             data.forEach(college => {
                 const formattedRank = college.closing_rank > 0 ? college.closing_rank.toLocaleString() : 'N/A';
+                const roundText = college.closing_round && college.closing_round !== '-' ? college.closing_round : '';
 
                 tbody.innerHTML += `
                     <tr>
@@ -255,7 +256,10 @@ async function runPrediction() {
                         <td class="text-muted fw-bold small">${college.quota || '-'}</td>
                         <td><span class="badge shadow-sm" style="background-color: #ccdfed; color: #1e3c72; border: 1px solid rgba(30,60,114,0.1);">${college.category || '-'}</span></td>
                         <td class="text-dark small">${college.domicile || '-'}</td>
-                        <td class="pe-4 text-end fw-bold text-danger fs-6">${formattedRank}</td>
+                        <td class="pe-4 text-end">
+                            <div class="fw-bold text-danger fs-6">${formattedRank}</div>
+                            <div class="text-muted small fw-bold" style="font-size: 0.7rem; text-transform: uppercase;">${roundText}</div>
+                        </td>
                     </tr>
                 `;
             });

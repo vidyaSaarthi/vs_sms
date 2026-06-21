@@ -3404,7 +3404,8 @@ def upload_cutoffs():
         count = 0
         for row in csv_input:
             try:
-                ranks = []
+                # 🚨 SMART RANK PARSER: Store the round name along with the rank value
+                ranks_with_rounds = []
                 exclude_cols = ['State', 'Course', 'Type', 'Quota', 'Quota Description', 'College Name',
                                 'Allotted Category', 'Allotted Category Description', 'Domicile']
 
@@ -3412,10 +3413,20 @@ def upload_cutoffs():
                     if key and value and key not in exclude_cols:
                         clean_val = str(value).replace(',', '').strip()
                         if clean_val.isdigit():
-                            ranks.append(int(clean_val))
+                            ranks_with_rounds.append({'round': key.strip(), 'rank': int(clean_val)})
 
-                closing_rank = max(ranks) if ranks else 0
-                opening_rank = min(ranks) if ranks else 0
+                # Find the object with the highest rank and capture both rank and round name
+                if ranks_with_rounds:
+                    highest_round = max(ranks_with_rounds, key=lambda x: x['rank'])
+                    lowest_round = min(ranks_with_rounds, key=lambda x: x['rank'])
+
+                    closing_rank = highest_round['rank']
+                    closing_round_name = highest_round['round']
+                    opening_rank = lowest_round['rank']
+                else:
+                    closing_rank = 0
+                    opening_rank = 0
+                    closing_round_name = "-"
 
                 cutoff = PredictorCutoff(
                     state=row.get('State', '').strip(),
@@ -3426,7 +3437,8 @@ def upload_cutoffs():
                     category=row.get('Allotted Category Description', '').strip(),
                     domicile=row.get('Domicile', '').strip(),
                     opening_rank=opening_rank,
-                    closing_rank=closing_rank
+                    closing_rank=closing_rank,
+                    closing_round=closing_round_name  # 🚨 NEW: Save the Round Name
                 )
                 db.session.add(cutoff)
                 count += 1
@@ -3439,7 +3451,6 @@ def upload_cutoffs():
         flash("Please upload a valid CSV file.", "error")
 
     return redirect(url_for('college_predictor'))
-
 
 # 🚨 NEW: API to fetch Dynamic Cascading Options
 @app.route('/predictor/options', methods=['POST'])
