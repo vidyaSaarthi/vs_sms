@@ -11,6 +11,12 @@
     .choices__list--multiple .choices__item { background-color: #cc0000; border: 1px solid #a30000; border-radius: 4px; }
     .choices[data-type*="select-multiple"] .choices__button { border-left: 1px solid rgba(255,255,255,0.3); }
     .filter-label { font-size: 0.85rem; text-transform: uppercase; color: #1e3c72; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 5px;}
+
+    /* Ensure the table expands fully when generating PDF */
+    .pdf-export-mode .table-responsive {
+        max-height: none !important;
+        overflow: visible !important;
+    }
 </style>
 
 <div class="container-fluid pt-4 pb-5">
@@ -24,7 +30,7 @@
         </div>
 
         <form action="{{ url_for('upload_cutoffs') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
-            <input type="file" name="file" class="form-control form-control-sm border-danger" accept=".csv" required>
+            <input type="file" name="file" class="form-control form-control-sm border-danger" accept=".csv" required title="Please save your Excel file as CSV before uploading.">
             <button type="submit" class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: #cc0000;" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Processing...';">
                 <i class="fas fa-upload me-1"></i> Upload Cutoffs CSV
             </button>
@@ -75,15 +81,15 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label class="filter-label">Category / Categories</label>
                         <select id="categoryFilter" multiple class="form-control">
                             {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" onclick="clearFilters()" class="btn btn-white fw-bold shadow-sm" style="border: 1px solid #ced4da; height: 45px; color: #6c757d;" title="Reset all filters">
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="button" onclick="clearFilters()" class="btn btn-light border-secondary fw-bold shadow-sm" style="height: 45px;" title="Reset Filters">
                             <i class="fas fa-undo"></i>
                         </button>
                         <button type="submit" id="predictBtn" class="btn w-100 fw-bold shadow-sm" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580; height: 45px;">
@@ -100,13 +106,13 @@
             <h5 class="mb-0 fw-bold" style="color: #1e3c72;">
                 Predicted Options: <span id="resultCount" class="text-danger">0</span>
             </h5>
-            <button onclick="downloadPDF()" class="btn btn-sm btn-dark fw-bold shadow-sm">
+            <button onclick="downloadPDF()" class="btn btn-sm btn-dark fw-bold shadow-sm" id="downloadPdfBtn">
                 <i class="fas fa-file-pdf text-danger me-1"></i> Download PDF
             </button>
         </div>
 
         <div id="pdfContent" class="p-0 bg-white">
-            <div class="table-responsive" style="max-height: 60vh;">
+            <div class="table-responsive" style="max-height: 60vh;" id="tableContainer">
                 <table class="table table-hover align-middle mb-0">
                     <thead style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 10;">
                         <tr>
@@ -138,6 +144,24 @@ const cQuota = new Choices('#quotaFilter', choiceConfig);
 const cCat = new Choices('#categoryFilter', choiceConfig);
 const cDom = new Choices('#domicileFilter', choiceConfig);
 
+// Function to instantly wipe all selections
+function clearFilters() {
+    document.getElementById('rankInput').value = '';
+
+    cCourse.removeActiveItems();
+    cState.removeActiveItems();
+    cType.removeActiveItems();
+    cQuota.removeActiveItems();
+    cCat.removeActiveItems();
+    cDom.removeActiveItems();
+
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('resultsBody').innerHTML = '';
+    document.getElementById('resultCount').innerText = '0';
+
+    triggerCascade(null);
+}
+
 // 2. Cascading Logic
 async function triggerCascade(changedTrigger) {
     const payload = {
@@ -157,7 +181,6 @@ async function triggerCascade(changedTrigger) {
 
     const data = await res.json();
 
-    // Helper to gracefully replace options while keeping valid selections
     function updateInstance(instance, newOptions) {
         const currentVals = instance.getValue(true);
         instance.clearStore();
@@ -169,7 +192,6 @@ async function triggerCascade(changedTrigger) {
         instance.setChoices(mappedOpts, 'value', 'label', true);
     }
 
-    // Do not update the field that triggered the change!
     if (changedTrigger !== 'state') updateInstance(cState, data.states);
     if (changedTrigger !== 'type') updateInstance(cType, data.types);
     if (changedTrigger !== 'quota') updateInstance(cQuota, data.quotas);
@@ -177,36 +199,12 @@ async function triggerCascade(changedTrigger) {
     if (changedTrigger !== 'domicile') updateInstance(cDom, data.domiciles);
 }
 
-// Attach event listeners for cascade
 document.getElementById('courseFilter').addEventListener('change', () => triggerCascade('course'));
 document.getElementById('stateFilter').addEventListener('change', () => triggerCascade('state'));
 document.getElementById('typeFilter').addEventListener('change', () => triggerCascade('type'));
 document.getElementById('quotaFilter').addEventListener('change', () => triggerCascade('quota'));
 document.getElementById('categoryFilter').addEventListener('change', () => triggerCascade('category'));
 document.getElementById('domicileFilter').addEventListener('change', () => triggerCascade('domicile'));
-
-
-// 🚨 NEW: Function to instantly wipe all selections and fetch the original dropdown options
-function clearFilters() {
-    // Clear rank input
-    document.getElementById('rankInput').value = '';
-
-    // Wipe selections from the Choices.js instances
-    cCourse.removeActiveItems();
-    cState.removeActiveItems();
-    cType.removeActiveItems();
-    cQuota.removeActiveItems();
-    cCat.removeActiveItems();
-    cDom.removeActiveItems();
-
-    // Hide the results table
-    document.getElementById('resultsCard').style.display = 'none';
-    document.getElementById('resultsBody').innerHTML = '';
-    document.getElementById('resultCount').innerText = '0';
-
-    // Trigger the backend to repopulate all dropdowns back to their full, unfiltered default lists
-    triggerCascade(null);
-}
 
 // 3. Prediction Engine
 async function runPrediction() {
@@ -277,30 +275,51 @@ async function runPrediction() {
     }
 }
 
+// 🚨 FIXED: Reliable PDF Generation
 function downloadPDF() {
-    const element = document.getElementById('pdfContent');
-    const rank = document.getElementById('rankInput').value;
+    const btn = document.getElementById('downloadPdfBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin text-danger me-1"></i> Generating...';
+    btn.disabled = true;
 
+    const rank = document.getElementById('rankInput').value;
+    const element = document.getElementById('pdfContent');
+    const tableContainer = document.getElementById('tableContainer');
+
+    // Temporarily remove max-height so all rows render in the PDF
+    const originalMaxHeight = tableContainer.style.maxHeight;
+    const originalOverflow = tableContainer.style.overflow;
+    tableContainer.style.maxHeight = 'none';
+    tableContainer.style.overflow = 'visible';
+
+    // Create a temporary header for the PDF report
     const headerHtml = `
-        <div style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px;">
+        <div id="tempPdfHeader" style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px;">
             <h2 style="color: #cc0000; font-family: sans-serif; margin:0;">VidyaSaarthi College Predictions</h2>
             <p style="color: #666; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0;">Report Generated for Rank: ${rank}</p>
         </div>
     `;
 
-    const clone = element.cloneNode(true);
-    clone.querySelector('.table-responsive').style.maxHeight = 'none';
-    clone.insertAdjacentHTML('afterbegin', headerHtml);
+    element.insertAdjacentHTML('afterbegin', headerHtml);
 
     const opt = {
       margin:       0.5,
-      filename:     `VidyaSaarthi_College_Predictions_Rank_${rank}.pdf`,
+      filename:     `VidyaSaarthi_Predictions_Rank_${rank}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
     };
 
-    html2pdf().set(opt).from(clone).save();
+    html2pdf().set(opt).from(element).save().then(() => {
+        // Cleanup: Remove header and restore table height
+        const tempHeader = document.getElementById('tempPdfHeader');
+        if (tempHeader) tempHeader.remove();
+
+        tableContainer.style.maxHeight = originalMaxHeight;
+        tableContainer.style.overflow = originalOverflow;
+
+        btn.innerHTML = '<i class="fas fa-file-pdf text-danger me-1"></i> Download PDF';
+        btn.disabled = false;
+    });
 }
 </script>
 {% endblock %}
