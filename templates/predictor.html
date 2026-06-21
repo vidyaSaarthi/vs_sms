@@ -6,7 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <style>
-    /* 🚨 FIXED: Overrides the default Choices.js margin that breaks vertical alignment */
+    /* Styling for Multi-Select Elements */
     .choices { margin-bottom: 0 !important; }
     .choices__inner { border-radius: 8px; border-color: #dee2e6; background-color: #fff; min-height: 45px; padding-bottom: 0px !important;}
     .choices__list--multiple .choices__item { background-color: #cc0000; border: 1px solid #a30000; border-radius: 4px; margin-bottom: 0; }
@@ -15,37 +15,24 @@
     .filter-label { display: block; font-size: 0.85rem; text-transform: uppercase; color: #1e3c72; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px;}
     .custom-rank-input { height: 45px !important; border-radius: 8px; border: 1px solid #dee2e6; }
 
-    /* 🚨 BULLETPROOF PDF EXPORT STYLES */
-    .pdf-export-mode {
-        width: 1100px !important;
-        max-width: 1100px !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    /* 🚨 NEW: PDF-ONLY CLONE STYLES (Will not affect live UI) */
+    .print-clone-wrapper {
         background-color: white !important;
     }
-    .pdf-export-mode .table-responsive {
+    .print-clone-wrapper .table-responsive {
         max-height: none !important;
         overflow: visible !important;
-        width: 100% !important;
-        margin: 0 !important;
     }
-    .pdf-export-mode .table {
-        table-layout: fixed !important;
+    .print-clone-wrapper table {
         width: 100% !important;
-        max-width: 100% !important;
-        margin-bottom: 0 !important;
+        table-layout: auto !important; /* Let browser handle optimal spacing */
     }
-    .pdf-export-mode th,
-    .pdf-export-mode td {
+    .print-clone-wrapper th,
+    .print-clone-wrapper td {
         white-space: normal !important;
         word-wrap: break-word !important;
-        vertical-align: middle !important;
-        font-size: 0.8rem !important;
-        padding: 10px 8px !important;
-    }
-    .pdf-export-mode th:nth-child(4),
-    .pdf-export-mode td:nth-child(4) {
-        width: 25% !important;
+        font-size: 11px !important; /* Perfect size for A4 Landscape */
+        padding: 8px 6px !important;
     }
 </style>
 
@@ -76,14 +63,12 @@
                         <label class="filter-label">Student Rank <span class="text-danger">*</span></label>
                         <input type="number" id="rankInput" class="form-control fw-bold shadow-sm custom-rank-input" style="font-size: 1.1rem; color: #cc0000;" placeholder="e.g. 25000" required min="1">
                     </div>
-
                     <div class="col-md-5">
                         <label class="filter-label">Course(s)</label>
                         <select id="courseFilter" multiple class="form-control">
                             {% for c in courses %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
                         </select>
                     </div>
-
                     <div class="col-md-5">
                         <label class="filter-label">State(s)</label>
                         <select id="stateFilter" multiple class="form-control">
@@ -99,14 +84,12 @@
                             {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
                         </select>
                     </div>
-
                     <div class="col-md-4">
                         <label class="filter-label">Domicile(s)</label>
                         <select id="domicileFilter" multiple class="form-control">
                             {% for d in domiciles %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
                         </select>
                     </div>
-
                     <div class="col-md-4">
                         <label class="filter-label">Quota(s)</label>
                         <select id="quotaFilter" multiple class="form-control">
@@ -122,7 +105,6 @@
                             {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
                         </select>
                     </div>
-
                     <div class="col-md-4 d-flex gap-2">
                         <button type="button" onclick="clearFilters()" class="btn btn-light fw-bold shadow-sm px-4" style="height: 45px; border: 1px solid #ced4da; color: #495057;">
                             <i class="fas fa-undo me-1"></i> Reset
@@ -147,7 +129,7 @@
         </div>
 
         <div id="pdfContent" class="p-0 bg-white">
-            <div class="table-responsive" style="max-height: 60vh;" id="tableContainer">
+            <div class="table-responsive" style="max-height: 60vh;">
                 <table class="table table-hover align-middle mb-0">
                     <thead style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 10;">
                         <tr>
@@ -322,7 +304,7 @@ async function runPrediction() {
     }
 }
 
-// 🚨 LIVE-INJECTION PDF GENERATOR
+// 🚨 INVISIBLE CLONE METHOD (Prevents UI Shift & Blank Pages)
 function downloadPDF() {
     const btn = document.getElementById('downloadPdfBtn');
     const originalText = btn.innerHTML;
@@ -330,43 +312,51 @@ function downloadPDF() {
     btn.disabled = true;
 
     const rank = document.getElementById('rankInput').value;
-    const element = document.getElementById('pdfContent');
+    const liveElement = document.getElementById('pdfContent');
 
-    // Activate strict PDF CSS rules
-    element.classList.add('pdf-export-mode');
+    // 1. Create a clone of the table
+    const clone = liveElement.cloneNode(true);
 
-    // Inject temporary PDF header
-    const headerDiv = document.createElement('div');
-    headerDiv.id = 'tempPdfHeader';
-    headerDiv.innerHTML = `
+    // 2. Create an INVISIBLE wrapper and append it to the body
+    const wrapper = document.createElement('div');
+    wrapper.className = 'print-clone-wrapper';
+    wrapper.style.position = 'fixed';
+    wrapper.style.top = '0';
+    wrapper.style.left = '0';
+    wrapper.style.width = '1200px'; // Strict width forces perfect landscape spacing
+    wrapper.style.zIndex = '-9999';
+    wrapper.style.opacity = '0'; // Completely invisible to the user
+
+    // 3. Inject the header into the clone
+    const headerHtml = `
         <div style="padding: 20px 30px; text-align: left; border-bottom: 3px solid #cc0000; margin-bottom: 20px; background-color: #f8f9fa;">
             <h2 style="color: #cc0000; font-family: sans-serif; font-weight: bold; margin:0;">VidyaSaarthi College Options</h2>
             <p style="color: #1e3c72; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0; font-size: 1.1rem;">Predicted Allotments for Rank: <span style="color: #cc0000;">${rank}</span></p>
         </div>
     `;
-    element.insertBefore(headerDiv, element.firstChild);
+    clone.insertAdjacentHTML('afterbegin', headerHtml);
 
-    // PDF Configuration
+    // Put clone in wrapper, put wrapper in DOM
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    // 4. Generate PDF from the invisible wrapper
     const opt = {
-      margin:       0.2,
+      margin:       0.3,
       filename:     `VidyaSaarthi_Predictions_Rank_${rank}.pdf`,
       image:        { type: 'jpeg', quality: 1.0 },
-      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 1100 },
+      html2canvas:  { scale: 2, useCORS: true },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
     };
 
-    html2pdf().set(opt).from(element).save().then(() => {
-        // Cleanup UI
-        element.classList.remove('pdf-export-mode');
-        const tempHeader = document.getElementById('tempPdfHeader');
-        if (tempHeader) tempHeader.remove();
+    html2pdf().set(opt).from(wrapper).save().then(() => {
+        // 5. Cleanup
+        document.body.removeChild(wrapper);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }).catch(err => {
         console.error("PDF Error:", err);
-        element.classList.remove('pdf-export-mode');
-        const tempHeader = document.getElementById('tempPdfHeader');
-        if (tempHeader) tempHeader.remove();
+        document.body.removeChild(wrapper);
         btn.innerHTML = originalText;
         btn.disabled = false;
         alert("Failed to generate PDF. Please try again.");
