@@ -6,15 +6,18 @@
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <style>
-    /* Styling for Multi-Select Elements to match Brand */
-    .choices__inner { border-radius: 8px; border-color: #dee2e6; background-color: #fff; min-height: 45px;}
-    .choices__list--multiple .choices__item { background-color: #cc0000; border: 1px solid #a30000; border-radius: 4px; }
+    /* 🚨 FIXED: Overrides the default Choices.js margin that breaks vertical alignment */
+    .choices { margin-bottom: 0 !important; }
+    .choices__inner { border-radius: 8px; border-color: #dee2e6; background-color: #fff; min-height: 45px; padding-bottom: 0px !important;}
+    .choices__list--multiple .choices__item { background-color: #cc0000; border: 1px solid #a30000; border-radius: 4px; margin-bottom: 0; }
     .choices[data-type*="select-multiple"] .choices__button { border-left: 1px solid rgba(255,255,255,0.3); }
-    .filter-label { font-size: 0.85rem; text-transform: uppercase; color: #1e3c72; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 5px;}
+
+    .filter-label { display: block; font-size: 0.85rem; text-transform: uppercase; color: #1e3c72; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px;}
+    .custom-rank-input { height: 45px !important; border-radius: 8px; border: 1px solid #dee2e6; }
 
     /* 🚨 BULLETPROOF PDF EXPORT STYLES */
     .pdf-export-mode {
-        width: 1100px !important; /* Force a strict Landscape A4 width */
+        width: 1100px !important;
         max-width: 1100px !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -27,20 +30,19 @@
         margin: 0 !important;
     }
     .pdf-export-mode .table {
-        table-layout: fixed !important; /* Force strict column widths */
+        table-layout: fixed !important;
         width: 100% !important;
         max-width: 100% !important;
         margin-bottom: 0 !important;
     }
     .pdf-export-mode th,
     .pdf-export-mode td {
-        white-space: normal !important; /* Allow text wrapping */
+        white-space: normal !important;
         word-wrap: break-word !important;
         vertical-align: middle !important;
-        font-size: 0.8rem !important; /* Shrink font slightly for PDF */
+        font-size: 0.8rem !important;
         padding: 10px 8px !important;
     }
-    /* Lock specific column widths so College Name doesn't get squished */
     .pdf-export-mode th:nth-child(4),
     .pdf-export-mode td:nth-child(4) {
         width: 25% !important;
@@ -68,26 +70,29 @@
     <div class="card shadow-sm border-0 mb-4" style="background-color: #ccdfed; border-radius: 12px;">
         <div class="card-body p-4">
             <form id="predictorForm" onsubmit="event.preventDefault(); runPrediction();">
-                <div class="row g-3">
-                    <div class="col-md-3">
+
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-2">
                         <label class="filter-label">Student Rank <span class="text-danger">*</span></label>
-                        <input type="number" id="rankInput" class="form-control fw-bold border-0 shadow-sm" style="height: 45px; font-size: 1.1rem; color: #cc0000;" placeholder="e.g. 25000" required min="1">
+                        <input type="number" id="rankInput" class="form-control fw-bold shadow-sm custom-rank-input" style="font-size: 1.1rem; color: #cc0000;" placeholder="e.g. 25000" required min="1">
                     </div>
 
-                    <div class="col-md-9">
+                    <div class="col-md-5">
                         <label class="filter-label">Course(s)</label>
                         <select id="courseFilter" multiple class="form-control">
                             {% for c in courses %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label class="filter-label">State(s)</label>
                         <select id="stateFilter" multiple class="form-control">
                             {% for s in states %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
                         </select>
                     </div>
+                </div>
 
+                <div class="row g-3 align-items-end mb-3">
                     <div class="col-md-4">
                         <label class="filter-label">College Type(s)</label>
                         <select id="typeFilter" multiple class="form-control">
@@ -108,16 +113,18 @@
                             {% for q in quotas %}<option value="{{ q }}">{{ q }}</option>{% endfor %}
                         </select>
                     </div>
+                </div>
 
-                    <div class="col-md-5">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
                         <label class="filter-label">Category / Categories</label>
                         <select id="categoryFilter" multiple class="form-control">
                             {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                        <button type="button" onclick="clearFilters()" class="btn btn-light fw-bold shadow-sm px-3" style="height: 45px; border: 1px solid #ced4da; color: #495057;">
+                    <div class="col-md-4 d-flex gap-2">
+                        <button type="button" onclick="clearFilters()" class="btn btn-light fw-bold shadow-sm px-4" style="height: 45px; border: 1px solid #ced4da; color: #495057;">
                             <i class="fas fa-undo me-1"></i> Reset
                         </button>
                         <button type="submit" id="predictBtn" class="btn fw-bold shadow-sm flex-grow-1" style="background-color: #f6e89e; color: #cc0000; border: 1px solid #e5d580; height: 45px;">
@@ -164,7 +171,7 @@
 
 <script>
 // 1. Initialize Multi-Select Libraries
-const choiceConfig = { removeItemButton: true, searchEnabled: true, placeholderValue: 'Select...' };
+const choiceConfig = { removeItemButton: true, searchEnabled: true, placeholderValue: 'Select Options...' };
 const cCourse = new Choices('#courseFilter', choiceConfig);
 const cState = new Choices('#stateFilter', choiceConfig);
 const cType = new Choices('#typeFilter', choiceConfig);
@@ -172,14 +179,13 @@ const cDom = new Choices('#domicileFilter', choiceConfig);
 const cQuota = new Choices('#quotaFilter', choiceConfig);
 const cCat = new Choices('#categoryFilter', choiceConfig);
 
-// Define the strict top-down hierarchy
+// Strict top-down hierarchy
 const hierarchy = ['course', 'state', 'type', 'domicile', 'quota', 'category'];
 const instances = {
     'course': cCourse, 'state': cState, 'type': cType,
     'domicile': cDom, 'quota': cQuota, 'category': cCat
 };
 
-// Function to instantly wipe all selections
 function clearFilters() {
     document.getElementById('rankInput').value = '';
     Object.values(instances).forEach(inst => inst.removeActiveItems());
@@ -316,7 +322,7 @@ async function runPrediction() {
     }
 }
 
-// 🚨 PDF GENERATOR WITH STRICT ALIGNMENT
+// 🚨 LIVE-INJECTION PDF GENERATOR
 function downloadPDF() {
     const btn = document.getElementById('downloadPdfBtn');
     const originalText = btn.innerHTML;
@@ -340,9 +346,9 @@ function downloadPDF() {
     `;
     element.insertBefore(headerDiv, element.firstChild);
 
-    // PDF Configuration - Enforce strict zero-scroll, strict width
+    // PDF Configuration
     const opt = {
-      margin:       0.2, // Tiny margin so the table utilizes the whole page
+      margin:       0.2,
       filename:     `VidyaSaarthi_Predictions_Rank_${rank}.pdf`,
       image:        { type: 'jpeg', quality: 1.0 },
       html2canvas:  { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowWidth: 1100 },
