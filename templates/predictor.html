@@ -301,6 +301,7 @@ async function runPrediction() {
 }
 
 // 🚨 BULLETPROOF PDF GENERATOR
+// 🚨 BULLETPROOF PDF GENERATOR
 function downloadPDF() {
     // 1. Loading State
     const btn = document.querySelector('button[onclick="downloadPDF()"]');
@@ -309,41 +310,56 @@ function downloadPDF() {
     btn.disabled = true;
 
     const rank = document.getElementById('rankInput').value;
+
+    // We target the live element on the page, NOT a clone
     const element = document.getElementById('pdfContent');
 
-    // 2. CLONE the table so we don't ruin the live UI
-    const clone = element.cloneNode(true);
+    // Temporarily add a class that removes max-height and scrolling
+    element.classList.add('pdf-export-mode');
 
-    // 3. Find the container inside the CLONE and force it to expand fully
-    const clonedContainer = clone.querySelector('#tableContainer');
-    if (clonedContainer) {
-        clonedContainer.style.maxHeight = 'none';
-        clonedContainer.style.overflow = 'visible';
-    }
-
-    // 4. Create and inject the Branded Header
-    const headerHtml = `
-        <div style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px;">
+    // Create a temporary header div and prepend it to the live element
+    const headerDiv = document.createElement('div');
+    headerDiv.id = 'tempPdfHeader';
+    headerDiv.innerHTML = `
+        <div style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px; background-color: white;">
             <h2 style="color: #cc0000; font-family: sans-serif; margin:0;">VidyaSaarthi College Predictions</h2>
             <p style="color: #666; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0;">Report Generated for Rank: ${rank}</p>
         </div>
     `;
-    clone.insertAdjacentHTML('afterbegin', headerHtml);
+    element.insertBefore(headerDiv, element.firstChild);
 
-    // 5. Configure PDF settings
+    // Configure PDF settings
     const opt = {
       margin:       0.5,
       filename:     `VidyaSaarthi_Predictions_Rank_${rank}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+      // windowWidth ensures the canvas renders wide enough to prevent cutoff
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 1200 },
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
     };
 
-    // 6. Generate and save
-    html2pdf().set(opt).from(clone).save().then(() => {
-        // Reset the button once the download finishes
+    // Generate and save
+    html2pdf().set(opt).from(element).save().then(() => {
+        // CLEANUP: After generation, remove the temporary class to restore scrolling
+        element.classList.remove('pdf-export-mode');
+
+        // Remove the temporary header from the UI
+        const tempHeader = document.getElementById('tempPdfHeader');
+        if (tempHeader) {
+            tempHeader.remove();
+        }
+
+        // Reset the download button
         btn.innerHTML = originalText;
         btn.disabled = false;
+    }).catch(err => {
+        console.error("PDF Generation Error:", err);
+        element.classList.remove('pdf-export-mode');
+        const tempHeader = document.getElementById('tempPdfHeader');
+        if (tempHeader) tempHeader.remove();
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert("Failed to generate PDF. Please try again.");
     });
 }
 </script>
