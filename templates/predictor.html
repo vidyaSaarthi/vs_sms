@@ -300,32 +300,37 @@ async function runPrediction() {
     }
 }
 
-// 🚨 FIXED: Reliable PDF Generation
+// 🚨 BULLETPROOF PDF GENERATOR
 function downloadPDF() {
-    const btn = document.getElementById('downloadPdfBtn');
+    // 1. Loading State
+    const btn = document.querySelector('button[onclick="downloadPDF()"]');
+    const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin text-danger me-1"></i> Generating...';
     btn.disabled = true;
 
     const rank = document.getElementById('rankInput').value;
     const element = document.getElementById('pdfContent');
-    const tableContainer = document.getElementById('tableContainer');
 
-    // Temporarily remove max-height so all rows render in the PDF
-    const originalMaxHeight = tableContainer.style.maxHeight;
-    const originalOverflow = tableContainer.style.overflow;
-    tableContainer.style.maxHeight = 'none';
-    tableContainer.style.overflow = 'visible';
+    // 2. CLONE the table so we don't ruin the live UI
+    const clone = element.cloneNode(true);
 
-    // Create a temporary header for the PDF report
+    // 3. Find the container inside the CLONE and force it to expand fully
+    const clonedContainer = clone.querySelector('#tableContainer');
+    if (clonedContainer) {
+        clonedContainer.style.maxHeight = 'none';
+        clonedContainer.style.overflow = 'visible';
+    }
+
+    // 4. Create and inject the Branded Header
     const headerHtml = `
-        <div id="tempPdfHeader" style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px;">
+        <div style="padding: 20px; text-align: center; border-bottom: 2px solid #cc0000; margin-bottom: 20px;">
             <h2 style="color: #cc0000; font-family: sans-serif; margin:0;">VidyaSaarthi College Predictions</h2>
             <p style="color: #666; font-family: sans-serif; font-weight: bold; margin: 5px 0 0 0;">Report Generated for Rank: ${rank}</p>
         </div>
     `;
+    clone.insertAdjacentHTML('afterbegin', headerHtml);
 
-    element.insertAdjacentHTML('afterbegin', headerHtml);
-
+    // 5. Configure PDF settings
     const opt = {
       margin:       0.5,
       filename:     `VidyaSaarthi_Predictions_Rank_${rank}.pdf`,
@@ -334,15 +339,10 @@ function downloadPDF() {
       jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
     };
 
-    html2pdf().set(opt).from(element).save().then(() => {
-        // Cleanup: Remove header and restore table height
-        const tempHeader = document.getElementById('tempPdfHeader');
-        if (tempHeader) tempHeader.remove();
-
-        tableContainer.style.maxHeight = originalMaxHeight;
-        tableContainer.style.overflow = originalOverflow;
-
-        btn.innerHTML = '<i class="fas fa-file-pdf text-danger me-1"></i> Download PDF';
+    // 6. Generate and save
+    html2pdf().set(opt).from(clone).save().then(() => {
+        // Reset the button once the download finishes
+        btn.innerHTML = originalText;
         btn.disabled = false;
     });
 }
