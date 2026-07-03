@@ -45,13 +45,15 @@ def check_mandatory_columns(df, required_columns, file_name):
 
 
 print("1. Loading Excel Files...")
-location = r'H:\My Drive\Business\Vidya Saarthi\2026\Counsellings\NEET UG\Colleges Study - Perplexity\Uttarakhand_Colleges_Study\\'
 
-# df1 = pd.read_excel(location + 'basic_mcc.xlsx', sheet_name="UK")
-# df2 = pd.read_excel(location + 'cutoffs_mcc.xlsx', sheet_name="UK")
+#
+# location = r'H:\My Drive\Business\Vidya Saarthi\2026\NEET UG\Colleges Study - Perplexity\AIQ_Colleges_Study\\'
+# df1 = pd.read_excel(location + 'basic_mcc.xlsx', sheet_name="Jharkhand")
+# df2 = pd.read_excel(location + 'cutoffs_mcc.xlsx', sheet_name="Jharkhand")
 
-df1 = pd.read_excel(location + 'basic_uk.xlsx', sheet_name="Sheet1")
-df2 = pd.read_excel(location + 'cutoffs_uk.xlsx', sheet_name="Sheet1")
+location = r'H:\My Drive\Business\Vidya Saarthi\2026\NEET UG\Colleges Study - Perplexity\Bihar_College_Study\\'
+df1 = pd.read_excel(location + 'basic_bihar.xlsx', sheet_name="Sheet1")
+df2 = pd.read_excel(location + 'cutoffs_bihar.xlsx', sheet_name="Sheet1")
 
 
 df3 = pd.read_excel(location + 'College_Database.xlsx')
