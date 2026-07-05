@@ -47,13 +47,13 @@ def check_mandatory_columns(df, required_columns, file_name):
 print("1. Loading Excel Files...")
 
 #
-# location = r'H:\My Drive\Business\Vidya Saarthi\2026\NEET UG\Colleges Study - Perplexity\AIQ_Colleges_Study\\'
-# df1 = pd.read_excel(location + 'basic_mcc.xlsx', sheet_name="Jharkhand")
-# df2 = pd.read_excel(location + 'cutoffs_mcc.xlsx', sheet_name="Jharkhand")
+location = r'H:\My Drive\Business\Vidya Saarthi\2026\NEET UG\Colleges Study - Perplexity\AIQ_Colleges_Study\\'
+df1 = pd.read_excel(location + 'basic_mcc.xlsx', sheet_name="Karnataka")
+df2 = pd.read_excel(location + 'cutoffs_mcc.xlsx', sheet_name="Karnataka")
 
-location = r'H:\My Drive\Business\Vidya Saarthi\2026\NEET UG\Colleges Study - Perplexity\Bihar_College_Study\\'
-df1 = pd.read_excel(location + 'basic_bihar.xlsx', sheet_name="Sheet1")
-df2 = pd.read_excel(location + 'cutoffs_bihar.xlsx', sheet_name="Sheet1")
+# location = r'H:\My Drive\Business\Vidya Saarthi\2026\NEET UG\Colleges Study - Perplexity\Karnataka_College_Study\\'
+# df1 = pd.read_excel(location + 'basic_karnataka.xlsx', sheet_name="Sheet1")
+# df2 = pd.read_excel(location + 'cutoffs_karnataka.xlsx', sheet_name="Sheet1")
 
 
 df3 = pd.read_excel(location + 'College_Database.xlsx')
