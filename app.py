@@ -1686,7 +1686,13 @@ def college_database():
     type_filter = request.args.get('type', '')
     counselling_filter = request.args.get('counselling', '')
 
-    query = College.query
+    # 🚨 THE FIX: Eagerly load the related tables so Jinja doesn't trigger lazy loads
+    query = College.query.options(
+        joinedload(College.state),
+        joinedload(College.course),
+        joinedload(College.university),
+        joinedload(College.counselling)
+    )
 
     if search_query:
         query = query.filter(
@@ -1697,7 +1703,8 @@ def college_database():
                 College.college_code.ilike(f'%{search_query}%')
             )
         )
-    if state_filter:
+
+    if state_filter9
         # Cast the filter to int explicitly if it's a numeric ID
         if state_filter.isdigit():
             query = query.filter(College.state_id == int(state_filter))
