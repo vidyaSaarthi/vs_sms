@@ -990,17 +990,17 @@ def dashboard():
     if selected_couns_id:
         selected_couns = Counselling.query.get(selected_couns_id)
         if selected_couns:
-            # 1. Fetch Students (🚨 ADDED joinedload HERE)
+            # 1. Fetch Students (Eager loaded)
             registrations = StudentCounsellingRegistration.query.options(
                 joinedload(StudentCounsellingRegistration.student)
             ).filter(
                 StudentCounsellingRegistration.counselling_id == selected_couns.id,
                 StudentCounsellingRegistration.registration_status != 'Exited'
             ).all()
-            students = [reg.student for reg in registrations]
+            students = [reg.student for reg in registrations if reg.student]
+            student_ids = [s.id for s in students]
 
             # 2. Build Columns (Global Phase + Round Actions)
-            # ... (keep existing column logic)
             for act in selected_couns.global_activities:
                 report_data['columns'].append(
                     {'id': act.id, 'name': act.activity_name, 'due': act.end_date, 'type': 'global'})
@@ -1011,88 +1011,91 @@ def dashboard():
                         report_data['columns'].append(
                             {'id': act.id, 'name': act.activity_name, 'due': act.end_date, 'type': 'round'})
 
-            # 3. Build Status Matrix
+            # 3. BULK FETCH STATUSES (Fixes the N+1 inside the nested loops)
+            all_statuses = []
+            if student_ids:
+                all_statuses = StudentActivityStatus.query.filter(
+                    StudentActivityStatus.student_id.in_(student_ids)
+                ).all()
+
+            # Map statuses for O(1) in-memory lookup
+            status_map = {}
+            for s in all_statuses:
+                if s.global_activity_id:
+                    status_map[f"global_{s.global_activity_id}_{s.student_id}"] = s.is_completed
+                if s.round_activity_id:
+                    status_map[f"round_{s.round_activity_id}_{s.student_id}"] = s.is_completed
+
+            # 4. Build Status Matrix in memory
             for student in students:
                 report_data['matrix'][student.id] = {}
                 for col in report_data['columns']:
                     col_key = f"{col['type']}_{col['id']}"
-
-                    if col['type'] == 'global':
-                        status = StudentActivityStatus.query.filter_by(student_id=student.id,
-                                                                       global_activity_id=col['id']).first()
-                    else:
-                        status = StudentActivityStatus.query.filter_by(student_id=student.id,
-                                                                       round_activity_id=col['id']).first()
-
-                    report_data['matrix'][student.id][col_key] = status.is_completed if status else False
+                    lookup_key = f"{col['type']}_{col['id']}_{student.id}"
+                    report_data['matrix'][student.id][col_key] = status_map.get(lookup_key, False)
 
     else:
-        # Build Global Action Center
+        # Build Global Action Center - OPTIMIZED
 
-        # 1. SCAN ROUND ACTIVITIES
-        all_round_acts = RoundActivity.query.filter_by(is_actionable=True).all()
-        for act in all_round_acts:
-            if not act.round or not act.round.counselling_id:
-                continue
+        # 1. Bulk Fetch Active Registrations & Students
+        active_regs = StudentCounsellingRegistration.query.options(
+            joinedload(StudentCounsellingRegistration.student)
+        ).filter(
+            StudentCounsellingRegistration.registration_status != 'Exited'
+        ).all()
 
-            parent_couns = Counselling.query.get(act.round.counselling_id)
-            if not parent_couns:
-                continue
+        # Group students by counselling_id for fast lookup
+        students_by_couns = {}
+        student_ids = []
+        for reg in active_regs:
+            if not reg.student: continue
+            students_by_couns.setdefault(reg.counselling_id, []).append(reg.student)
+            student_ids.append(reg.student_id)
 
-            # 🚨 ADDED joinedload HERE
-            active_regs = StudentCounsellingRegistration.query.options(
-                joinedload(StudentCounsellingRegistration.student)
-            ).filter(
-                StudentCounsellingRegistration.counselling_id == parent_couns.id,
-                StudentCounsellingRegistration.registration_status != 'Exited'
+        # 2. Bulk Fetch Statuses
+        all_statuses = []
+        if student_ids:
+            all_statuses = StudentActivityStatus.query.filter(
+                StudentActivityStatus.student_id.in_(student_ids)
             ).all()
 
-            for reg in active_regs:
-                if not reg.student:
-                    continue
+        round_status_map = {(s.student_id, s.round_activity_id): s.is_completed for s in all_statuses if
+                            s.round_activity_id}
+        global_status_map = {(s.student_id, s.global_activity_id): s.is_completed for s in all_statuses if
+                             s.global_activity_id}
 
-                status = StudentActivityStatus.query.filter_by(student_id=reg.student_id,
-                                                               round_activity_id=act.id).first()
-                if not status or not status.is_completed:
+        all_couns_dict = {c.id: c for c in all_counsellings}
+
+        # 3. SCAN ROUND ACTIVITIES (In memory)
+        all_round_acts = RoundActivity.query.options(joinedload(RoundActivity.round)).filter_by(
+            is_actionable=True).all()
+
+        for act in all_round_acts:
+            if not act.round or not act.round.counselling_id: continue
+            parent_couns_id = act.round.counselling_id
+            if parent_couns_id not in all_couns_dict: continue
+
+            parent_couns = all_couns_dict[parent_couns_id]
+            for student in students_by_couns.get(parent_couns_id, []):
+                # O(1) lookup instead of a database query
+                if not round_status_map.get((student.id, act.id), False):
                     global_pending_alerts.append({
-                        'student': reg.student,
-                        'counselling': parent_couns,
-                        'round': act.round,
-                        'activity': act,
-                        'due': act.end_date
+                        'student': student, 'counselling': parent_couns, 'round': act.round,
+                        'activity': act, 'due': act.end_date
                     })
 
-        # 2. SCAN GLOBAL COUNSELLING ACTIVITIES
+        # 4. SCAN GLOBAL COUNSELLING ACTIVITIES (In memory)
         all_global_acts = CounsellingActivity.query.all()
         for act in all_global_acts:
-            if not act.counselling_id:
-                continue
+            if not act.counselling_id or act.counselling_id not in all_couns_dict: continue
 
-            parent_couns = Counselling.query.get(act.counselling_id)
-            if not parent_couns:
-                continue
-
-            # 🚨 ADDED joinedload HERE
-            active_regs = StudentCounsellingRegistration.query.options(
-                joinedload(StudentCounsellingRegistration.student)
-            ).filter(
-                StudentCounsellingRegistration.counselling_id == parent_couns.id,
-                StudentCounsellingRegistration.registration_status != 'Exited'
-            ).all()
-
-            for reg in active_regs:
-                if not reg.student:
-                    continue
-
-                status = StudentActivityStatus.query.filter_by(student_id=reg.student_id,
-                                                               global_activity_id=act.id).first()
-                if not status or not status.is_completed:
+            parent_couns = all_couns_dict[act.counselling_id]
+            for student in students_by_couns.get(act.counselling_id, []):
+                # O(1) lookup instead of a database query
+                if not global_status_map.get((student.id, act.id), False):
                     global_pending_alerts.append({
-                        'student': reg.student,
-                        'counselling': parent_couns,
-                        'round': None,
-                        'activity': act,
-                        'due': act.end_date
+                        'student': student, 'counselling': parent_couns, 'round': None,
+                        'activity': act, 'due': act.end_date
                     })
 
         # Safe sorting logic
