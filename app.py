@@ -1704,7 +1704,7 @@ def college_database():
             )
         )
 
-    if state_filter9
+    if state_filter:
         # Cast the filter to int explicitly if it's a numeric ID
         if state_filter.isdigit():
             query = query.filter(College.state_id == int(state_filter))
